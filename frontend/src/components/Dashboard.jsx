@@ -9,6 +9,7 @@ import CreateEventModal from './CreateEventModal';
 import EventDetailModal from './EventDetailModal';
 import MyEvents from './MyEvents';
 import MyRegistrationsPage from './MyRegistrationsPage';
+import EventTicketPage from './EventTicketPage';
 import NotificationsPage from './NotificationsPage';
 import Sidebar from './Sidebar';
 
@@ -42,6 +43,7 @@ export default function Dashboard({ user, onLogout, onNavigate }) {
     const [userActivities, setUserActivities] = useState([]);
     const [activitiesLoading, setActivitiesLoading] = useState(false);
     const [chatbotFilters, setChatbotFilters] = useState({}); // For chatbot-driven filters
+    const [selectedTicketEventId, setSelectedTicketEventId] = useState(null);
 
     useEffect(() => {
         fetchDashboardStats();
@@ -283,7 +285,16 @@ export default function Dashboard({ user, onLogout, onNavigate }) {
             const token = localStorage.getItem('token');
             const res = await fetch(`http://localhost:8000/api/v1/events/${pendingEventId}/register`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    tickets: [],
+                    attendee: {},
+                    total_amount: 0
+                })
             });
             const data = await res.json();
 
@@ -328,6 +339,16 @@ export default function Dashboard({ user, onLogout, onNavigate }) {
         }
     };
 
+    const handleRegistrationCancellation = (eventId) => {
+        // Remove from newlyRegisteredIds
+        setNewlyRegisteredIds(prev => prev.filter(id => id !== eventId));
+        // Remove from userRegistrations
+        setUserRegistrations(prev => prev.filter(reg => reg.event_id !== eventId));
+        setUserRegistrationCount(prev => Math.max(0, prev - 1));
+        // Switch view back
+        setActiveView('feed'); // Or 'my-registrations', but user asked for dashboard
+    };
+
     const getIcon = (type) => {
         const icons = {
             success: '✅',
@@ -361,7 +382,24 @@ export default function Dashboard({ user, onLogout, onNavigate }) {
                 {activeView === 'my-events' ? (
                     <MyEvents onCreateNew={() => onNavigate('create-event')} />
                 ) : activeView === 'my-registrations' ? (
-                    <MyRegistrationsPage onNavigate={() => setActiveView('feed')} user={user} />
+                    <MyRegistrationsPage
+                        onNavigate={(view, eventId) => {
+                            if (view === 'ticket-details' && eventId) {
+                                setSelectedTicketEventId(eventId);
+                                setActiveView('ticket-details');
+                            } else {
+                                setActiveView('feed');
+                            }
+                        }}
+                        user={user}
+                    />
+                ) : activeView === 'ticket-details' ? (
+                    <EventTicketPage
+                        eventId={selectedTicketEventId}
+                        onNavigate={(view) => setActiveView(view)}
+                        onCancelSuccess={() => handleRegistrationCancellation(selectedTicketEventId)}
+                        user={user}
+                    />
                 ) : activeView === 'notifications' ? (
                     <NotificationsPage notifications={userActivities} />
                 ) : (

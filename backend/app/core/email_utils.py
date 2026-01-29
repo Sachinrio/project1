@@ -121,6 +121,55 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, ticket
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send ticket email via SMTP: {e}")
         return False
+
+async def send_organizer_notification_email(email: EmailStr, organizer_name: str, attendee_name: str, attendee_email: str, event_title: str, event_date, ticket_path: str):
+    """
+    Sends a notification email to the organizer/admin (MAIL_FROM) about a new registration.
+    """
+    if not ENABLE_EMAIL:
+        return False
+
+    # Target the configured sender email (MAIL_FROM) or the specific organizer email passed in
+    # The user said "mail from email id" which implies the sender address.
+    recipient = MAIL_FROM 
+    
+    print(f"Sending Notification to {recipient} regarding {attendee_email}...")
+    try:
+        body = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                    <h2 style="color: #0F172A;">New Registration for {event_title}</h2>
+                    <p><strong>A new attendee has registered!</strong></p>
+                    <hr/>
+                    <p><strong>Event:</strong> {event_title}</p>
+                    <p><strong>Organizer:</strong> {organizer_name}</p>
+                    <p><strong>Date & Time:</strong> {event_date}</p>
+                    <hr/>
+                    <p><strong>Attendee Name:</strong> {attendee_name}</p>
+                    <p><strong>Attendee Email:</strong> {attendee_email}</p>
+                    <br/>
+                    <p>The ticket PDF sent to the user is attached for your records.</p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        message = MessageSchema(
+            subject=f"New Registration: {event_title} - {attendee_name}",
+            recipients=[recipient],     # Sending TO the sender/admin
+            body=body,
+            subtype=MessageType.html,
+            attachments=[ticket_path]
+        )
+        
+        fm = FastMail(conf)
+        await fm.send_message(message)
+        print("organizer notification sent.")
+        return True
+    except Exception as e:
+        print(f"Failed to send organizer notification: {e}")
+        return False
 def generate_qr_code(data: str) -> str:
     """
     Generate QR code for given data and return as base64 string.
