@@ -1,67 +1,43 @@
+
 import asyncio
 import sys
-import os
 
-# 1. Force proper event loop for Windows + Playwright
+# Force proper event loop for Windows + Playwright
 if sys.platform == 'win32':
     asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-from sqlalchemy.ext.asyncio import create_async_engine
+from app.services.event_manager import run_full_scrape_cycle
+from app.services.scraper import scrape_events_playwright
+from app.models.schemas import Event
+from app.core.database import engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-# Setup DB connection locally since we are not in the app
-from app.core.database import DATABASE_URL
-engine = create_async_engine(DATABASE_URL)
-
 async def force_scrape():
-    print("STARTING FORCE SCRAPE...")
+    print("STARTING COMPREHENSIVE FORCE SCRAPE...")
     
-    # Import scraper here to ensure loop policy is active first
-    from app.services.scraper import scrape_events_playwright
-    from app.models.schemas import Event
-
-    try:
-        # A. SCRAPE
-        print("Scraping Eventbrite (bypass server)...")
-        events_data = await scrape_events_playwright("chennai")
-        print(f"SCRAPE COMPLETE. Found {len(events_data)} events.")
-
-        # B. SAVE TO DB
-        print("Saving to Database...")
-        async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
-        async with async_session() as session:
-            count = 0
-            for data in events_data:
-                # Check duplicate
-                stmt = select(Event).where(Event.eventbrite_id == data["eventbrite_id"])
-                res = await session.execute(stmt)
-                existing_event = res.scalars().first()
-                if existing_event:
-                    # UPDATE EXISTING
-                    print(f"Updating {data['title']}...")
-                    existing_event.venue_address = data.get("venue_address")
-                    existing_event.organizer_name = data.get("organizer_name")
-                    existing_event.venue_name = data.get("venue_name")
-                    existing_event.image_url = data.get("image_url") # Ensure image is current
-                    existing_event.is_free = data.get("is_free")
-                    existing_event.online_event = data.get("online_event")
-                    existing_event.start_time = data.get("start_time")
-                    existing_event.end_time = data.get("end_time")
-                    session.add(existing_event) # Mark as dirty
-                    count += 1
-                else:
-                    # INSERT NEW
-                    session.add(Event(**data))
-                    count += 1
-            await session.commit()
-            print(f"SUCCESS! Added {count} new events to database.")
-            
-    except Exception as e:
-        print(f"ERROR: {e}")
-        import traceback
-        traceback.print_exc()
+    # 1. Run the Multi-Source Scraper (EventManager handles DB update)
+    await run_full_scrape_cycle()
+    
+    # 2. ALSO run the specific Eventbrite Scraper (since it's sometimes missed)
+    print("Running Specific Eventbrite Scraper...")
+    eb_events = await scrape_events_playwright("chennai")
+    
+    async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    async with async_session() as session:
+        for data in eb_events:
+            stmt = select(Event).where(Event.eventbrite_id == data['eventbrite_id'])
+            result = await session.execute(stmt)
+            existing = result.scalars().first()
+            if not existing:
+                session.add(Event(**data))
+            else:
+                for key, val in data.items():
+                    setattr(existing, key, val)
+        await session.commit()
+    
+    print("FORCE SCRAPE COMPLETE.")
 
 if __name__ == "__main__":
     asyncio.run(force_scrape())

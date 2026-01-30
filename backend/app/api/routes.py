@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, UploadFile, File
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import delete
+from sqlalchemy import delete, case, func, over
 from typing import List, Optional, Dict, Any
 import shutil
 import os
@@ -323,7 +323,7 @@ async def list_events(
     mode: str = None,    # 'online', 'offline', or None
     date: str = None,    # 'YYYY-MM-DD'
     page: int = 1,
-    limit: int = 10,
+    limit: int = 21,
     session: AsyncSession = Depends(get_session)
 ):
     """
@@ -475,14 +475,44 @@ async def list_events(
     total_events = count_result.scalar()
 
     # 4. Get DATA (Apply limit/offset)
-    # Order by InfiniteBZ events first (URL contains infinitebz.com), then by start_time
-    if limit >= 10000:
-        query = filter_query.order_by(Event.url.ilike("%infinitebz.com%").desc(), Event.start_time)
-    else:
-        query = filter_query.order_by(Event.url.ilike("%infinitebz.com%").desc(), Event.start_time).offset(offset).limit(limit)
-        
-    result = await session.execute(query)
-    events = result.scalars().all()
+    # We want InfiniteBZ events first, then others interleaved by source.
+    
+    # We need a subquery that adds the ranks
+    inner_subq = filter_query.subquery()
+    
+    # Create expressions using columns from the subquery
+    is_inf_expr = case((inner_subq.c.url.ilike("%infinitebz.com%"), 0), else_=1)
+    
+    source_rank_expr = func.row_number().over(
+        partition_by=inner_subq.c.raw_data['source'].astext,
+        order_by=inner_subq.c.start_time
+    )
+    
+    # Selection from the subquery
+    # We select all columns from inner_subq
+    inner_stmt = select(
+        inner_subq,
+        is_inf_expr.label('is_inf'),
+        source_rank_expr.label('s_rank')
+    )
+    
+    final_subq = inner_stmt.subquery()
+    
+    # Final query with limit/offset
+    final_query = select(final_subq).order_by(
+        final_subq.c.is_free.desc(),
+        final_subq.c.is_inf,
+        final_subq.c.s_rank,
+        final_subq.c.start_time
+    ).offset(offset).limit(limit)
+    
+    result = await session.execute(final_query)
+    
+    # Map back to Event objects
+    events = []
+    for row in result.all():
+        data = {col: getattr(row, col) for col in Event.__fields__ if hasattr(row, col)}
+        events.append(Event(**data))
     
     return EventListResponse(
         data=events,
