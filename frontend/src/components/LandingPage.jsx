@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, CheckCircle2, Calendar, Database, MousePointer2, ChevronDown, ChevronUp, Clock, MapPin, Mail, Phone, MessageSquare, ExternalLink, Search } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Calendar, Database, MousePointer2, ChevronDown, ChevronUp, Clock, MapPin, Mail, Phone, MessageSquare, ExternalLink, Search, Infinity } from 'lucide-react';
 
 export default function LandingPage({ onNavigate, onLogin, onSignup, events, user }) {
     const upcomingEvents = events.slice(0, 3);
@@ -11,7 +11,9 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
             <nav className="fixed w-full z-50 bg-slate-900/95 backdrop-blur-md border-b border-white/10 shadow-lg">
                 <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-primary-500 font-bold text-xl">E</div>
+                        <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-white/10">
+                            <Infinity className="text-primary-500" size={20} strokeWidth={3} />
+                        </div>
                         <span className="text-xl font-bold text-white tracking-tight">Infinite BZ</span>
                     </div>
 
@@ -73,14 +75,7 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
                             </button>
                         </div>
 
-                        <div className="mt-12 text-sm text-white/70 flex items-center gap-4">
-                            <div className="flex -space-x-2">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-primary-500" />
-                                ))}
-                            </div>
-                            Trusted by 500+ professionals in Chennai
-                        </div>
+
                     </div>
 
                     <div className="relative">

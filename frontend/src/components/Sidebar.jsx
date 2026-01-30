@@ -1,12 +1,12 @@
-import { LayoutDashboard, ClipboardList, TrendingUp, Settings, LogOut, ScanLine, Plus } from 'lucide-react';
+import { LayoutDashboard, ClipboardList, TrendingUp, Settings, LogOut, ScanLine, Plus, Infinity } from 'lucide-react';
 
 export default function Sidebar({ activePage, onNavigate, onLogout, onCreateClick }) {
     return (
         <aside className="w-64 bg-slate-900 border-r border-white/20 flex flex-col fixed h-full z-20 hidden lg:flex text-white transition-all duration-300">
             <div className="p-6">
                 <div className="flex items-center gap-3 font-bold text-xl text-white cursor-pointer" onClick={() => onNavigate('dashboard')}>
-                    <div className="w-8 h-8 bg-primary-500 rounded-lg flex items-center justify-center shadow-lg shadow-primary-500/20">
-                        <i className="text-white not-italic">BZ</i>
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-white/10">
+                        <Infinity className="text-primary-500" size={20} strokeWidth={3} />
                     </div>
                     <div>
                         InfiniteBZ
