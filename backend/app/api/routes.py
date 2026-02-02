@@ -614,8 +614,10 @@ async def register_for_event(
 ):
     # 1. Get Event Details
     try:
-        with open("debug_email_identity.txt", "a") as f:
-             f.write(f"TIMESTAMP: {datetime.now()} | USER: {current_user.email}\n")
+        # Debug logging (optional, can be removed)
+        # with open("debug_email_identity.txt", "a") as f:
+        #      f.write(f"TIMESTAMP: {datetime.now()} | USER: {current_user.email}\n")
+        pass
     except:
         pass
 

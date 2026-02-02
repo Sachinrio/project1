@@ -323,7 +323,11 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
             const token = localStorage.getItem('token');
             const res = await fetch(`http://localhost:8000/api/v1/events/${pendingEventId}/register`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
             });
             const data = await res.json();
 
