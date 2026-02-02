@@ -8,6 +8,8 @@ router = APIRouter()
 class GenerateEventRequest(BaseModel):
     title: str
     category: str = "Business"
+    start_time: str = "10:00"
+    end_time: str = "12:00"
 
 @router.post("/generate-event")
 async def generate_event(request: GenerateEventRequest):
@@ -16,23 +18,10 @@ async def generate_event(request: GenerateEventRequest):
     """
     try:
         # 1. Generate Content
-        content = await ai_service.generate_event_content(request.title, request.category)
+        # 1. Generate Content
+        content = await ai_service.generate_event_content(request.title, request.category, request.start_time, request.end_time)
         
-        # 2. Generate Image URL (using Unsplash source for zero-config)
-        # We take the first keyword, formatted for URL
-        keywords = content.get("image_keywords", ["event"])
-        primary_keyword = keywords[0].replace(" ", ",") if keywords else "event"
-        
-        # Construct a source.unsplash URL which redirects to a random image matching keywords
-        image_url = f"https://source.unsplash.com/1600x900/?{primary_keyword}"
-        
-        return {
-            "description": content["description"],
-            "agenda": content["agenda"],
-            "tags": content["tags"],
-            "imageUrl": image_url,
-            "image_keywords": keywords
-        }
+        return content
 
     except Exception as e:
         print(f"AI Generation Failed: {e}")

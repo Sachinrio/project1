@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Calendar, MapPin, Type, AlignLeft, Clock, Globe, X, Check, ChevronRight, ChevronLeft, Image as ImageIcon, Plus, Trash2, User, List, Link as LinkIcon, Twitter, Linkedin, Sparkles, Ticket } from 'lucide-react';
+import { Calendar, MapPin, Type, AlignLeft, Clock, Globe, X, Check, ChevronRight, ChevronLeft, Image as ImageIcon, Plus, Trash2, User, List, Link as LinkIcon, Twitter, Linkedin, Sparkles, Ticket, Edit3 } from 'lucide-react';
 import TicketManager from './TicketManager';
 
 export default function CreateEventModal({ isOpen, onClose, onSave, initialData = null }) {
@@ -10,6 +10,9 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
     const [generationMode, setGenerationMode] = useState('manual'); // 'manual' | 'ai'
     const [isGenerating, setIsGenerating] = useState(false);
     const [aiPrompt, setAiPrompt] = useState("");
+    const [aiDuration, setAiDuration] = useState("2 hours");
+    const [aiDate, setAiDate] = useState(""); // Will default to tomorrow in useEffect
+    const [aiTime, setAiTime] = useState("10:00");
     const [aiTone, setAiTone] = useState("Professional");
 
     const [formData, setFormData] = useState({
@@ -24,7 +27,8 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
         location: "",
         imageUrl: "",
         agendaItems: [],
-        tickets: [] // List of { name, type, price, quantity, description }
+        tickets: [], // List of { name, type, price, quantity, description }
+        speakers: [] // List of { id, name, role, company }
     });
 
     useEffect(() => {
@@ -33,6 +37,9 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
             setGenerationMode('manual');
             setIsGenerating(false);
             setAiPrompt("");
+            setAiDuration("2 hours");
+            setAiDate(new Date(Date.now() + 86400000).toISOString().split('T')[0]);
+            setAiTime("10:00");
 
             if (initialData) {
                 setStep(1); // specific behavior for edit: skip mode selection
@@ -64,7 +71,9 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                     location: "",
                     imageUrl: "",
                     agendaItems: [],
-                    tickets: []
+
+                    tickets: [],
+                    speakers: []
                 });
             }
         }
@@ -88,7 +97,11 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
     const handleBack = () => {
         setIsAnimating(true);
         setTimeout(() => {
-            setStep(prev => prev - 1);
+            if (step === 0.5) {
+                setStep(0);
+            } else {
+                setStep(prev => prev - 1);
+            }
             setIsAnimating(false);
         }, 200);
     };
@@ -138,6 +151,33 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
         }));
     };
 
+    // --- Helpers for Speakers ---
+    const addSpeaker = () => {
+        setFormData(prev => ({
+            ...prev,
+            speakers: [
+                ...prev.speakers,
+                { id: Date.now(), name: "", role: "", company: "" }
+            ]
+        }));
+    };
+
+    const removeSpeaker = (id) => {
+        setFormData(prev => ({
+            ...prev,
+            speakers: prev.speakers.filter(s => s.id !== id)
+        }));
+    };
+
+    const updateSpeaker = (id, field, value) => {
+        setFormData(prev => ({
+            ...prev,
+            speakers: prev.speakers.map(s =>
+                s.id === id ? { ...s, [field]: value } : s
+            )
+        }));
+    };
+
 
     const handleAIGenerate = async () => {
         if (!aiPrompt) return;
@@ -150,13 +190,21 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title: aiPrompt,
-                    category: formData.category
+                    category: formData.category,
+                    duration: aiDuration,
+                    start_time: aiTime
                 })
             });
 
             if (!response.ok) throw new Error("AI Generation Failed");
 
             const data = await response.json();
+
+            // Calculate End Time based on duration
+            let endHour = 12;
+            if (aiDuration === "Half Day") endHour = 14; // 2 PM
+            if (aiDuration === "Full Day") endHour = 17; // 5 PM
+            const endTimeString = `${endHour}:00`;
 
             // Map AI Content to Form Data
             setFormData(prev => ({
@@ -173,10 +221,21 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                     description: item.description
                 })) || [],
                 // We could also map tags if we had a field for it
+                // Map Speakers
+                speakers: data.speakers?.map(s => ({
+                    id: Date.now() + Math.random(),
+                    name: s.name,
+                    role: s.role,
+                    company: s.company
+                })) || [],
+                startDate: aiDate,
+                startTime: aiTime,
+                endDate: aiDate, // Assuming single day for now
+                endTime: endTimeString,
             }));
 
-            // Jump to Review Step (Step 5) to see the magic, or Step 1 to edit
-            setStep(5);
+            // Jump to Basics Step (Step 1) to edit
+            setStep(1);
 
         } catch (error) {
             console.error(error);
@@ -187,15 +246,15 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-300 p-4">
-            <div className={`bg-slate-900 w-full max-w-4xl rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-700/50 relative transition-all duration-500 ring-1 ring-white/10 ${step === 0 ? 'max-w-2xl h-[500px]' : ''}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900 animate-in fade-in duration-300">
+            <div className="w-full h-full flex flex-col overflow-hidden relative">
 
                 {/* DECORATIVE ELEMENTS */}
                 <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />
 
-                {/* HEADER (Hide on Step 0 for cleaner look or Keep it) */}
-                {step > 0 && (
+                {/* HEADER (Hide on Step 0 and 0.5 for clean focus) */}
+                {step >= 1 && (
                     <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-slate-900/50 backdrop-blur-sm z-10">
                         <div>
                             <h2 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -266,8 +325,8 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
 
                                 {/* AI CARD */}
                                 <button
-                                    onClick={() => setGenerationMode('ai')}
-                                    className={`group relative flex flex-col items-start p-8 rounded-3xl border transition-all duration-500 text-left overflow-hidden ${generationMode === 'ai' ? 'bg-indigo-600/10 border-indigo-500 ring-2 ring-indigo-500/20 shadow-[-10px_-10px_30px_4px_rgba(0,0,0,0.1),_10px_10px_30px_4px_rgba(45,255,196,0.15)]' : 'bg-gradient-to-br from-indigo-900/20 to-purple-900/10 border-indigo-500/30 hover:border-indigo-400'}`}
+                                    onClick={() => setStep(0.5)}
+                                    className="group relative flex flex-col items-start p-8 rounded-3xl border transition-all duration-500 text-left overflow-hidden bg-gradient-to-br from-indigo-900/20 to-purple-900/10 border-indigo-500/30 hover:border-indigo-400"
                                 >
                                     {/* Animated Background */}
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-400/30 transition-all" />
@@ -280,40 +339,104 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                                         Just type a title. We'll generate the description, agenda, tags, and cover image instantly.
                                     </p>
 
-                                    {generationMode !== 'ai' && (
-                                        <div className="mt-auto pt-6 flex items-center text-sm font-bold text-indigo-400 group-hover:text-indigo-300 transition-colors">
-                                            Try it out <ChevronRight size={16} className="ml-1" />
-                                        </div>
-                                    )}
-
-                                    {/* AI INPUT EXPANSION */}
-                                    <div className={`w-full overflow-hidden transition-all duration-500 ease-in-out ${generationMode === 'ai' ? 'max-h-60 opacity-100 mt-6' : 'max-h-0 opacity-0 mt-0'}`}>
-                                        <div className="space-y-3" onClick={e => e.stopPropagation()}>
-                                            <input
-                                                autoFocus
-                                                value={aiPrompt}
-                                                onChange={e => setAiPrompt(e.target.value)}
-                                                placeholder="e.g. AI Conf 2026..."
-                                                className="w-full bg-slate-950/50 border border-indigo-500/30 rounded-xl px-4 py-3 text-white placeholder:text-indigo-400/50 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all"
-                                                onKeyDown={e => e.key === 'Enter' && handleAIGenerate()}
-                                            />
-                                            <button
-                                                onClick={handleAIGenerate}
-                                                disabled={!aiPrompt || isGenerating}
-                                                className="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
-                                            >
-                                                {isGenerating ? (
-                                                    <>Generating <span className="animate-spin">✨</span></>
-                                                ) : (
-                                                    <>Generate Event <Sparkles size={16} /></>
-                                                )}
-                                            </button>
-                                        </div>
+                                    <div className="mt-auto pt-6 flex items-center text-sm font-bold text-indigo-400 group-hover:text-indigo-300 transition-colors">
+                                        Try it out <ChevronRight size={16} className="ml-1" />
                                     </div>
                                 </button>
                             </div>
                         </div>
                     )}
+
+                    {/* STEP 0.5: AI INPUT FORM */}
+                    {step === 0.5 && (
+                        <div className="h-full flex flex-col items-center justify-center p-4">
+                            <div className="w-full max-w-2xl bg-slate-900/40 backdrop-blur-2xl border border-white/10 rounded-[2.5rem] p-8 md:p-12 shadow-2xl space-y-10 animate-in zoom-in-95 duration-500 relative overflow-hidden ring-1 ring-white/5">
+
+                                {/* Decor */}
+                                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none" />
+                                <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2 pointer-events-none" />
+
+                                <div className="text-center space-y-4 relative z-10">
+                                    <div className="w-20 h-20 mx-auto rounded-3xl bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/30 mb-6 group hover:scale-105 transition-transform duration-500">
+                                        <Sparkles size={40} className="text-white animate-pulse" />
+                                    </div>
+                                    <h2 className="text-4xl font-extrabold text-white tracking-tight">AI Magic Build</h2>
+                                    <p className="text-slate-400 text-lg">Tell us a bit about your event, and we'll handle the rest.</p>
+                                </div>
+
+                                <div className="space-y-6 relative z-10">
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-indigo-300 uppercase tracking-widest pl-1">Event Title</label>
+                                        <input
+                                            autoFocus
+                                            value={aiPrompt}
+                                            onChange={e => setAiPrompt(e.target.value)}
+                                            placeholder="e.g. Annual Tech Conference 2026"
+                                            className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-5 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-400 focus:ring-1 focus:ring-indigo-400 transition-all font-medium text-xl shadow-inner"
+                                            onKeyDown={e => e.key === 'Enter' && handleAIGenerate()}
+                                        />
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Date</label>
+                                            <input
+                                                type="date"
+                                                value={aiDate}
+                                                onChange={e => setAiDate(e.target.value)}
+                                                className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white text-base focus:outline-none focus:border-indigo-400 transition-all shadow-inner"
+                                            />
+                                        </div>
+                                        <div className="space-y-3">
+                                            <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Start Time</label>
+                                            <input
+                                                type="time"
+                                                value={aiTime}
+                                                onChange={e => setAiTime(e.target.value)}
+                                                className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white text-base focus:outline-none focus:border-indigo-400 transition-all shadow-inner"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <label className="text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Duration</label>
+                                        <div className="relative">
+                                            <select
+                                                value={aiDuration}
+                                                onChange={e => setAiDuration(e.target.value)}
+                                                className="w-full bg-black/20 border border-white/10 rounded-2xl px-6 py-4 text-white text-base focus:outline-none focus:border-indigo-400 transition-all appearance-none cursor-pointer shadow-inner pr-12"
+                                            >
+                                                <option value="2 hours">Short (2 Hours)</option>
+                                                <option value="Half Day">Half Day (4 Hours)</option>
+                                                <option value="Full Day">Full Day (8 Hours)</option>
+                                            </select>
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
+                                                <Clock size={20} />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button
+                                        onClick={handleAIGenerate}
+                                        disabled={!aiPrompt || isGenerating}
+                                        className="w-full py-5 rounded-2xl font-bold text-white text-lg bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-600 bg-[length:200%_auto] animate-gradient hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all flex items-center justify-center gap-3 shadow-xl shadow-indigo-600/20 mt-6"
+                                    >
+                                        {isGenerating ? (
+                                            <>Generating Magic <span className="animate-spin text-xl">✨</span></>
+                                        ) : (
+                                            <>Generate Event <Sparkles size={20} className="animate-pulse" /></>
+                                        )}
+                                    </button>
+                                </div>
+
+                                <button onClick={() => setStep(0)} className="w-full text-center text-slate-500 hover:text-white text-sm transition-colors py-2">
+                                    Back to options
+                                </button>
+
+                            </div>
+                        </div>
+                    )}
+
 
                     {/* AI LOADING OVERLAY */}
                     {isGenerating && (
@@ -582,6 +705,55 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                                                     className="w-full bg-transparent border-0 border-b border-slate-700 px-0 py-1 text-sm text-white focus:border-primary-500 focus:ring-0 placeholder:text-slate-600 font-medium"
                                                 />
                                             </div>
+
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* SPEAKERS SECTION */}
+                                <div className="space-y-4 pt-8 border-t border-slate-700/50">
+                                    <div className="flex justify-between items-center bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+                                        <h3 className="text-white font-bold flex items-center gap-2">
+                                            <User className="text-primary-500" size={20} /> Speakers
+                                        </h3>
+                                        <button onClick={addSpeaker} className="w-8 h-8 rounded-lg bg-primary-500 hover:bg-primary-400 text-slate-900 flex items-center justify-center transition-colors shadow-lg shadow-primary-500/20">
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {formData.speakers.length === 0 && (
+                                            <div className="col-span-full py-8 flex flex-col items-center justify-center text-slate-600 border-2 border-dashed border-slate-800 rounded-xl bg-slate-900/30">
+                                                <User size={32} className="mb-2 opacity-20" />
+                                                <p className="text-sm">No speakers added</p>
+                                            </div>
+                                        )}
+                                        {formData.speakers.map((speaker) => (
+                                            <div key={speaker.id} className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-4 space-y-3 relative group hover:border-slate-600 transition-colors">
+                                                <button onClick={() => removeSpeaker(speaker.id)} className="absolute top-3 right-3 text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all">
+                                                    <Trash2 size={14} />
+                                                </button>
+                                                <input
+                                                    placeholder="Speaker Name"
+                                                    value={speaker.name}
+                                                    onChange={(e) => updateSpeaker(speaker.id, 'name', e.target.value)}
+                                                    className="w-full bg-transparent border-0 border-b border-slate-700 px-0 py-1 text-sm text-white focus:border-primary-500 focus:ring-0 placeholder:text-slate-600 font-bold"
+                                                />
+                                                <div className="grid grid-cols-2 gap-2">
+                                                    <input
+                                                        placeholder="Role"
+                                                        value={speaker.role}
+                                                        onChange={(e) => updateSpeaker(speaker.id, 'role', e.target.value)}
+                                                        className="bg-transparent border-0 border-b border-slate-800 px-0 py-1 text-xs text-slate-300 focus:border-primary-500 focus:ring-0 placeholder:text-slate-600"
+                                                    />
+                                                    <input
+                                                        placeholder="Company"
+                                                        value={speaker.company}
+                                                        onChange={(e) => updateSpeaker(speaker.id, 'company', e.target.value)}
+                                                        className="bg-transparent border-0 border-b border-slate-800 px-0 py-1 text-xs text-slate-300 focus:border-primary-500 focus:ring-0 placeholder:text-slate-600"
+                                                    />
+                                                </div>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>
@@ -607,7 +779,11 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                             <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 text-left space-y-4 shadow-xl">
                                 <div className="flex items-center gap-4 pb-4 border-b border-slate-700/50">
                                     <div className="w-12 h-12 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400 font-bold text-center leading-none">
-                                        <span className="text-xs uppercase">{new Date(formData.startDate).toLocaleString('default', { month: 'short' })}<br /><span className="text-lg text-white">{new Date(formData.startDate).getDate()}</span></span>
+                                        {formData.startDate && !isNaN(new Date(formData.startDate).getTime()) ? (
+                                            <span className="text-xs uppercase">{new Date(formData.startDate).toLocaleString('default', { month: 'short' })}<br /><span className="text-lg text-white">{new Date(formData.startDate).getDate()}</span></span>
+                                        ) : (
+                                            <span className="text-xs">TBD</span>
+                                        )}
                                     </div>
                                     <div>
                                         <h4 className="font-bold text-white text-lg leading-tight">{formData.title}</h4>
@@ -647,6 +823,15 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                         {step === 1 ? 'Cancel' : <><ChevronLeft size={16} /> Back</>}
                     </button>
 
+                    {step === 5 && (
+                        <button
+                            onClick={() => setStep(1)}
+                            className="px-4 py-3 rounded-xl font-bold text-indigo-400 hover:text-indigo-300 hover:bg-slate-800 transition-colors flex items-center gap-2 text-sm mr-auto ml-2"
+                        >
+                            <Edit3 size={16} /> Edit Details
+                        </button>
+                    )}
+
                     <button
                         onClick={step === 5 ? handleSubmit : handleNext}
                         className={`px-8 py-3 rounded-xl font-bold text-white shadow-xl transition-all flex items-center gap-2 transform active:scale-95 duration-200 ${step === 5 ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 shadow-green-500/25' : 'bg-gradient-to-r from-primary-600 to-indigo-600 hover:from-primary-500 hover:to-indigo-500 shadow-primary-500/25'}`}
@@ -659,7 +844,7 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                     </button>
                 </div>
 
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
