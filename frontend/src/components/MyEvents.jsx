@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Calendar, MapPin, BarChart3, Users, Clock, Edit, Trash2, Eye, Plus, Search, Filter, ArrowUpRight, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import EventStatsModal from './EventStatsModal';
-import CreateEventModal from './CreateEventModal';
+import CreateEventModal from './create-event/CreateEventModal';
 
 export default function MyEvents({ onCreateNew, onNavigate }) {
     const [events, setEvents] = useState([]);

@@ -18,11 +18,13 @@
     *   **Eventbrite**: Corporate seminars and conferences.
 
 ### 🤖 Smart Technology
+*   **AI Event Wizard**: "Magic Build" mode using **Groq** to auto-generate agendas, speakers, and tags.
+*   **AI Image Gen**: Integrated **Pollinations.ai (Flux Model)** for stunning, context-aware cover images without API keys.
 *   **Multi-Source Scraping**: Powered by **Playwright** for robust, real-time event discovery.
-*   **AI Chatbot**: Built with **Groq (Llama 3)** to answer natural language queries like *"Show me AI conferences next week"*.
 *   **Dynamic Dashboard**: Real-time analytics, registration tracking, and event management.
 
 ### 🎟️ Seamless Management
+*   **Ticket Management**: Create multiple ticket classes (VIP, Early Bird, Free) with quantity limits.
 *   **Unified Registration**: Register for events directly or get redirected to official sources.
 *   **PDF Tickets**: Automated generation of professional QR-coded tickets.
 *   **Email Confirmations**: Instant booking confirmations via SMTP.

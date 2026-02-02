@@ -5,7 +5,7 @@ import {
     Search, Bell, Plus, Download, MessageSquare, ClipboardList, X, Eye, UserPlus, UserMinus, Trash2, MessageCircle, RefreshCw
 } from 'lucide-react';
 import CityDropdown from './CityDropdown';
-import CreateEventModal from './CreateEventModal';
+import CreateEventModal from './create-event/CreateEventModal';
 import EventDetailModal from './EventDetailModal';
 import MyEvents from './MyEvents';
 import MyRegistrationsPage from './MyRegistrationsPage';
