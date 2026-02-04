@@ -9,4 +9,4 @@ if __name__ == "__main__":
         print("Windows Proactor Loop Policy Applied.")
 
     print("Starting Server with Custom Runner (NO RELOAD - REQUIRED FOR PLAYWRIGHT ON WINDOWS)...")
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8001, reload=False)

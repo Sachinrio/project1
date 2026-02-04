@@ -61,6 +61,24 @@ async def lifespan(app: FastAPI):
     # 1. Startup: Create DB Tables
     await init_db()
     
+    # 1.1 Startup: Run Auto-Migrations (Permanent Fix for Auth Error)
+    try:
+        from sqlalchemy import text
+        async with engine.begin() as conn:
+            # Check for razorpay_account_id
+            try:
+                # Quote "user" for Postgres compatibility
+                await conn.execute(text('SELECT razorpay_account_id FROM "user" LIMIT 1'))
+            except Exception:
+                print("MIGRATION: Adding missing 'razorpay_account_id' column...")
+                try:
+                    await conn.execute(text('ALTER TABLE "user" ADD COLUMN razorpay_account_id VARCHAR'))
+                    print("MIGRATION: Column added successfully.")
+                except Exception as e:
+                    print(f"MIGRATION: Error adding column (might differ by DB): {e}")
+    except Exception as e:
+        print(f"MIGRATION CHECK FAILED: {e}")
+    
     # 2. Startup: Initialize Scheduler
     scheduler = AsyncIOScheduler()
     scheduler.add_job(scheduled_scraper_task, 'cron', hour=8, minute=0)
@@ -105,6 +123,10 @@ app.include_router(router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(scraper_router, prefix="/api/v1") # NEW Scraper Endpoints
+
+from app.api.payment_routes import router as payment_router
+app.include_router(payment_router, prefix="/api/v1")
+
 
 # Mount uploads directory to serve images
 import os

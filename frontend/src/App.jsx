@@ -9,6 +9,7 @@ import MyRegistrationsPage from './components/MyRegistrationsPage';
 import OrganizerCheckInPage from './components/OrganizerCheckInPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import OrganizerCheckIn from './components/OrganizerCheckIn';
+import EventRegisterPage from './components/EventRegisterPage';
 
 export default function App() {
   const [events, setEvents] = useState([]);
@@ -32,6 +33,8 @@ export default function App() {
     if (view === 'ticket-details' && eventId) {
       setInitialDashboardView('ticket-details');
       setInitialDashboardEventId(eventId);
+    } else if (view === 'event-register') {
+      setCurrentView('event-register');
     }
 
     fetchEvents();
@@ -260,6 +263,15 @@ export default function App() {
           }}
         />
       )}
+      {currentView === 'event-register' && (
+        <EventRegisterPage
+          onNavigate={(view) => {
+            window.scrollTo(0, 0);
+            setCurrentView(view || 'dashboard');
+          }}
+        />
+      )}
     </>
   );
 }
+

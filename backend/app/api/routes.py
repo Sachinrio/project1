@@ -544,8 +544,8 @@ async def list_events(
     
     # Final query with limit/offset
     final_query = select(final_subq).order_by(
-        final_subq.c.is_free.desc(),
         final_subq.c.is_inf,
+        final_subq.c.is_free.desc(),
         final_subq.c.s_rank,
         final_subq.c.start_time
     ).offset(offset).limit(limit)
@@ -786,7 +786,9 @@ class UserProfileResponse(SQLModel):
     company: Optional[str] = None
     phone: Optional[str] = None
     bio: Optional[str] = None
+    bio: Optional[str] = None
     profile_image: Optional[str] = None
+    razorpay_account_id: Optional[str] = None
 
 @router.get("/user/profile", response_model=UserProfileResponse)
 async def get_user_profile(
@@ -805,7 +807,8 @@ async def get_user_profile(
         company=current_user.company,
         phone=current_user.phone,
         bio=current_user.bio,
-        profile_image=current_user.profile_image
+        profile_image=current_user.profile_image,
+        razorpay_account_id=current_user.razorpay_account_id
     )
 
 @router.put("/user/profile")

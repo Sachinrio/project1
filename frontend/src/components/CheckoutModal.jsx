@@ -34,14 +34,104 @@ export default function CheckoutModal({ event, isOpen, onClose, onConfirm }) {
 
     const handleConfirm = async () => {
         setIsProcessing(true);
-        // Prepare Payload
-        const payload = {
-            tickets: tickets.filter(t => t.selectedQty > 0),
-            attendee: attendee,
-            total_amount: totalPrice
-        };
-        await onConfirm(payload);
-        setIsProcessing(false);
+
+        try {
+            const token = localStorage.getItem('token');
+            const totalAmount = totalPrice; // Use the calculated Total Price
+
+            // 1. Create Order
+            const orderRes = await fetch('/api/v1/payment/create-order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    amount: Math.ceil(totalAmount),
+                    currency: "INR",
+                    event_id: event.id // Pass event ID for split payments
+                })
+            });
+
+            if (!orderRes.ok) throw new Error("Failed to create order");
+            const orderData = await orderRes.json();
+
+            // 2. Open Razorpay
+            const options = {
+                key: orderData.key_id,
+                amount: orderData.amount,
+                currency: orderData.currency,
+                name: "Infinite BZ",
+                description: `Event Registration - ${event.title}`,
+                order_id: orderData.id,
+                handler: async function (response) {
+                    await verifyAndComplete(response);
+                },
+                prefill: {
+                    name: `${attendee.firstName} ${attendee.lastName}`,
+                    email: attendee.email,
+                    contact: attendee.phone
+                },
+                theme: {
+                    color: "#0ea5e9" // primary-500
+                },
+                modal: {
+                    ondismiss: function () {
+                        setIsProcessing(false);
+                    }
+                }
+            };
+
+            const rzp = new window.Razorpay(options);
+            rzp.on('payment.failed', function (response) {
+                alert("Payment Failed: " + response.error.description);
+                setIsProcessing(false);
+            });
+            rzp.open();
+
+        } catch (error) {
+            console.error(error);
+            alert("Payment initialization failed");
+            setIsProcessing(false);
+        }
+    };
+
+    const verifyAndComplete = async (paymentDetails) => {
+        try {
+            const token = localStorage.getItem('token');
+            const verifyRes = await fetch('/api/v1/payment/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    razorpay_order_id: paymentDetails.razorpay_order_id,
+                    razorpay_payment_id: paymentDetails.razorpay_payment_id,
+                    razorpay_signature: paymentDetails.razorpay_signature
+                })
+            });
+
+            if (!verifyRes.ok) throw new Error("Verification failed");
+            const verifyData = await verifyRes.json();
+
+            if (verifyData.status === "success") {
+                // Prepare Payload for Final Registration
+                const payload = {
+                    tickets: tickets.filter(t => t.selectedQty > 0),
+                    attendee: attendee,
+                    total_amount: totalPrice,
+                    payment_id: paymentDetails.razorpay_payment_id // Pass payment ID if backend needs it
+                };
+                await onConfirm(payload); // Call the original prop to save ticket
+                // setIsProcessing(false); // onConfirm likely handles navigation/close, but just in case
+            }
+
+        } catch (error) {
+            console.error(error);
+            alert("Payment verification failed! Ticket not issued.");
+            setIsProcessing(false);
+        }
     };
 
     return (

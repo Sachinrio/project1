@@ -17,7 +17,7 @@ export default function MyRegistrationsPage({ onNavigate, user }) {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:8000/api/v1/user/registrations', {
+      const res = await fetch('/api/v1/user/registrations', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -76,7 +76,7 @@ export default function MyRegistrationsPage({ onNavigate, user }) {
   const handleShowQr = async (eventId) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/api/v1/user/registrations/${eventId}/qr`, {
+      const res = await fetch(`/api/v1/user/registrations/${eventId}/qr`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {

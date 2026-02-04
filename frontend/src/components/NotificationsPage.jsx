@@ -114,7 +114,7 @@ const NotificationsPage = ({ notifications = [] }) => {
     setQrLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/v1/user/registrations/${eventId}/qr`, {
+      const response = await fetch(`/api/v1/user/registrations/${eventId}/qr`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -138,7 +138,7 @@ const NotificationsPage = ({ notifications = [] }) => {
     setEventLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/v1/events/${eventId}`, {
+      const response = await fetch(`/api/v1/events/${eventId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -218,9 +218,9 @@ const NotificationsPage = ({ notifications = [] }) => {
                         style={{ display: (originalActivity.event_image || originalActivity.image_url || originalActivity.follower_image) ? 'block' : 'none' }}
                       />
                       <div className={`w-full h-full rounded-full flex items-center justify-center text-xl font-bold shadow-md ${notif.type === 'success' ? 'bg-green-100 text-green-600' :
-                          notif.type === 'info' ? 'bg-blue-100 text-blue-600' :
-                            notif.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                              'bg-purple-100 text-purple-600'
+                        notif.type === 'info' ? 'bg-blue-100 text-blue-600' :
+                          notif.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
+                            'bg-purple-100 text-purple-600'
                         }`} style={{ display: (originalActivity.event_image || originalActivity.image_url || originalActivity.follower_image) ? 'none' : 'flex' }}>
                         {getIcon(notif.type)}
                       </div>

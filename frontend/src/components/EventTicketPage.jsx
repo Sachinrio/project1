@@ -17,7 +17,7 @@ export default function EventTicketPage({ eventId, onNavigate, onCancelSuccess, 
     const fetchEventDetails = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${eventId}`, {
+            const res = await fetch(`/api/v1/events/${eventId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -34,7 +34,7 @@ export default function EventTicketPage({ eventId, onNavigate, onCancelSuccess, 
     const fetchQrCode = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/user/registrations/${eventId}/qr`, {
+            const res = await fetch(`/api/v1/user/registrations/${eventId}/qr`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -80,7 +80,7 @@ export default function EventTicketPage({ eventId, onNavigate, onCancelSuccess, 
     const downloadQR = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8000/api/v1/user/registrations/${eventId}/pdf`, {
+            const response = await fetch(`/api/v1/user/registrations/${eventId}/pdf`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -117,7 +117,7 @@ export default function EventTicketPage({ eventId, onNavigate, onCancelSuccess, 
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8000/api/v1/user/registrations/${eventId}`, {
+            const response = await fetch(`/api/v1/user/registrations/${eventId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

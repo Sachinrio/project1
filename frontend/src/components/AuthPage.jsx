@@ -51,7 +51,16 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login' }) 
                 body: formData,
             });
 
-            const data = await res.json();
+            const contentType = res.headers.get("content-type");
+            let data;
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                data = await res.json();
+            } else {
+                const text = await res.text();
+                console.error("Non-JSON response:", res.status, text);
+                throw new Error(`Login failed: Server returned ${res.status}. Check console for details.`);
+            }
+
             if (!res.ok) throw new Error(data.detail || 'Login failed');
 
             localStorage.setItem('token', data.access_token);

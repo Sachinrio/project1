@@ -126,6 +126,7 @@ class UserBase(SQLModel):
     email: str = Field(unique=True, index=True)
     full_name: Optional[str] = None
     is_active: bool = Field(default=True)
+    razorpay_account_id: Optional[str] = None # Linked Account ID for Payouts
 
     # Profile fields
     first_name: Optional[str] = None

@@ -43,7 +43,7 @@ export default function OrganizerCheckInPage({ eventId, onNavigate }) {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${activeEventId}/check-in?ticket_id=${finalId}`, {
+            const res = await fetch(`/api/v1/events/${activeEventId}/check-in?ticket_id=${finalId}`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

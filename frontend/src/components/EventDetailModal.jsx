@@ -30,7 +30,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister, i
         setIsLoadingCheckFollow(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8000/api/v1/user/following`, {
+            const response = await fetch(`/api/v1/user/following`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -93,7 +93,7 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister, i
                 return;
             }
 
-            const url = `http://localhost:8000/api/v1/user/follow/${encodeURIComponent(targetIdentifier)}`;
+            const url = `/api/v1/user/follow/${encodeURIComponent(targetIdentifier)}`;
             console.log('🌐 Making POST request to:', url);
 
             const response = await fetch(url, {
@@ -127,6 +127,13 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister, i
             setIsLoadingFollow(false);
             console.log('🏁 Follow request completed');
         }
+    };
+
+    const handleOpenMap = () => {
+        if (!event.venue_name && !event.venue_address) return;
+
+        const query = encodeURIComponent(`${event.venue_name || ''}, ${event.venue_address || ''}`);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
     };
 
     return (
@@ -220,7 +227,11 @@ export default function EventDetailModal({ event, isOpen, onClose, onRegister, i
                                             {event.venue_address || "Link available after registration"}
                                         </p>
                                         {!isOnline && (
-                                            <div className="h-32 bg-slate-700/30 rounded-xl w-full relative overflow-hidden group cursor-pointer border border-slate-700">
+                                            <div
+                                                onClick={handleOpenMap}
+                                                className="h-32 bg-slate-700/30 rounded-xl w-full relative overflow-hidden group cursor-pointer border border-slate-700 active:scale-[0.98] transition-all"
+                                                title="Open in Google Maps"
+                                            >
                                                 <div className="absolute inset-0 bg-slate-800 flex items-center justify-center text-slate-500">
                                                     <span className="text-xs">Map Preview</span>
                                                 </div>

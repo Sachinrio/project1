@@ -1,29 +1,50 @@
-import asyncio
-import asyncpg
+import os
+from sqlalchemy import create_engine, text, inspect
+from dotenv import load_dotenv
 
-async def create_database():
-    # We connect to the default 'postgres' database on Port 5432
-    # We use 'python_user' and '55555' since your debug script proved they work!
-    conn_str = "postgresql://python_user:55555@localhost:5432/postgres"
+load_dotenv()
+
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/infinite_bz")
+# Enforce sync driver for this script
+if "+asyncpg" in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("+asyncpg", "")
+
+def fix_database():
+    print(f"Connecting to {DATABASE_URL}...")
+    engine = create_engine(DATABASE_URL)
     
-    try:
-        print("🔌 Connecting to Port 5432...")
-        conn = await asyncpg.connect(conn_str)
+    with engine.connect() as conn:
+        print("Connected.")
         
-        # Create the database
-        print("🔨 Creating 'event_hub_db'...")
+        # Check if column exists
         try:
-            await conn.execute('CREATE DATABASE event_hub_db;')
-            print("✅ SUCCESS: Database created! You are ready to go.")
-        except asyncpg.DuplicateDatabaseError:
-            print("⚠️ Database already exists (That's okay too!)")
+            # We use text() for raw SQL
+            # Note: "user" is a reserved word in Postgres, so we must quote it
+            result = conn.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name='user' AND column_name='razorpay_account_id'"))
+            exists = result.fetchone()
             
-        await conn.close()
-        
-    except Exception as e:
-        print(f"❌ Error: {e}")
-        print("Tip: If this says 'permission denied', reply and I will give you the admin code.")
+            if exists:
+                print("SUCCESS: Column 'razorpay_account_id' ALREADY EXISTS.")
+                return
+            else:
+                print("INFO: Column 'razorpay_account_id' is MISSING.")
+        except Exception as e:
+            print(f"Error checking column: {e}")
 
-# Run the fix
+        # Add column if missing
+        print("Attempting to ADD column...")
+        try:
+            conn.execute(text('ALTER TABLE "user" ADD COLUMN razorpay_account_id VARCHAR'))
+            conn.commit()
+            print("SUCCESS: Column 'razorpay_account_id' ADDED successfully.")
+        except Exception as e:
+            print(f"CRITICAL ERROR adding column: {e}")
+            # Identify if it's because it already exists (race condition)
+            if "already exists" in str(e):
+                 print("Safe to ignore: Column already exists.")
+
 if __name__ == "__main__":
-    asyncio.run(create_database())
+    try:
+        fix_database()
+    except Exception as e:
+        print(f"Script Failed: {e}")

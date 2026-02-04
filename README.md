@@ -28,6 +28,8 @@
 *   **Unified Registration**: Register for events directly or get redirected to official sources.
 *   **PDF Tickets**: Automated generation of professional QR-coded tickets.
 *   **Email Confirmations**: Instant booking confirmations via SMTP.
+*   **Razorpay Integration**: Verified bank settlements + Secure payment lifecycle for paid tickets.
+*   **Location Services**: Integrated "View on Map" redirect for seamless venue navigation.
 
 ---
 

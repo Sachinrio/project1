@@ -191,10 +191,10 @@ export default function Step4_Tickets({ formData, updateFormData, onNext, onBack
                 <button onClick={onBack} className="px-6 py-3 rounded-xl text-slate-400 hover:text-white font-bold transition-colors">Back</button>
                 <button
                     onClick={onNext}
-                    disabled={formData.tickets.length === 0 && !draft.name} // Basic check, ideally strictly enforce saved tickets? User implies they want explicit save.
+                    disabled={formData.tickets.length === 0 || draft.name.length > 0}
                     className="px-8 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-all shadow-lg shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Next Step
+                    {draft.name.length > 0 ? "Save Ticket First" : "Next Step"}
                 </button>
             </div>
         </div>

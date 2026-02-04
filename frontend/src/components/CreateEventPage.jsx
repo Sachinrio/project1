@@ -292,7 +292,7 @@ export default function CreateEventPage({ user, onNavigate, onLogout, onSave }) 
                                                 uploadData.append('file', file);
 
                                                 try {
-                                                    const res = await fetch('http://localhost:8000/api/v1/upload', {
+                                                    const res = await fetch('/api/v1/upload', {
                                                         method: 'POST',
                                                         body: uploadData
                                                     });

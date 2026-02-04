@@ -129,7 +129,7 @@ export default function SettingsPage({ user, onNavigate }) {
   const fetchFollowersData = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/v1/user/followers', {
+      const response = await fetch('/api/v1/user/followers', {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -270,11 +270,10 @@ export default function SettingsPage({ user, onNavigate }) {
                     <div className="text-xs text-slate-400">PROFILE</div>
                   </div>
                   <div className="flex flex-col items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold ${
-                      user?.is_active
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-lg font-bold ${user?.is_active
                         ? 'bg-green-500/20 text-green-400 border border-green-500/30'
                         : 'bg-red-500/20 text-red-400 border border-red-500/30'
-                    }`}>
+                      }`}>
                       {user?.is_active ? <Check size={20} /> : <X size={20} />}
                     </div>
                     <div className="text-xs text-slate-400 mt-1">Active</div>

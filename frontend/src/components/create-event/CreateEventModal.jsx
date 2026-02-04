@@ -26,9 +26,16 @@ const slideVariants = {
     })
 };
 
-export default function CreateEventModal({ isOpen, onClose, onSave, initialData = null }) {
+import BankDetailsModal from './BankDetailsModal';
+
+export default function CreateEventModal({ isOpen, onClose, onSave, initialData = null, user }) {
     const [step, setStep] = useState(1);
     const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+
+    // Bank Onboarding State
+    const [showBankModal, setShowBankModal] = useState(false);
+    const [isUserOnboarded, setIsUserOnboarded] = useState(!!user?.razorpay_account_id);
+
     const [formData, setFormData] = useState({
         title: "",
         category: "Conference",
@@ -57,14 +64,39 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
             setStep(1);
             // Reset form or load initialData
             if (initialData) setFormData(initialData);
+            // Update onboard status from prop
+            setIsUserOnboarded(!!user?.razorpay_account_id);
         }
-    }, [isOpen, initialData]);
+    }, [isOpen, initialData, user]);
 
     const updateFormData = (updates) => {
         setFormData(prev => ({ ...prev, ...updates }));
     };
 
     const handleNext = () => {
+        // Intercept Step 3 (Tickets) exit if Paid tickets exist and User not onboarded
+        if (step === 3) {
+            const hasPaidTickets = formData.tickets.some(t => t.type === 'paid');
+
+            // Strict check: Must have ID and MUST NOT be a mock ID
+            const isStrictlyOnboarded = user?.razorpay_account_id && !user.razorpay_account_id.includes("mock");
+            const isLocalOnboarded = isUserOnboarded && (!user?.razorpay_account_id?.includes("mock"));
+
+            if (hasPaidTickets && !isStrictlyOnboarded && !isLocalOnboarded) {
+                console.log("Blocking Next Step: Paid Ticket needs Real Bank Account");
+                setShowBankModal(true);
+                return;
+            }
+        }
+
+        setDirection(1);
+        setStep(prev => prev + 1);
+    };
+
+    const handleBankSuccess = (accountId) => {
+        setIsUserOnboarded(true);
+        setShowBankModal(false);
+        // Automatically proceed to next step
         setDirection(1);
         setStep(prev => prev + 1);
     };
@@ -133,6 +165,13 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
                     </AnimatePresence>
                 </div>
             </div>
+
+            <BankDetailsModal
+                isOpen={showBankModal}
+                onClose={() => setShowBankModal(false)}
+                onSuccess={handleBankSuccess}
+                user={user}
+            />
         </div>
     );
 }

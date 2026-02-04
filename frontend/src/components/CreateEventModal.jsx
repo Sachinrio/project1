@@ -185,7 +185,7 @@ export default function CreateEventModal({ isOpen, onClose, onSave, initialData 
 
         try {
             // Call Backend API
-            const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000'}/api/v1/ai/generate-event`, {
+            const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/ai/generate-event`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({

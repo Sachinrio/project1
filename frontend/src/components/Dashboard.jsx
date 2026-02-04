@@ -58,7 +58,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
         try {
             const token = localStorage.getItem('token');
             // Trigger background scrape
-            const res = await fetch('http://localhost:8000/api/v1/refresh-events', {
+            const res = await fetch('/api/v1/refresh-events', {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -98,7 +98,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const fetchDashboardStats = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/v1/admin/stats', {
+            const res = await fetch('/api/v1/admin/stats', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -113,7 +113,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const fetchUserRegistrations = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/v1/user/registrations', {
+            const res = await fetch('/api/v1/user/registrations', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -134,7 +134,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
         setActivitiesLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/v1/user/activities', {
+            const res = await fetch('/api/v1/user/activities', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -167,7 +167,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                 params.append('search', search.trim());
             }
 
-            const res = await fetch(`http://localhost:8000/api/v1/events?${params.toString()}`, {
+            const res = await fetch(`/api/v1/events?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -213,6 +213,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [showCreateEventModal, setShowCreateEventModal] = useState(false);
     const [showDetailModal, setShowDetailModal] = useState(false);
+    const [editingEvent, setEditingEvent] = useState(null); // For editing existing events
 
 
     const [pendingEventId, setPendingEventId] = useState(null);
@@ -241,7 +242,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const handleInternalRegistration = async (event, payload = null) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${event.id}/register`, {
+            const res = await fetch(`/api/v1/events/${event.id}/register`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -282,7 +283,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const handleCreateEvent = async (eventData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/v1/events', { // Standard create endpoint
+            const res = await fetch('/api/v1/events', { // Standard create endpoint
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -311,7 +312,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${pendingEventId}/register`, {
+            const res = await fetch(`/api/v1/events/${pendingEventId}/register`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -680,11 +681,15 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                     </>
                 )}
 
-                <CreateEventModal
-                    isOpen={showCreateEventModal}
-                    onClose={() => setShowCreateEventModal(false)}
-                    onSave={handleCreateEvent}
-                />
+                {showCreateEventModal && (
+                    <CreateEventModal
+                        isOpen={showCreateEventModal}
+                        onClose={() => setShowCreateEventModal(false)}
+                        onSave={handleCreateEvent}
+                        initialData={editingEvent}
+                        user={user}
+                    />
+                )}
 
                 <EventDetailModal
                     isOpen={showDetailModal}

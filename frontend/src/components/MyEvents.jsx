@@ -24,7 +24,7 @@ export default function MyEvents({ onCreateNew, onNavigate }) {
     const fetchMyEvents = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('http://localhost:8000/api/v1/events/my-events', {
+            const res = await fetch('/api/v1/events/my-events', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -50,7 +50,7 @@ export default function MyEvents({ onCreateNew, onNavigate }) {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${eventToDelete.id}`, {
+            const res = await fetch(`/api/v1/events/${eventToDelete.id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
@@ -76,7 +76,7 @@ export default function MyEvents({ onCreateNew, onNavigate }) {
     const handleUpdateEvent = async (payload) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:8000/api/v1/events/${payload.id}`, {
+            const res = await fetch(`/api/v1/events/${payload.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
