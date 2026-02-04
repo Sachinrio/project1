@@ -1368,6 +1368,7 @@ async def get_user_activities(
                 "event_date": reg.event.start_time,
                 "venue": reg.event.venue_name,
                 "confirmation_id": reg.confirmation_id,
+                "source": reg.event.raw_data.get("source") if reg.event.raw_data else None,
                 "status": "registered"
             })
 
