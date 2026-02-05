@@ -84,7 +84,7 @@ const NotificationsPage = ({ notifications = [] }) => {
         case 'event_created':
           return 'View Event';
         case 'event_registered':
-          return 'View Ticket';
+          return (activity.source === 'InfiniteBZ' || activity.source === 'Infinite_BZ') ? 'View Ticket' : null;
         case 'new_follower':
           return 'View Profile';
         case 'event_deleted':
