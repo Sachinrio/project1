@@ -39,6 +39,26 @@ export default function CheckoutModal({ event, isOpen, onClose, onConfirm }) {
             const token = localStorage.getItem('token');
             const totalAmount = totalPrice; // Use the calculated Total Price
 
+            // --- FREE EVENT BYPASS ---
+            // If total amount is 0, skip Razorpay and register directly
+            if (totalAmount === 0 || event.is_free) {
+                console.log("Free event detected. Skipping payment gateway.");
+
+                const payload = {
+                    tickets: tickets.filter(t => t.selectedQty > 0),
+                    attendee: attendee,
+                    total_amount: 0,
+                    payment_id: "FREE_REGISTRATION"
+                };
+
+                await onConfirm(payload);
+                // Note: onConfirm usually closes the modal, so we don't need to do much else.
+                // But just in case it doesn't close immediately:
+                setIsProcessing(false);
+                return;
+            }
+            // -------------------------
+
             // 1. Create Order
             const orderRes = await fetch('/api/v1/payment/create-order', {
                 method: 'POST',
@@ -255,7 +275,7 @@ export default function CheckoutModal({ event, isOpen, onClose, onConfirm }) {
                         disabled={step === 1 && totalQty === 0 || isProcessing}
                         className="bg-primary-600 hover:bg-primary-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-lg shadow-primary-500/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
-                        {isProcessing ? 'Processing... ' : (step === 2 ? 'Pay & Register' : 'Continue')}
+                        {isProcessing ? 'Processing... ' : (step === 2 ? (totalPrice === 0 ? 'Register' : 'Pay & Register') : 'Continue')}
                         {!isProcessing && <ChevronRight size={18} />}
                     </button>
                 </div>

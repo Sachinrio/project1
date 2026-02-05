@@ -85,18 +85,47 @@ async def run_full_scrape_cycle():
         # 3. Cleanup Old Events
         await remove_outdated_events(session)
 
+# Import UserRegistration to handle foreign key cleanup
+from app.models.schemas import Event, UserRegistration
+
+# ... (Previous imports remain same) ...
+
+# ... (scrapers import) ...
+
+# ... (run_full_scrape_cycle function) ...
+
 async def remove_outdated_events(session: AsyncSession):
     """
     Deletes events where end_time < NOW.
+    Safely handles foreign keys by deleting related registrations first.
     """
     try:
         current_time = datetime.now()
         print(f"CLEANUP: Removing events older than {current_time}...")
         
-        stmt = delete(Event).where(Event.end_time < current_time)
-        result = await session.execute(stmt)
+        # 1. Select IDs of events to delete
+        stmt_select = select(Event.id).where(Event.end_time < current_time)
+        result_ids = await session.execute(stmt_select)
+        event_ids = result_ids.scalars().all()
+        
+        if not event_ids:
+            print("CLEANUP: No old events found.")
+            return
+
+        print(f"CLEANUP: Found {len(event_ids)} old events to delete.")
+
+        # 2. Delete related registrations first
+        stmt_del_regs = delete(UserRegistration).where(UserRegistration.event_id.in_(event_ids))
+        res_regs = await session.execute(stmt_del_regs)
+        print(f"CLEANUP: Deleted {res_regs.rowcount} related registrations.")
+
+        # 3. Delete events
+        stmt_del_events = delete(Event).where(Event.id.in_(event_ids))
+        res_events = await session.execute(stmt_del_events)
         await session.commit()
         
-        print(f"CLEANUP: Deleted {result.rowcount} old events.")
+        print(f"CLEANUP: Deleted {res_events.rowcount} old events.")
     except Exception as e:
         print(f"CLEANUP FAILED: {e}")
+        # Rollback in case of error to keep DB consistent
+        await session.rollback()

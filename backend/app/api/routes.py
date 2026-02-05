@@ -305,16 +305,26 @@ async def get_my_events(
     now_time = datetime.now()
 
     for event in my_events:
-        # 1. Total Registrations
-        reg_stmt = select(func.count()).select_from(UserRegistration).where(UserRegistration.event_id == event.id)
+        # 1. Total Registrations (SUCCESS or CHECKED_IN only)
+        reg_stmt = select(func.count()).select_from(UserRegistration).where(
+            UserRegistration.event_id == event.id,
+            or_(
+                UserRegistration.status == "SUCCESS",
+                UserRegistration.status == "CHECKED_IN"
+            )
+        )
         reg_res = await session.execute(reg_stmt)
         reg_count = reg_res.scalar()
         total_registrations += reg_count
         
-        # 2. Recent Signups (Last 24h)
+        # 2. Recent Signups (Last 24h, SUCCESS only)
         recent_stmt = select(func.count()).select_from(UserRegistration).where(
             UserRegistration.event_id == event.id,
-            UserRegistration.registered_at >= cutoff_24h
+            UserRegistration.registered_at >= cutoff_24h,
+            or_(
+                UserRegistration.status == "SUCCESS",
+                UserRegistration.status == "CHECKED_IN"
+            )
         )
         recent_res = await session.execute(recent_stmt)
         recent_count = recent_res.scalar()
@@ -657,7 +667,8 @@ async def register_for_event(
     # 2. Check if already registered
     stmt = select(UserRegistration).where(
         UserRegistration.user_email == current_user.email,
-        UserRegistration.event_id == event_id
+        UserRegistration.event_id == event_id,
+        UserRegistration.status == "SUCCESS"
     )
     result = await session.execute(stmt)
     existing = result.scalars().first()

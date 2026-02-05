@@ -52,6 +52,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const [activitiesLoading, setActivitiesLoading] = useState(false);
 
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false); // NEW STATE for Red Dot
 
     const handleRefresh = async () => {
         setIsRefreshing(true);
@@ -149,7 +150,17 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
             });
             if (res.ok) {
                 const data = await res.json();
-                setUserActivities(data.activities || []);
+                const activities = data.activities || [];
+                setUserActivities(activities);
+
+                // NOTIFICATION LOGIC:
+                // Check local storage for last seen count
+                const lastSeenCount = parseInt(localStorage.getItem('lastSeenActivityCount') || '0');
+
+                // If we have more activities than before, show Red Dot
+                if (activities.length > lastSeenCount) {
+                    setHasUnreadNotifications(true);
+                }
             }
         } catch (err) {
             console.error("Failed to fetch user activities", err);
@@ -460,12 +471,19 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                                     />
                                 </div>
                                 <button
-                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    onClick={() => {
+                                        setShowNotifications(!showNotifications);
+                                        if (!showNotifications) {
+                                            // When opening, mark as read
+                                            setHasUnreadNotifications(false);
+                                            localStorage.setItem('lastSeenActivityCount', userActivities.length.toString());
+                                        }
+                                    }}
                                     className="relative text-slate-500 hover:text-sky-600"
                                 >
                                     <Bell size={20} />
-                                    {userActivities.length > 0 && (
-                                        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                                    {hasUnreadNotifications && (
+                                        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                     )}
                                 </button>
                                 <div className="relative">

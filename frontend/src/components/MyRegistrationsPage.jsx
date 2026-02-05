@@ -126,45 +126,7 @@ export default function MyRegistrationsPage({ onNavigate, user }) {
   return (
     <div className="min-h-screen bg-slate-900">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="text-2xl font-bold text-primary-500">InfiniteBZ</div>
-            <div className="hidden md:flex items-center gap-3 bg-gray-100 rounded-full px-4 py-2 flex-1">
-              <input
-                type="text"
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-white text-gray-800 outline-none flex-1 rounded-full px-2 py-1"
-              />
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-semibold">30% off</span>
-            <button className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-slate-900 px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-primary-500/20">
-              Try Pro
-            </button>
-            <button className="flex items-center gap-2 bg-primary-500 hover:bg-primary-600 text-slate-900 px-4 py-2 rounded-lg font-bold transition-all shadow-lg shadow-primary-500/20">
-              Free
-            </button>
-
-            <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center">
-              {user?.profile_image ? (
-                <img
-                  src={user.profile_image}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-primary-500 flex items-center justify-center text-slate-900 font-bold">
-                  {user?.full_name?.[0] || 'U'}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Header Removed as per user request */}
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
