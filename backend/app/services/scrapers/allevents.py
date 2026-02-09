@@ -1,8 +1,8 @@
-
 from .base_scraper import BaseScraper
 from playwright.async_api import Page
 from datetime import datetime, timedelta
 import dateparser
+import hashlib
 
 from .utils import is_business_event
 
@@ -103,7 +103,7 @@ class AllEventsScraper(BaseScraper):
                         "url": link,
                         "venue_name": venue,
                         "image_url": event_image,
-                        "eventbrite_id": f"allevents-{hash(link)}",
+                        "eventbrite_id": f"allevents-{hashlib.md5(link.split('?')[0].encode()).hexdigest()}",
                         "is_free": False,
                         "category": "Business",
                         "raw_data": {"source": "allevents"}

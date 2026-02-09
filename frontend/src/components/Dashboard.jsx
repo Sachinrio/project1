@@ -52,6 +52,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const [activitiesLoading, setActivitiesLoading] = useState(false);
 
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false); // NEW STATE for Red Dot
 
     const handleRefresh = async () => {
         setIsRefreshing(true);
@@ -149,7 +150,17 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
             });
             if (res.ok) {
                 const data = await res.json();
-                setUserActivities(data.activities || []);
+                const activities = data.activities || [];
+                setUserActivities(activities);
+
+                // NOTIFICATION LOGIC:
+                // Check local storage for last seen count
+                const lastSeenCount = parseInt(localStorage.getItem('lastSeenActivityCount') || '0');
+
+                // If we have more activities than before, show Red Dot
+                if (activities.length > lastSeenCount) {
+                    setHasUnreadNotifications(true);
+                }
             }
         } catch (err) {
             console.error("Failed to fetch user activities", err);
@@ -187,8 +198,11 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                 // ROBUST HANDLING: Check if array or object
                 if (data && Array.isArray(data.data)) {
                     // BACKEND UPGRADE: API now returns { data, total, page, limit }
+                    // FRONTEND DEDUPLICATION: Remove duplicates by title
+                    const uniqueEvents = Array.from(new Map(data.data.map(item => [item.title, item])).values());
+
                     setEventsData({
-                        data: data.data,
+                        data: uniqueEvents,
                         total: data.total,
                         page: data.page,
                         limit: data.limit
@@ -293,7 +307,8 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
     const handleCreateEvent = async (eventData) => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/v1/events', { // Standard create endpoint
+            const baseUrl = import.meta.env.VITE_API_URL || '';
+            const res = await fetch(`${baseUrl}/api/v1/events`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -301,6 +316,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                 },
                 body: JSON.stringify(eventData)
             });
+
             const data = await res.json();
 
             if (res.ok) {
@@ -310,11 +326,12 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                 fetchEvents(1, activeSearch, selectedCity, selectedCategory, selectedSource, selectedCost, selectedMode, selectedDate);
                 setRefreshForMyEvents(prev => prev + 1);
             } else {
-                alert(`Creation Failed: ${data.message || "Unknown error"}`);
+                console.error("Creation failed with status:", res.status, data);
+                alert(`Creation Failed: ${data.detail || data.message || "Unknown error"}`);
             }
         } catch (err) {
             console.error("Create event error", err);
-            alert("Failed to create event");
+            alert(`Failed to create event: ${err.message}`);
         }
     };
 
@@ -459,13 +476,29 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                                         onKeyDown={handleSearch}
                                     />
                                 </div>
+
                                 <button
-                                    onClick={() => setShowNotifications(!showNotifications)}
+                                    onClick={handleRefresh}
+                                    disabled={isRefreshing}
+                                    className={`relative text-slate-500 hover:text-sky-600 transition-colors ${isRefreshing ? 'animate-spin' : ''}`}
+                                    title="Refresh Events"
+                                >
+                                    <RefreshCw size={20} />
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setShowNotifications(!showNotifications);
+                                        if (!showNotifications) {
+                                            // When opening, mark as read
+                                            setHasUnreadNotifications(false);
+                                            localStorage.setItem('lastSeenActivityCount', userActivities.length.toString());
+                                        }
+                                    }}
                                     className="relative text-slate-500 hover:text-sky-600"
                                 >
                                     <Bell size={20} />
-                                    {userActivities.length > 0 && (
-                                        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
+                                    {hasUnreadNotifications && (
+                                        <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
                                     )}
                                 </button>
                                 <div className="relative">
@@ -589,11 +622,11 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                                 <div className="ml-auto relative">
                                     <input
                                         type="date"
-                                        className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 focus:outline-none focus:border-sky-500 hover:bg-slate-50 cursor-pointer"
+                                        className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 focus:outline-none focus:border-sky-500 hover:bg-slate-50 cursor-pointer relative z-0"
                                         value={selectedDate}
                                         onChange={(e) => setSelectedDate(e.target.value)}
                                     />
-                                    <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                                    <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none z-10" />
                                 </div>
                             </div>
 

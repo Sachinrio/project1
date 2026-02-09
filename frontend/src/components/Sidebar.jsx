@@ -34,12 +34,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout, onCreateClic
                     active={activePage === 'my-registrations'}
                     onClick={() => onNavigate('my-registrations')}
                 />
-                <NavItem
-                    icon={<ScanLine size={20} />}
-                    label="Scan Tickets"
-                    active={activePage === 'check-in'}
-                    onClick={() => onNavigate('check-in')}
-                />
+
                 <NavItem
                     icon={<Settings size={20} />}
                     label="Settings"
