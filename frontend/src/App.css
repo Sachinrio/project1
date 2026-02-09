@@ -1,0 +1,104 @@
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* SPECIFIC USER PALETTE */
+/* SPECIFIC USER PALETTE */
+body,
+#root>div {
+  background-color: transparent !important;
+  /* Allow index.css #0B1221 to show */
+  color: #FFFFFF;
+}
+
+/* Headings default to White */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #FFFFFF;
+}
+
+/* Secondary Text on Main BG */
+p,
+span,
+.text-slate-500 {
+  color: #E0E0E0;
+  /* Secondary Text (Light Gray) */
+}
+
+/* --- EXCEPTION: White Cards --- */
+/* Card Backgrounds #FFFFFF */
+.bg-white,
+.bg-white h1,
+.bg-white h2,
+.bg-white h3,
+.bg-white h4,
+.bg-white h5,
+.bg-white p,
+.bg-white span,
+.bg-white div,
+.bg-white button {
+  color: #1e293b !important;
+  /* Reset to dark for legibility in white cards */
+}
+
+/* Fix sub-text in white cards */
+.bg-white .text-slate-500 {
+  color: #64748b !important;
+}
+
+.bg-white .text-slate-400 {
+  color: #94a3b8 !important;
+}
+
+/* Restore Icons in white cards */
+.bg-white .lucide {
+  color: inherit;
+}
+
+/* Ensure Logo uses brand colors where applicable */
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em #844FC1aa);
+  /* Purple glow */
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
