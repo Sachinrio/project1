@@ -479,7 +479,6 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                                 <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
                                     <div className="flex flex-col">
                                         <h1 className="text-3xl font-black text-slate-900 font-outfit tracking-tight">Events Dashboard</h1>
-                                        <p className="text-sm text-slate-400 font-medium mt-1">Last updated: 5 minutes ago</p>
                                     </div>
 
                                     <div className="flex items-center gap-4 w-full md:w-auto">
@@ -735,6 +734,8 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                             event={selectedInternalEvent}
                             onRegister={handleInternalRegistration}
                             isRegistered={selectedInternalEvent && newlyRegisteredIds.includes(selectedInternalEvent.id)}
+                            user={user}
+                            onLogin={onLogout}
                         />
 
                         {/* NOTIFICATIONS MODAL */}

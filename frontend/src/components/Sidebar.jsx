@@ -9,7 +9,6 @@ import {
     Plus,
     X,
     Menu,
-    Heart,
     Infinity
 } from 'lucide-react';
 
@@ -18,9 +17,8 @@ export default function Sidebar({ activePage, onNavigate, onLogout, onCreateClic
 
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'my-events', label: 'Events', icon: Calendar },
+        { id: 'my-events', label: 'My Events', icon: Calendar },
         { id: 'my-registrations', label: 'My Registrations', icon: Ticket },
-        { id: 'saved-events', label: 'Saved Events', icon: Heart },
     ];
 
     const toggleSidebar = () => setIsOpen(!isOpen);
@@ -95,6 +93,20 @@ export default function Sidebar({ activePage, onNavigate, onLogout, onCreateClic
                         })}
                     </nav>
 
+
+                    {/* Create Event Button */}
+                    <div className="px-4 mt-4">
+                        <button
+                            onClick={onCreateClick}
+                            className="w-full group relative px-4 py-3 bg-indigo-600 rounded-xl font-bold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                            <span className="flex items-center justify-center gap-2">
+                                <Plus size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+                                Create Event
+                            </span>
+                        </button>
+                    </div>
+
                     {/* System Label */}
                     <div className="px-8 mt-6 mb-2">
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">System</span>
@@ -125,7 +137,7 @@ export default function Sidebar({ activePage, onNavigate, onLogout, onCreateClic
                         </button>
                     </div>
                 </div>
-            </aside>
+            </aside >
         </>
     );
 }
