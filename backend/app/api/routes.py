@@ -24,38 +24,38 @@ router.include_router(ai_routes.router, prefix="/ai", tags=["AI Generation"])
 
 # --- 1. SYNC (Admin Only / Debug) ---
 @router.post("/sync")
-async def sync_events(city: str = "chennai", session: AsyncSession = Depends(get_session)):
+async def sync_events(city: str = "chennai"):
     """
-    Triggers the Playwright Scraper
+    Triggers the FULL Multi-Source Scraper (Meetup, AllEvents, CTC, Eventbrite)
+    in a background process (subprocess).
     """
-    print(f"Starting Sync for {city}...")
-    try:
-        print("Calling scraper function...")
-        events_data = await scrape_events_playwright(city)
-        print("Scraper returned.")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-    
-    saved_count = 0
-    processed_ids = set()
-    for data in events_data:
-        evt_id = data["eventbrite_id"]
-        if evt_id in processed_ids:
-             continue
-        processed_ids.add(evt_id)
+    import subprocess
+    import sys
+    import os
 
-        # Check duplicates via eventbrite_id
-        stmt = select(Event).where(Event.eventbrite_id == evt_id)
-        result = await session.execute(stmt)
-        existing = result.scalars().first()
-        
-        if not existing:
-            new_event = Event(**data)
-            session.add(new_event)
-            saved_count += 1
-            
-    await session.commit()
-    return {"status": "success", "added": saved_count, "total_found": len(events_data)}
+    print(f"Starting Full Sync for {city} via Worker Process...")
+    
+    # Path to the python executable
+    python_exe = sys.executable
+    worker_script = os.path.join(os.getcwd(), "scraper_worker.py")
+    log_file = os.path.join(os.getcwd(), "scraper.log")
+    
+    # Open log file for background process inheritance
+    f = open(log_file, "a")
+    
+    # Spawn worker to run in background
+    subprocess.Popen(
+        [python_exe, worker_script], 
+        stdout=f, 
+        stderr=f, 
+        creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
+    )
+    
+    return {
+        "status": "accepted", 
+        "message": "Full scraping cycle started in background. Check logs or refresh dashboard in a few minutes.",
+        "details": "Triggers Meetup, AllEvents, CTC, and Eventbrite scrapers."
+    }
 
 # --- 1.5 CREATE EVENT (User Generated) ---
 

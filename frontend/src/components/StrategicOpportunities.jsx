@@ -3,8 +3,15 @@ import React, { useRef } from 'react';
 import { toPng } from 'https://esm.sh/html-to-image';
 
 export const StrategicOpportunities = ({ events = [], onEventClick }) => {
-    // Map real events to opportunity format
-    const opportunities = (events || []).slice(0, 4).map(event => ({
+    // prioritize InfiniteBZ events
+    const sortedEvents = [...(events || [])].sort((a, b) => {
+        const sourceA = a.raw_data?.source === 'InfiniteBZ' ? 1 : 0;
+        const sourceB = b.raw_data?.source === 'InfiniteBZ' ? 1 : 0;
+        return sourceB - sourceA; // InfiniteBZ first
+    });
+
+    // Map real events to opportunity format (show 6)
+    const opportunities = sortedEvents.slice(0, 6).map(event => ({
         id: event.id,
         title: event.title,
         // Mocking some matchmaking data for now as backend doesn't provide it yet
@@ -23,7 +30,7 @@ export const StrategicOpportunities = ({ events = [], onEventClick }) => {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-6">
             {opportunities.map((opp, idx) => (
                 <OpportunityCard key={opp.id} opp={opp} idx={idx} onClick={() => onEventClick && onEventClick(opp.raw)} />
             ))}

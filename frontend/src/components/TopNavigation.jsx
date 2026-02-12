@@ -92,55 +92,12 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }
             {/* Right Side Actions */}
             <div className="flex items-center gap-4 ml-8 relative">
                 <button
-                    onClick={handleNotificationClick}
-                    className="relative p-2 text-slate-500 hover:text-slate-900 hover:bg-slate-100 rounded-full transition-all"
+                    onClick={onSignup}
+                    className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
                 >
-                    <Bell size={22} />
-                    {hasNotifications && (
-                        <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border border-white animate-pulse"></span>
-                    )}
+                    <UserPlus size={18} />
+                    <span>Sign Up</span>
                 </button>
-
-                {/* Notifications Dropdown */}
-                {showNotifications && (
-                    <>
-                        <div className="fixed inset-0 z-30" onClick={() => setShowNotifications(false)} />
-                        <div className="absolute right-0 top-full mt-4 w-80 bg-white/90 backdrop-blur-xl border border-white/20 rounded-2xl shadow-2xl z-40 animate-in fade-in zoom-in-95 duration-200 overflow-hidden ring-1 ring-black/5">
-                            <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-white/50">
-                                <h3 className="text-sm font-bold text-slate-900">New Events</h3>
-                                <span className="text-[10px] font-bold text-fuchsia-500 bg-fuchsia-50 px-2 py-0.5 rounded-full">Recent</span>
-                            </div>
-                            <div className="max-h-80 overflow-y-auto">
-                                {recentEvents.length === 0 ? (
-                                    <div className="p-8 text-center text-slate-400 text-sm">No new events</div>
-                                ) : (
-                                    recentEvents.map((event, idx) => (
-                                        <div key={idx} className="p-4 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0 group cursor-pointer">
-                                            <div className="flex gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-slate-100 flex-shrink-0 overflow-hidden">
-                                                    {event.image_url ? (
-                                                        <img src={event.image_url} alt="" className="w-full h-full object-cover" />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-slate-300">
-                                                            <Calendar size={16} />
-                                                        </div>
-                                                    )}
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <h4 className="text-sm font-bold text-slate-900 truncate group-hover:text-fuchsia-600 transition-colors">{event.title}</h4>
-                                                    <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
-                                                        <span className="flex items-center gap-1"><Calendar size={10} /> {new Date(event.start_time).toLocaleDateString()}</span>
-                                                        {event.venue_name && <span className="flex items-center gap-1"><MapPin size={10} /> {event.venue_name}</span>}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))
-                                )}
-                            </div>
-                        </div>
-                    </>
-                )}
                 {user ? (
                     <div
                         onClick={onLogin}
@@ -156,7 +113,7 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }
                 ) : (
                     <button
                         onClick={onLogin}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-fuchsia-600 to-pink-600 text-white rounded-xl font-bold text-sm hover:from-fuchsia-500 hover:to-pink-500 transition-all shadow-lg shadow-fuchsia-500/20"
+                        className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
                     >
                         <LogIn size={18} />
                         <span>Log In</span>

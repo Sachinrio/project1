@@ -12,12 +12,12 @@ class AllEventsScraper(BaseScraper):
         target_url = "https://allevents.in/chennai/business"
         
         # AllEvents is heavy, use render_js=True
-        proxy_url = self.get_proxy_url(target_url, render_js=True)
+        # proxy_url = self.get_proxy_url(target_url, render_js=True)
         
         try:
-            print("AllEvents: Navigating via Proxy (this may take 1-3 mins)...")
+            print("AllEvents: Navigating Direct (Proxy Disabled)...")
             # Increase timeout
-            await page.goto(proxy_url, timeout=180000)
+            await page.goto(target_url, timeout=180000)
             
             # Wait for body to ensure load
             await page.wait_for_selector('body', timeout=60000)

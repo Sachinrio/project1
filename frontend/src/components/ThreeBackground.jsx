@@ -7,26 +7,9 @@ const Geometries = () => {
     // We'll create a few floating shapes
     return (
         <group>
-            <Float speed={1.5} rotationIntensity={1} floatIntensity={2}>
-                <mesh position={[-4, 2, -5]} rotation={[0, 0, 0]}>
-                    <icosahedronGeometry args={[1, 0]} />
-                    <meshStandardMaterial color="#6366f1" roughness={0.1} metalness={0.5} transparent opacity={0.6} />
-                </mesh>
-            </Float>
 
-            <Float speed={2} rotationIntensity={1.5} floatIntensity={1.5}>
-                <mesh position={[4, -1, -6]}>
-                    <torusGeometry args={[0.8, 0.2, 16, 100]} />
-                    <meshStandardMaterial color="#10b981" roughness={0.1} metalness={0.8} transparent opacity={0.5} />
-                </mesh>
-            </Float>
 
-            <Float speed={1} rotationIntensity={0.5} floatIntensity={1}>
-                <mesh position={[0, -3, -8]}>
-                    <dodecahedronGeometry args={[1.2, 0]} />
-                    <meshStandardMaterial color="#06b6d4" roughness={0.2} metalness={0.6} transparent opacity={0.4} />
-                </mesh>
-            </Float>
+
         </group>
     );
 };

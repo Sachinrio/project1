@@ -14,11 +14,11 @@ class CTCScraper(BaseScraper):
         target_url = "https://www.chennaitradecentre.in/UpcomingEvents.aspx?etype=1"
         
         # Use render_js=True for Proxy
-        proxy_url = self.get_proxy_url(target_url, render_js=True)
+        # proxy_url = self.get_proxy_url(target_url, render_js=True)
         
         try:
             # Increase timeout
-            await page.goto(proxy_url, timeout=180000)
+            await page.goto(target_url, timeout=180000)
             print("CTC page loaded.")
             
             # Wait for the JS-rendered content

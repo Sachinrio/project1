@@ -16,15 +16,15 @@ class MeetupScraper(BaseScraper):
         url = "https://www.meetup.com/find/?location=in--Chennai&source=EVENTS&categoryId=career-business"
         
         # render_js=True is MUST for Meetup
-        proxy_url = self.get_proxy_url(url, render_js=True)
+        # proxy_url = self.get_proxy_url(url, render_js=True)
         
         try:
             # Set a large viewport internally to ensure desktop layout
             await page.set_viewport_size({'width': 1920, 'height': 1080})
             
-            print("Meetup: Navigating via Proxy (Timeout set to 3 mins)...")
+            print("Meetup: Navigating Direct (Proxy Disabled)...")
             # 3 Minute Timeout to be safe
-            await page.goto(proxy_url, timeout=180000)
+            await page.goto(url, timeout=180000)
             
             # Wait for Body to load
             await page.wait_for_selector('body', timeout=60000)
@@ -44,6 +44,12 @@ class MeetupScraper(BaseScraper):
                 # Find ALL links containing '/events/' 
                 # This bypasses specific class names or test-ids
                 cards = await page.query_selector_all('a[href*="/events/"]')
+
+            if len(cards) == 0:
+                print("Meetup: Strategy B failed. Dumping HTML to debug_meetup.html...")
+                content = await page.content()
+                with open("debug_meetup.html", "w", encoding="utf-8") as f:
+                    f.write(content)
 
             print(f"Meetup: Found {len(cards)} potential items.")
 

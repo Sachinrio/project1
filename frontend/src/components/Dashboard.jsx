@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
     LayoutDashboard, Users, Calendar, Settings, LogOut,
     TrendingUp, AlertCircle, CheckCircle2, MoreHorizontal,
-    Search, Bell, Plus, Download, MessageSquare, ClipboardList, X, Eye, UserPlus, UserMinus, Trash2, MessageCircle, RefreshCw, Infinity, Building2, MapPin, Globe
+    Search, Bell, Plus, Download, MessageSquare, ClipboardList, X, Eye, UserPlus, UserMinus, Trash2, MessageCircle, RefreshCw, Infinity, Building2, MapPin, Globe, RotateCcw
 } from 'lucide-react';
 import CityDropdown from './CityDropdown';
 import CreateEventModal from './create-event/CreateEventModal';
@@ -616,6 +616,26 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                                             />
                                             <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none z-10" />
                                         </div>
+
+                                        {/* Reset Filters Button */}
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCity("All");
+                                                setSelectedCategory("All");
+                                                setSelectedSource("All");
+                                                setSelectedCost("All");
+                                                setSelectedMode("All");
+                                                setSelectedDate("");
+                                                setActiveSearch(""); // Clear active search
+                                                setSearchQuery(""); // Clear search input
+                                                setCurrentPage(1); // Reset to first page
+                                            }}
+                                            className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 text-sm font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow h-[42px]"
+                                            title="Clear all filters"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Reset
+                                        </button>
                                     </div>
 
                                     {/* EVENTS GRID */}

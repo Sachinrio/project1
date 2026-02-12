@@ -154,36 +154,31 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
                                         <CategoriesGrid events={displayEvents} onEventClick={handleEventClick} />
                                     </div>
 
+                                    <div className="mb-12">
+                                        <div className="flex items-end justify-between mb-8 border-b border-slate-100 pb-6">
+                                            <div>
+                                                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Strategic Matches</h2>
+                                                <p className="text-slate-500 font-medium mt-1">Founders, capital, and talent tuned to your goals.</p>
+                                            </div>
+                                        </div>
+                                        <StrategicOpportunities events={events} onEventClick={handleEventClick} />
+                                    </div>
+
                                     <div className="flex flex-col lg:flex-row gap-10 mt-12">
                                         {/* Primary Feed */}
                                         <div className="flex-1 space-y-2">
-                                            <section>
-                                                <div className="flex items-end justify-between mb-8 border-b border-slate-100 pb-6">
-                                                    <div>
-                                                        <h2 className="text-3xl font-black text-slate-900 tracking-tight">Strategic Matches</h2>
-                                                        <p className="text-slate-500 font-medium mt-1">Founders, capital, and talent tuned to your goals.</p>
-                                                    </div>
-                                                </div>
-                                                <StrategicOpportunities events={events} onEventClick={handleEventClick} />
-                                            </section>
+
 
                                             <section ref={networkRef}>
                                                 <EcosystemHighlights />
                                             </section>
-
-                                            <div ref={feedRef}>
-                                                <MarketplaceFeed events={events} onEventClick={handleEventClick} />
-                                                <div ref={summitRef} />
-                                            </div>
                                         </div>
                                         {/* Side-Scout Panel */}
                                         <aside className="lg:w-96 space-y-12">
                                             <div className="sticky top-28 space-y-12">
                                                 <AIInsights />
 
-
-
-                                                <div className="bg-slate-900 p-10 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200/20 group relative overflow-hidden">
+                                                <div ref={summitRef} className="bg-slate-900 p-10 rounded-[2.5rem] text-white shadow-2xl shadow-indigo-200/20 group relative overflow-hidden">
                                                     <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-cyan-500"></div>
                                                     <h4 className="text-2xl font-black mb-4 group-hover:text-indigo-400 transition-colors">Host a Summit</h4>
                                                     <p className="text-slate-400 text-sm mb-8 leading-relaxed font-medium">Connect your brand with Chennai's fastest-growing venture community.</p>
@@ -193,6 +188,11 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
                                                 </div>
                                             </div>
                                         </aside>
+                                    </div>
+                                    {/* Moved MarketplaceFeed to Bottom (Full Width) */}
+                                    <div ref={feedRef} className="mt-12">
+                                        <MarketplaceFeed events={events} onEventClick={handleEventClick} />
+                                        <div />
                                     </div>
                                 </div>
 

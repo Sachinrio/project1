@@ -107,7 +107,7 @@ export const Hero = ({ events = [], onLogin, onExplore }) => {
                     <MagneticButton strength={40}>
                         <button
                             onClick={onLogin}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-lg font-bold px-10 py-4 rounded-xl shadow-lg shadow-indigo-200 transition-all hover:scale-105 btn-bounce flex items-center gap-2 group"
+                            className="bg-slate-900 hover:bg-slate-800 text-white text-lg font-bold px-10 py-4 rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:scale-105 btn-bounce flex items-center gap-2 group"
                         >
                             Login Hub
                             <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">

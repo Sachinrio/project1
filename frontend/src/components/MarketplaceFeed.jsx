@@ -4,7 +4,7 @@ import { useRef } from 'react';
 
 export const MarketplaceFeed = ({ events = [], onEventClick }) => {
     // Process events for display
-    const items = events.slice(0, 12).map(event => ({
+    const items = events.slice(0, 15).map(event => ({
         id: event.id,
         title: event.title,
         location: event.venue_name || 'Chennai Hub',
@@ -27,7 +27,7 @@ export const MarketplaceFeed = ({ events = [], onEventClick }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {items.length === 0 ? (
                     <div className="col-span-full py-20 text-center bg-slate-50 rounded-[2.5rem] border border-dashed border-slate-200">
                         <p className="text-slate-400 font-medium italic">Synchronizing with ecosystem nodes... no events found yet.</p>

@@ -12,8 +12,16 @@
   /* Cyan */
 }
 
+/* Global Scroll Fix */
+html,
 body {
+  overflow-x: hidden;
+  width: 100%;
   margin: 0;
+  padding: 0;
+}
+
+body {
   font-family: 'Inter', sans-serif;
   background-color: #0B1221;
   color: rgba(255, 255, 255, 0.9);
