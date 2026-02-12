@@ -5,7 +5,7 @@ from datetime import datetime
 from openai import AsyncOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.output_parsers import JsonOutputParser
-from pydantic import BaseModel, Field
+from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import List, Optional
 
 # Define Pydantic models for Langchain parsing
