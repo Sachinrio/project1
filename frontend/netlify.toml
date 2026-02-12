@@ -13,9 +13,9 @@
   NPM_FLAGS = "--legacy-peer-deps"
   CI = "false" 
 
-# Placeholder for API proxy - Updated based on DB name inference
+# Placeholder for API proxy - Updated to User's Deployed Backend
 [[redirects]]
   from = "/api/*"
-  to = "https://infinitetechai-97nv.onrender.com/api/:splat"
+  to = "https://project1-kmm5.onrender.com/api/:splat"
   status = 200
   force = true
