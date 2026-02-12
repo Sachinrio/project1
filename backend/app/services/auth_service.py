@@ -15,7 +15,7 @@ from app.auth import (
 )
 from app.core.email_utils import send_reset_email
 
-GOOGLE_CLIENT_ID = "616951204268-dsfdjvqp7mfn41gingbs7oqntp8f4f5g.apps.googleusercontent.com"
+GOOGLE_CLIENT_ID = "229326322088-ic295lg65e3ltr4h5cnt80v85k8t2nng.apps.googleusercontent.com"
 
 class AuthService:
     def __init__(self, session: AsyncSession):
