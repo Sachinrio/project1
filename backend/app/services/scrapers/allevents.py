@@ -20,7 +20,11 @@ class AllEventsScraper(BaseScraper):
             await page.goto(target_url, timeout=180000)
             
             # Wait for body to ensure load
-            await page.wait_for_selector('body', timeout=60000)
+            try:
+                await page.wait_for_selector('body', timeout=60000)
+            except:
+                print("AllEvents: Body selector timeout. Dumping HTML...")
+                pass
             
             print("AllEvents page loaded.")
             # Selector for event items

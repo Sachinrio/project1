@@ -140,13 +140,23 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
     print(f"Scraper: Starting Playwright session for {search_url}...")
 
     async with async_playwright() as p:
-        # Launch browser 
+        # Launch browser with stealth args
         browser = await p.chromium.launch(
             headless=True,
-            args=["--disable-gpu", "--no-sandbox", "--disable-dev-shm-usage"]
+            args=[
+                "--disable-gpu",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-blink-features=AutomationControlled", 
+                "--window-size=1920,1080"
+            ]
         )
         context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+            viewport={"width": 1920, "height": 1080},
+            ignore_https_errors=True,
+            java_script_enabled=True,
+            bypass_csp=True
         )
         page = await context.new_page()
 

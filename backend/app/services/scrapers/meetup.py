@@ -27,7 +27,11 @@ class MeetupScraper(BaseScraper):
             await page.goto(url, timeout=180000)
             
             # Wait for Body to load
-            await page.wait_for_selector('body', timeout=60000)
+            try:
+                await page.wait_for_selector('body', timeout=60000)
+            except:
+                print("Meetup: Body selector timeout. Dumping HTML...")
+                pass
             
             # Scroll to trigger lazy loading
             for _ in range(3):
