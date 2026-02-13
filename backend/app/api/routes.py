@@ -622,7 +622,7 @@ async def list_events(
     # Map back to Event objects
     events = []
     for row in result.all():
-        data = {col: getattr(row, col) for col in Event.__fields__ if hasattr(row, col)}
+        data = {col: getattr(row, col) for col in Event.model_fields if hasattr(row, col)}
         events.append(Event(**data))
     
     return EventListResponse(

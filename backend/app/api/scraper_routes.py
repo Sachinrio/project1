@@ -20,7 +20,7 @@ async def trigger_refresh():
     # current file: backend/app/api/scraper_routes.py
     # target file: backend/scraper_worker.py
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.abspath(os.path.join(current_dir, "../../..")) # Go up 3 levels to backend/
+    project_root = os.path.abspath(os.path.join(current_dir, "../..")) # Go up 2 levels to backend/
     
     worker_script = os.path.join(project_root, "scraper_worker.py")
     log_file = os.path.join(project_root, "scraper.log")
