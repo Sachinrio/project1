@@ -15,12 +15,19 @@ async def trigger_refresh():
     
     # Path to the virtualenv python
     python_exe = sys.executable
-    worker_script = os.path.join(os.getcwd(), "scraper_worker.py")
-    log_file = os.path.join(os.getcwd(), "scraper.log")
+    
+    # LOCATE WORKER SCRIPT RELATIVE TO THIS FILE
+    # current file: backend/app/api/scraper_routes.py
+    # target file: backend/scraper_worker.py
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.abspath(os.path.join(current_dir, "../../..")) # Go up 3 levels to backend/
+    
+    worker_script = os.path.join(project_root, "scraper_worker.py")
+    log_file = os.path.join(project_root, "scraper.log")
     
     # Pass current environment + PYTHONPATH to ensure imports work
     env = os.environ.copy()
-    env["PYTHONPATH"] = os.getcwd()
+    env["PYTHONPATH"] = project_root # Ensure backend root is in python path
 
     # Spawn subprocess letting it inherit stdout/stderr (so logs show in Render Dashboard)
     subprocess.Popen(
