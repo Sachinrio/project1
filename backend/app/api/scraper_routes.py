@@ -31,7 +31,7 @@ async def trigger_refresh():
 
     # Spawn subprocess letting it inherit stdout/stderr (so logs show in Render Dashboard)
     subprocess.Popen(
-        [python_exe, worker_script], 
+        [python_exe, "-u", worker_script], 
         # stdout=None, stderr=None,  <-- Default behavior is inheritance, which is what we want for logs
         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0,
         env=env

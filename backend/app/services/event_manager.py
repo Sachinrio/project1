@@ -10,11 +10,13 @@ from app.core.database import engine
 from app.models.schemas import Event
 
 # Import Scrapers
+print("EVENT MANAGER: Importing scrapers...", flush=True)
 from app.services.scrapers.meetup import MeetupScraper
 from app.services.scrapers.allevents import AllEventsScraper
 from app.services.scrapers.trade_centre import CTCScraper
 from app.services.scraper import scrape_events_playwright # Eventbrite Scraper
 from playwright.async_api import async_playwright
+print("EVENT MANAGER: Scrapers imported.", flush=True)
 
 async def run_full_scrape_cycle():
     """
