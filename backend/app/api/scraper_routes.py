@@ -5,9 +5,11 @@ from app.services.event_manager import run_full_scrape_cycle
 router = APIRouter()
 
 @router.post("/refresh-events")
+@router.post("/sync")
 async def trigger_refresh():
     """
-    Triggers the multi-source scraper in a separate process to avoid loop issues on Windows.
+    Triggers the FULL Multi-Source Scraper (Meetup, AllEvents, CTC, Eventbrite)
+    in a background process (subprocess) with proper environment for Render.
     """
     import subprocess
     import sys
@@ -17,34 +19,32 @@ async def trigger_refresh():
     python_exe = sys.executable
     
     # LOCATE WORKER SCRIPT RELATIVE TO THIS FILE
-    # current file: backend/app/api/scraper_routes.py
-    # target file: backend/scraper_worker.py
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    project_root = os.path.abspath(os.path.join(current_dir, "../..")) # Go up 2 levels to backend/
+    project_root = os.path.abspath(os.path.join(current_dir, "../..")) # Go up 2 levels: api -> app -> backend
     
     worker_script = os.path.join(project_root, "scraper_worker.py")
-    log_file = os.path.join(project_root, "scraper.log")
     
     # Pass current environment + PYTHONPATH to ensure imports work
     env = os.environ.copy()
-    env["PYTHONPATH"] = project_root # Ensure backend root is in python path
+    env["PYTHONPATH"] = project_root # CRITICAL: Ensure backend root is in python path
     
     # Point Playwright to the local browser folder created by build.sh
     # project_root is .../backend
     env["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(project_root, "pw-browsers")
-    print(f"API: Configured PLAYWRIGHT_BROWSERS_PATH={env['PLAYWRIGHT_BROWSERS_PATH']}")
+    
+    print(f"API: Triggering worker at {worker_script}")
+    print(f"API: PYTHONPATH={env.get('PYTHONPATH')}")
+    print(f"API: PLAYWRIGHT_BROWSERS_PATH={env.get('PLAYWRIGHT_BROWSERS_PATH')}")
 
-    # Spawn subprocess letting it inherit stdout/stderr (so logs show in Render Dashboard)
+    # Spawn subprocess
+    # On Render, we want the logs to show up in the main dashboard, so we inherit stdout/stderr
     subprocess.Popen(
         [python_exe, "-u", worker_script], 
-        # stdout=None, stderr=None,  <-- Default behavior is inheritance, which is what we want for logs
         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0,
         env=env
     )
     
-    print(f"API: Triggered background scraper via {worker_script}")
-    
     return {
         "status": "accepted",
-        "message": "Scraping started in a background process. Refresh the page in a minute."
+        "message": "Full scraping cycle started in background process. Refresh dashboard in 2-3 minutes."
     }
