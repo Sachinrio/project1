@@ -225,16 +225,36 @@ class AIGeneratorService:
         return random.choice(fallbacks)
 
     async def _is_image_clean(self, image_url: str) -> bool:
-        """Uses Gemini Vision to detect if an image is suitable (no text/logos)."""
+        """
+        Uses Gemini Vision to detect if an image is suitable (no text/logos).
+        Downloads the image bytes first to bypass 403 Forbidden headers.
+        """
         if not self.llm_google:
             return True
         try:
+            import requests
+            import base64
+            
+            # 1. Download image bytes with custom User-Agent
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+            response = requests.get(image_url, headers=headers, timeout=5)
+            if response.status_code != 200:
+                print(f"Failed to download image for Vision check ({response.status_code}): {image_url}")
+                return False # Skip if we can't see it
+                
+            image_data = base64.b64encode(response.content).decode("utf-8")
+            
+            # 2. Vision prompt via base64 to bypass crawler blocks
             from langchain_core.messages import HumanMessage
-            # Vision prompt
             message = HumanMessage(
                 content=[
                     {"type": "text", "text": "Does this image contain any significant text, logos, or watermarks? Answer ONLY 'YES' or 'NO'."},
-                    {"type": "image_url", "image_url": {"url": image_url}},
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
+                    },
                 ]
             )
             response = await self.llm_google.ainvoke([message])
