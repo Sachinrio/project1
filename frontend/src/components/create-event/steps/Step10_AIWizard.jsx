@@ -55,7 +55,7 @@ export default function Step10_AIWizard({ formData, updateFormData, onNext }) {
             updateFormData({
                 description: data.description,
                 // Force cache-busting and fresh generation if backend is stale
-                imageUrl: data.imageUrl + (data.imageUrl.includes('?') ? '&' : '?') + 'seed=' + Math.floor(Math.random() * 999999),
+                imageUrl: data.imageUrl,
                 tags: data.tags,
                 agendaItems: data.agenda?.map((item, idx) => ({ id: Date.now() + idx, ...item })) || [],
                 speakers: data.speakers?.map((item, idx) => ({ id: Date.now() + idx + 100, ...item, imageUrl: "" })) || [],

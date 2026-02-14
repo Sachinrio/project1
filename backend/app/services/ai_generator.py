@@ -1,6 +1,7 @@
 import os
 import json
 import asyncio
+import random
 from datetime import datetime
 from openai import AsyncOpenAI
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -82,7 +83,7 @@ class AIGeneratorService:
 
     async def generate_event_content(self, title: str, category: str, start_time: str, end_time: str) -> dict:
         """
-        Generates content using Google Gemini (Text) and Pollinations.ai (Image).
+        Generates content using Google Gemini (Text) and DuckDuckGo (Image).
         Falls back to Groq or Manual defaults if Quota is exceeded.
         """
         # Prompt Construction
@@ -178,28 +179,14 @@ class AIGeneratorService:
 
     def _search_image(self, query: str) -> Optional[str]:
         """
-        1. Attempts to generate a high-relevance image via Pollinations.ai
-        2. Falls back to DuckDuckGo Search
-        3. Falls back to a dynamic Unsplash keyword URL
+        Searches DuckDuckGo for images (Primary). 
+        Falls back to curated Unsplash images if blocked/failed.
         """
-        import urllib.parse
-        
-        # --- 1. Generative AI (Pollinations.ai) ---
-        # This is the most "related" since it uses the AI's specific prompt
-        try:
-            safe_query = urllib.parse.quote(query)
-            # We use several parameters to ensure quality
-            gen_url = f"https://pollinations.ai/p/{safe_query}?width=1024&height=768&seed={random.randint(1, 100000)}&nologo=true&enhance=true"
-            print(f"Generated AI Image URL: {gen_url}")
-            # We don't download it to verify (to save time), but return it as primary
-            return gen_url
-        except Exception as e:
-            print(f"Pollinations generation prep failed: {e}")
-
-        # --- 2. DuckDuckGo Search (Fallback) ---
         try:
             from duckduckgo_search import DDGS
-            search_query = f"{query} event photo"
+            
+            # Refine query for high-relevance professional event photos
+            search_query = f"{query} professional event background"
             print(f"Attempting DDG Search for: {search_query}")
             
             with DDGS() as ddgs:
@@ -207,21 +194,32 @@ class AIGeneratorService:
                     keywords=search_query,
                     region="wt-wt",
                     safesearch="off",
-                    max_results=3
+                    max_results=5
                 ))
                 
                 if results and len(results) > 0:
+                     # Pick the first result for maximum relevance
                      image_url = results[0]['image']
                      print(f"DDG Success: {image_url}")
                      return image_url
+                else:
+                    # Retry with simpler query
+                    print(f"DDG no results for '{search_query}', retrying simple title...")
+                    with DDGS() as ddgs:
+                        retry = list(ddgs.images(keywords=query, max_results=3))
+                        if retry: 
+                            print(f"DDG Retry Success: {retry[0]['image']}")
+                            return retry[0]['image']
         except Exception as e:
-            print(f"DDG Image Search Failed: {e}")
+            print(f"DDG Search Failed: {e}")
 
-        # --- 3. Dynamic Unsplash Fallback (Keyword based) ---
-        # Instead of a random list, use the query to get a somewhat related photo
-        print("Using Dynamic Unsplash Fallback...")
-        keywords = query.replace(" ", ",")
-        return f"https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&w=1000&q=80&keywords={keywords}"
+        # Curated fallbacks
+        fallbacks = [
+            "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&w=1000&q=80",
+            "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=80",
+            "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?auto=format&fit=crop&w=1000&q=80"
+        ]
+        return random.choice(fallbacks)
 
 
 
