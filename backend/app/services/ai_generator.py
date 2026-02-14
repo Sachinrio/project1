@@ -181,8 +181,9 @@ class AIGeneratorService:
         """
         Multi-source search strategy:
         1. DuckDuckGo (General)
-        2. Unsplash (Dynamic Search via DDG)
-        3. Curated Fallback
+        2. Unsplash (via DDG)
+        3. Pollinations.ai (AI Generation - High Reliability Fallback)
+        4. Curated Fallback
         All results are filtered by Gemini Vision.
         """
         # --- Source 1: DuckDuckGo General ---
@@ -211,7 +212,6 @@ class AIGeneratorService:
         # --- Source 2: Unsplash Dynamic Search (via DDG) ---
         try:
             from duckduckgo_search import DDGS
-            # Force search results from Unsplash for high quality event photos
             unsplash_query = f"site:unsplash.com {query} professional event"
             print(f"Attempting Source 2 (Unsplash via DDG): {unsplash_query}")
             
@@ -230,14 +230,36 @@ class AIGeneratorService:
         except Exception as e:
             print(f"Unsplash Source 2 Failed: {e}")
 
-        # --- Source 3: Curated Fallbacks ---
-        print("All dynamic searches failed or results were 'busy'. Using curated fallback.")
+        # --- Source 3: AI Generation (Pollinations.ai) ---
+        # This is high-reliability because it won't block the server IP
+        try:
+            print(f"Attempting Source 3 (AI Generation - Pollinations): {query}")
+            gen_url = self._generate_fallback_image(query)
+            if gen_url:
+                print(f"Checking generated image for quality/text: {gen_url}")
+                if await self._is_image_clean(gen_url):
+                    print(f"AI Generation Success (Clean): {gen_url}")
+                    return gen_url
+        except Exception as e:
+            print(f"Source 3 (AI Gen) Failed: {e}")
+
+        # --- Source 4: Curated Fallbacks ---
+        print("All dynamic methods failed or were 'busy'. Using curated fallback.")
         fallbacks = [
             "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&w=1000&q=80",
             "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=80",
             "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?auto=format&fit=crop&w=1000&q=80"
         ]
         return random.choice(fallbacks)
+
+    def _generate_fallback_image(self, title: str) -> str:
+        """Generates a related event image using Pollinations.ai with specific style."""
+        import urllib.parse
+        # Style: Professional Photography, High Resolution, Wide Angle, NO TEXT
+        prompt = f"Professional high-resolution photography of an {title} event, cinematic lighting, wide angle shot, natural environment, zero text, no labels, realistic --no text"
+        encoded_prompt = urllib.parse.quote(prompt)
+        seed = random.randint(1, 999999)
+        return f"https://pollinations.ai/p/{encoded_prompt}?width=1000&height=600&seed={seed}&model=flux&nologo=true"
 
     async def _is_image_clean(self, image_url: str) -> bool:
         """
