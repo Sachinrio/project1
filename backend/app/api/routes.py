@@ -719,27 +719,22 @@ async def register_for_event(
                 event_url=event.meeting_link or event.url
             )
             
-            # 2. Send Professional PDF Ticket Email (BACKGROUND TASK)
-            event_data_for_email = {
-                "id": event.id,
-                "title": event.title,
-                "start_time": event.start_time.strftime('%Y-%m-%d %H:%M %p'),
-                "venue_name": full_location,
-                "organizer_name": event.organizer_name or "Infinite BZ"
-            }
+            # 2. Send Email (BACKGROUND TASK)
+            # We pass the async function send_ticket_email to background_tasks
             background_tasks.add_task(
-                send_event_ticket_email,
+                send_ticket_email,
                 email=current_user.email,
-                event_data=event_data_for_email,
-                confirmation_id=confirmation_id,
-                user_name=current_user.full_name or current_user.email
+                name=current_user.full_name or "Attendee",
+                event_title=event.title,
+                event_id=event.id,
+                ticket_id=confirmation_id
             )
 
             # 3. Send Notification Email to Organizer/Sender (BACKGROUND TASK)
             background_tasks.add_task(
                 send_organizer_notification_email,
-                email=current_user.email,
-                organizer_name=event.organizer_name or "Infinite BZ",
+                email=current_user.email, # Argument unused by function but good for logging if updated
+                organizer_name=event.organizer_name,
                 attendee_name=current_user.full_name or "Attendee",
                 attendee_email=current_user.email,
                 event_title=event.title,

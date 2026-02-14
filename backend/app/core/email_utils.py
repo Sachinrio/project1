@@ -19,8 +19,6 @@ MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
 MAIL_FROM = os.getenv("MAIL_FROM", MAIL_USERNAME) # Default to username if not set
 MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
 MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
-MAIL_FROM_NAME = os.getenv("MAIL_FROM_NAME", "Infinite BZ")
 
 # Check for Real SMTP and valid credentials
 ENABLE_EMAIL = bool(MAIL_USERNAME and MAIL_PASSWORD and not MAIL_USERNAME.startswith("your_") and not MAIL_PASSWORD.startswith("your_"))
@@ -32,7 +30,6 @@ if ENABLE_EMAIL:
             MAIL_USERNAME = MAIL_USERNAME,
             MAIL_PASSWORD = MAIL_PASSWORD,
             MAIL_FROM = MAIL_FROM,
-            MAIL_FROM_NAME = MAIL_FROM_NAME,
             MAIL_PORT = MAIL_PORT,
             MAIL_SERVER = MAIL_SERVER,
             MAIL_STARTTLS = True,
@@ -140,7 +137,7 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
                     <p>Thank you for registering! We are excited to see you.</p>
                     <br/>
                     <div style="text-align: center;">
-                        <a href="{FRONTEND_URL}/?view=ticket-details&eventId={event_id}&email={email}&ticketId={ticket_id}&eventName={quote(event_title)}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 5px;">Go to Ticket</a>
+                        <a href="http://localhost:5174/?view=ticket-details&eventId={event_id}&email={email}&ticketId={ticket_id}&eventName={quote(event_title)}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 5px;">Go to Ticket</a>
                     </div>
                     <br/>
                     <p style="font-size: 12px; color: #888;">Powered by Infinite BZ Event Platform</p>
@@ -410,7 +407,7 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
                         <img src="data:image/png;base64,{qr_base64}" alt="QR Code" style="max-width: 200px;" />
                         <br/>
                         <div style="text-align: center; margin-top: 20px;">
-                            <a href="{FRONTEND_URL}/?view=ticket-details&eventId={event_data.get('id', '')}&email={email}&ticketId={ticket_id_to_use}&eventName={quote(event_data.get('title', ''))}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 5px;">Go to Ticket</a>
+                            <a href="http://localhost:5174/?view=ticket-details&eventId={event_data.get('id', '')}&email={email}&ticketId={ticket_id_to_use}&eventName={quote(event_data.get('title', ''))}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 5px;">Go to Ticket</a>
                         </div>
                         <p style="font-size: 12px; color: #888;">Please bring this to the event.</p>
                     </div>
