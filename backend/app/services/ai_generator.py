@@ -295,12 +295,20 @@ class AIGeneratorService:
                     },
                 ]
             )
-            response = await self.llm_google.ainvoke([message])
-            decision = response.content.strip().upper()
-            return "NO" in decision
+            
+            try:
+                response = await self.llm_google.ainvoke([message])
+                decision = response.content.strip().upper()
+                return "NO" in decision
+            except Exception as e:
+                # Catch 429 ResourceExhausted or other API errors
+                if "429" in str(e) or "QUOTA" in str(e).upper():
+                    print(f"Gemini quota exceeded (429), bypassing vision filter for: {image_url}")
+                    return True # Graceful bypass
+                raise e # Re-raise unexpected errors to outer block
             
         except Exception as e:
-            print(f"Gemini Vision check failed for {image_url}: {e}")
+            print(f"Vision check failed or bypassed for {image_url}: {e}")
             return True # Conservative: use it if check fails
 
 
