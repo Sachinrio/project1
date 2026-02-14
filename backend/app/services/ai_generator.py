@@ -227,32 +227,33 @@ class AIGeneratorService:
     async def _is_image_clean(self, image_url: str) -> bool:
         """
         Uses Gemini Vision to detect if an image is suitable (no text/logos).
-        Downloads the image bytes first to bypass 403 Forbidden headers.
+        Downloads image first to bypass 403 Forbidden blocks.
         """
         if not self.llm_google:
             return True
         try:
             import requests
             import base64
+            from langchain_core.messages import HumanMessage
             
-            # 1. Download image bytes with custom User-Agent
+            # 1. Download image with browser-like headers to bypass 403s
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
-            response = requests.get(image_url, headers=headers, timeout=5)
+            response = requests.get(image_url, headers=headers, timeout=10)
             if response.status_code != 200:
                 print(f"Failed to download image for Vision check ({response.status_code}): {image_url}")
-                return False # Skip if we can't see it
+                return False # Skip images we can't access
                 
+            # 2. Convert to Base64
             image_data = base64.b64encode(response.content).decode("utf-8")
             
-            # 2. Vision prompt via base64 to bypass crawler blocks
-            from langchain_core.messages import HumanMessage
+            # 3. Vision prompt using base64 data
             message = HumanMessage(
                 content=[
                     {"type": "text", "text": "Does this image contain any significant text, logos, or watermarks? Answer ONLY 'YES' or 'NO'."},
                     {
-                        "type": "image_url",
+                        "type": "image_url", 
                         "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
                     },
                 ]
@@ -260,6 +261,7 @@ class AIGeneratorService:
             response = await self.llm_google.ainvoke([message])
             decision = response.content.strip().upper()
             return "NO" in decision
+            
         except Exception as e:
             print(f"Gemini Vision check failed for {image_url}: {e}")
             return True # Conservative: use it if check fails
