@@ -1,32 +1,52 @@
-import asyncio
-from sqlalchemy import text
-from app.core.database import engine
+import os
+import psycopg2
+from dotenv import load_dotenv
 
-import sys
+load_dotenv()
 
-# Windows Loop Policy Fix
-if sys.platform == 'win32':
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+def check_data():
+    # Force Render URL from .env (which we modified locally)
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        print("Error: DATABASE_URL not set in .env")
+        return
 
-async def check_schema():
-    print("Checking Schema...")
-    async with engine.begin() as conn:
-        try:
-            # Try selecting the column
-            await conn.execute(text("SELECT razorpay_account_id FROM user LIMIT 1"))
-            print("SUCCESS: Column 'razorpay_account_id' exists.")
-        except Exception as e:
-            print(f"INFO: Column missing or other error: {e}")
-            print("Attempting to add column...")
+    # Cleaning URL for psycopg2 (remove +asyncpg)
+    if "+asyncpg" in db_url:
+        db_url = db_url.replace("+asyncpg", "")
+    
+    print(f"Connecting to: {db_url.split('@')[1] if '@' in db_url else '...'}")
+    
+    try:
+        conn = psycopg2.connect(db_url)
+        cur = conn.cursor()
+        
+        # Check Total
+        cur.execute("SELECT count(*) FROM event;")
+        count = cur.fetchone()[0]
+        print(f"Total Events in DB: {count}")
+
+        if count > 0:
+            print("\nEvents by Source:")
             try:
-                # Try adding it
-                await conn.execute(text("ALTER TABLE user ADD COLUMN razorpay_account_id VARCHAR"))
-                print("SUCCESS: Column added.")
-            except Exception as e2:
-                print(f"ERROR: Failed to add column: {e2}")
+                cur.execute("SELECT raw_data->>'source', count(*) FROM event GROUP BY raw_data->>'source';")
+                for row in cur.fetchall():
+                    print(f" - {row[0]}: {row[1]}")
+            except Exception as e:
+                print(f"Error grouping: {e}")
+
+            print("\nLatest 5 Events (ID | Title | Start | Address):")
+            cur.execute("SELECT id, title, start_time, venue_address FROM event ORDER BY created_at DESC LIMIT 5;")
+            for row in cur.fetchall():
+                print(f" - [{row[0]}] {row[1]} ({row[2]}) | {row[3]}")
+        else:
+            print("\nWARNING: Database is empty!")
+
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"Connection Failed: {e}")
 
 if __name__ == "__main__":
-    try:
-        asyncio.run(check_schema())
-    except Exception as e:
-        print(f"CRITICAL FAULT: {e}")
+    check_data()

@@ -169,10 +169,10 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
             }
         )
         # Import stealth dynamically or at top
-        from playwright_stealth import stealth_async
+        from playwright_stealth import Stealth
 
         page = await context.new_page()
-        await stealth_async(page)
+        await Stealth().apply_stealth_async(page)
 
         try:
             await page.goto(search_url, timeout=120000)
