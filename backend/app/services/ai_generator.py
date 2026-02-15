@@ -60,25 +60,8 @@ class AIGeneratorService:
         if not self.llm_google and not self.llm_groq:
             print("WARNING: Neither GOOGLE_API_KEY nor GROQ_API_KEY working. AI features will be disabled.")
             
-        # 2. Initialize EasyOCR for text detection (CNN)
-        print("Initializing EasyOCR (this may take a moment)...")
-        try:
-            # Skip EasyOCR on Render Free Tier to save memory (avoid OOM)
-            if os.getenv("RENDER"):
-                print("Running on Render: Disabling EasyOCR to save memory.")
-                raise ImportError("Disabled on Render")
-
-            import easyocr
-            # 'en' for English. gpu=False to be safe on standard servers, true if CUDA avail.
-            # Using CPU to avoid CUDA dependency hell for now unless user asked for GPU.
-            self.reader = easyocr.Reader(['en'], gpu=False) 
-            self.ocr_enabled = True
-        except ImportError:
-            print("EasyOCR not installed. Text filtering disabled.")
-            self.ocr_enabled = False
-        except Exception as e:
-            print(f"EasyOCR Init Failed: {e}")
-            self.ocr_enabled = False
+        # 2. Vision Filtering (Gemini-Based, No OCR required)
+        self.ocr_enabled = False # Legacy flag for compatibility, if needed
 
         self.parser = JsonOutputParser(pydantic_object=EventContent)
 
@@ -189,33 +172,33 @@ class AIGeneratorService:
         # --- Source 1: Browser-Based DDG Scraping ---
         try:
             search_query = f"{query} event"
-            print(f"Attempting Source 1 (Browser Scraping): {search_query}")
+            print(f"DEBUG: Source 1 (Browser Scraping) - Query: {search_query}")
             
-            # Use Playwright to scrape the website directly
             results = await browser_searcher.search_images(search_query)
             
-            if results:
-                for img_url in results:
-                    print(f"Vision Checking browser-scraped image: {img_url}")
+            if not results:
+                print("DEBUG: Source 1 returned NO candidate images.")
+            else:
+                print(f"DEBUG: Source 1 found {len(results)} candidates. Testing them with Vision...")
+                for i, img_url in enumerate(results):
+                    print(f"DEBUG: Checking candidate {i+1}/{len(results)}: {img_url}")
                     if await self._is_image_clean(img_url):
-                        print(f"Browser Search Success (Clean): {img_url}")
+                        print(f"DEBUG: SUCCESS - Image {i+1} is clean: {img_url}")
                         return img_url
                     else:
-                        print(f"Skipping browser-scraped image with text: {img_url}")
+                        print(f"DEBUG: REJECTED - Image {i+1} was 'busy' or failed check.")
         except Exception as e:
-            print(f"Source 1 (Browser Scraping) Failed: {e}")
+            print(f"DEBUG: Source 1 CRASHED: {e}")
 
         # --- Source 2: AI Generation (Pollinations.ai) ---
         try:
-            print(f"Attempting Source 2 (AI Generation - Pollinations): {query}")
+            print(f"DEBUG: Source 2 (AI Gen) - Title: {query}")
             gen_url = self._generate_fallback_image(query)
             if gen_url:
-                print(f"Checking generated image for quality/text: {gen_url}")
-                if await self._is_image_clean(gen_url):
-                    print(f"AI Generation Success (Clean): {gen_url}")
-                    return gen_url
+                print(f"DEBUG: SUCCESS - Using AI Generated image (Bypassing Vision for speed/reliability): {gen_url}")
+                return gen_url
         except Exception as e:
-            print(f"Source 2 (AI Gen) Failed: {e}")
+            print(f"DEBUG: Source 2 CRASHED: {e}")
 
         # --- Source 3: Curated Fallbacks ---
         print("All dynamic methods failed or were 'busy'. Using curated fallback.")
@@ -250,37 +233,40 @@ class AIGeneratorService:
             from PIL import Image
             from langchain_core.messages import HumanMessage
             
-            # 1. Download image with browser-like headers
+            # 1. Download image
+            print(f"DEBUG: Vision - Downloading image: {image_url}")
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
-            response = requests.get(image_url, headers=headers, timeout=10)
-            if response.status_code != 200:
-                print(f"Failed to download image for Vision check ({response.status_code}): {image_url}")
+            try:
+                response = requests.get(image_url, headers=headers, timeout=12)
+                if response.status_code != 200:
+                    print(f"DEBUG: Vision Download Denied - Status {response.status_code} for {image_url}")
+                    return False
+            except Exception as download_err:
+                print(f"DEBUG: Vision Download Failed - {download_err} for {image_url}")
                 return False
                 
-            # 2. Optimize & Resize to prevent 504 timeouts
+            # 2. Optimize & Resize
             try:
+                print(f"DEBUG: Vision - Resizing image ({len(response.content)} bytes)...")
                 img = Image.open(io.BytesIO(response.content))
-                # Convert to RGB if necessary (e.g. RGBA/PNG)
                 if img.mode != 'RGB':
                     img = img.convert('RGB')
                 
-                # Resize if larger than 800px on either dimension
                 max_size = 800
                 if img.width > max_size or img.height > max_size:
                     img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
                 
-                # Save back to bytes as JPEG with compression
                 buffer = io.BytesIO()
                 img.save(buffer, format="JPEG", quality=80)
                 image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
-                
+                print(f"DEBUG: Vision - Image compressed to {len(buffer.getvalue())} bytes.")
             except Exception as resize_err:
-                print(f"Image optimization failed, using raw: {resize_err}")
+                print(f"DEBUG: Vision - Resizing failed, using raw: {resize_err}")
                 image_data = base64.b64encode(response.content).decode("utf-8")
             
-            # 3. Vision prompt using optimized base64 data
+            # 3. Vision check
             message = HumanMessage(
                 content=[
                     {"type": "text", "text": "Does this image contain any significant text, logos, or watermarks? Answer ONLY 'YES' or 'NO'."},
@@ -292,21 +278,22 @@ class AIGeneratorService:
             )
             
             try:
-                # Add explicit internal timeout for the AI call
+                print("DEBUG: Vision - Invoking Gemini Vision model...")
                 response = await self.llm_google.ainvoke([message])
                 decision = response.content.strip().upper()
+                print(f"DEBUG: Vision - Gemini Decision: {decision}")
                 return "NO" in decision
             except Exception as e:
-                # Catch 429 Quota or 504 Deadline Exceeded
                 err_str = str(e).upper()
                 if any(x in err_str for x in ["429", "504", "QUOTA", "DEADLINE", "TIMEOUT"]):
-                    print(f"Gemini API limit/timeout hit ({e}), bypassing vision filter for: {image_url}")
-                    return True # Graceful bypass
+                    print(f"DEBUG: Vision - Quota/Timeout hit ({e}). BYPASSING check.")
+                    return True 
+                print(f"DEBUG: Vision - API Error: {e}")
                 raise e
             
         except Exception as e:
-            print(f"Vision check failed or bypassed for {image_url}: {e}")
-            return True # Conservative fallback
+            print(f"DEBUG: Vision check total failure: {e}")
+            return True
 
 
     def _clean_description(self, text: str) -> str:

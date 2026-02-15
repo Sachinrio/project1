@@ -29,10 +29,19 @@ class BrowserSearcher:
             browser_path = os.getenv("PLAYWRIGHT_BROWSERS_PATH")
             
             try:
+                print(f"DEBUG: BrowserSearcher - Launching Chromium (Headless)...")
                 browser = await p.chromium.launch(
                     headless=True,
-                    args=["--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"]
+                    args=[
+                        "--no-sandbox", 
+                        "--disable-setuid-sandbox", 
+                        "--disable-dev-shm-usage",
+                        "--disable-gpu",
+                        "--no-first-run",
+                        "--no-zygote"
+                    ]
                 )
+                print(f"DEBUG: BrowserSearcher - Browser launched successfully.")
                 
                 context = await browser.new_context(
                     user_agent=random.choice(self.user_agents),
@@ -49,39 +58,59 @@ class BrowserSearcher:
                 url = f"https://duckduckgo.com/?q={query.replace(' ', '+')}&iax=images&ia=images"
                 print(f"BrowserSearcher: Navigating to {url}")
                 
-                await page.goto(url, wait_until="networkidle", timeout=30000)
+                # Wait for navigation and check if blocked
+                await page.goto(url, wait_until="domcontentloaded", timeout=45000)
                 
-                # Wait for image results to load
-                await page.wait_for_selector(".tile--img", timeout=10000)
+                title = await page.title()
+                if "Just a moment" in title or "Access Denied" in title:
+                    print("BrowserSearcher: BLOCKED by bot detection.")
+                    await browser.close()
+                    return []
+
+                # Wait for any image tile
+                print("BrowserSearcher: Waiting for image tiles...")
+                try:
+                    await page.wait_for_selector(".tile--img, .tile--img__img", timeout=15000)
+                except:
+                    print("BrowserSearcher: Timeout waiting for image tiles. DOM might be different.")
+                    # Take a screenshot if possible for debugging (not possible here but logging content)
+                    html = await page.content()
+                    print(f"BrowserSearcher: DOM Snippet: {html[:500]}")
                 
-                # Extract image URLs from the JSON metadata in the tiles
-                # DuckDuckGo stores the large image URL in a 'data-solve' or similar attribute, 
-                # but often the simplest way is to extract it from the 'tile--img__img' src or better, the link.
-                
-                # We'll use a script to extract the actual high-res URLs from the DDG metadata
+                # Advanced extraction script
+                print("BrowserSearcher: Extracting image URLs...")
                 image_urls = await page.evaluate("""
                     () => {
                         const results = [];
+                        // Strategy 1: data-zci-link
                         const tiles = document.querySelectorAll('.tile--img');
-                        for (let tile of tiles) {
+                        tiles.forEach(tile => {
                             try {
                                 const data = JSON.parse(tile.getAttribute('data-zci-link') || '{}');
-                                if (data.image) {
-                                    results.push(data.image);
-                                } else {
-                                    // Fallback to finding internal JSON structure if attribute is different
-                                    const img = tile.querySelector('img.tile--img__img');
-                                    if (img && img.src && !img.src.includes('base64')) {
-                                        results.push(img.src);
-                                    }
+                                if (data.image && data.image.startsWith('http')) results.push(data.image);
+                            } catch (e) {}
+                        });
+
+                        // Strategy 2: tile--img__img src
+                        if (results.length < 5) {
+                            const imgs = document.querySelectorAll('img.tile--img__img');
+                            imgs.forEach(img => {
+                                if (img.src && !img.src.includes('base64') && img.src.startsWith('http')) {
+                                    results.push(img.src);
                                 }
-                            } catch (e) {
-                                const img = tile.querySelector('img.tile--img__img');
-                                if (img && img.src) results.push(img.src);
-                            }
-                            if (results.length >= 15) break;
+                            });
                         }
-                        return results;
+                        
+                        // Strategy 3: Generic img in tile link
+                        if (results.length < 5) {
+                            const links = document.querySelectorAll('a[href*="img_url"]');
+                            links.forEach(link => {
+                                const match = link.href.match(/img_url=([^&]+)/);
+                                if (match) results.push(decodeURIComponent(match[1]));
+                            });
+                        }
+
+                        return [...new Set(results)]; // De-duplicate
                     }
                 """)
                 
@@ -91,7 +120,10 @@ class BrowserSearcher:
             except Exception as e:
                 print(f"BrowserSearcher Error: {e}")
                 if 'browser' in locals():
-                    await browser.close()
+                    try:
+                        await browser.close()
+                    except:
+                        pass
                     
         return image_urls[:max_results]
 
