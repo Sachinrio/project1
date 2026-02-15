@@ -27,6 +27,11 @@ class BrowserSearcher:
         async with async_playwright() as p:
             # Check for local playwright browsers path (Render config)
             browser_path = os.getenv("PLAYWRIGHT_BROWSERS_PATH")
+            print(f"DEBUG: BrowserSearcher - PLAYWRIGHT_BROWSERS_PATH={browser_path}")
+            if browser_path and os.path.exists(browser_path):
+                print(f"DEBUG: BrowserSearcher - Path exists: {browser_path}")
+            elif browser_path:
+                print(f"DEBUG: BrowserSearcher - WARNING: Path DOES NOT exist: {browser_path}")
             
             try:
                 print(f"DEBUG: BrowserSearcher - Launching Chromium (Headless)...")

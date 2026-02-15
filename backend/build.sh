@@ -9,6 +9,8 @@ pip install --upgrade pip
 pip install -r requirements.txt
 
 # Install Playwright browsers (Chromium only) to a local directory for persistence
-export PLAYWRIGHT_BROWSERS_PATH=$(pwd)/pw-browsers
+# Using dirname $0 to ensure it's always inside the backend folder
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+export PLAYWRIGHT_BROWSERS_PATH="$SCRIPT_DIR/pw-browsers"
 echo "Installing browsers to $PLAYWRIGHT_BROWSERS_PATH"
 playwright install chromium

@@ -5,9 +5,10 @@ set -o errexit
 # Install Python dependencies
 pip install -r backend/requirements.txt
 
-# Install Playwright browsers
-playwright install chromium
-playwright install-deps chromium
+# Export the local Playwright browsers path so the app finds them
+# (They are installed here by backend/build.sh)
+export PLAYWRIGHT_BROWSERS_PATH=$(pwd)/backend/pw-browsers
+echo "STARTUP: Using PLAYWRIGHT_BROWSERS_PATH=$PLAYWRIGHT_BROWSERS_PATH"
 
 # Run the application
 python backend/run.py
