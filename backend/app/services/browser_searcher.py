@@ -104,10 +104,11 @@ class BrowserSearcher:
                 
                 # Advanced extraction script
                 print("BrowserSearcher: Extracting image URLs...")
-                image_urls = await page.evaluate("""
+                image_data = await page.evaluate("""
                     () => {
                         const results = [];
-                        // Strategy 1: data-zci-link
+                        
+                        // Strategy 1: data-zci-link (The most reliable DDG structure)
                         const tiles = document.querySelectorAll('.tile--img');
                         tiles.forEach(tile => {
                             try {
@@ -116,30 +117,34 @@ class BrowserSearcher:
                             } catch (e) {}
                         });
 
-                        // Strategy 2: tile--img__img src
-                        if (results.length < 5) {
-                            const imgs = document.querySelectorAll('img.tile--img__img');
-                            imgs.forEach(img => {
-                                if (img.src && !img.src.includes('base64') && img.src.startsWith('http')) {
-                                    results.push(img.src);
-                                }
-                            });
-                        }
+                        // Strategy 2: tile--img__img src (Backup)
+                        const imgs = document.querySelectorAll('img.tile--img__img');
+                        imgs.forEach(img => {
+                            if (img.src && !img.src.includes('base64') && img.src.startsWith('http')) {
+                                results.push(img.src);
+                            } else if (img.dataset.src && img.dataset.src.startsWith('http')) {
+                                results.push(img.dataset.src);
+                            }
+                        });
                         
-                        // Strategy 3: Generic img in tile link
-                        if (results.length < 5) {
-                            const links = document.querySelectorAll('a[href*="img_url"]');
-                            links.forEach(link => {
-                                const match = link.href.match(/img_url=([^&]+)/);
-                                if (match) results.push(decodeURIComponent(match[1]));
-                            });
-                        }
+                        // Strategy 3: DuckDuckGo proxy URLs (Last resort)
+                        const proxies = document.querySelectorAll('img[src*="external-content.duckduckgo.com"]');
+                        proxies.forEach(img => {
+                            if (img.src.startsWith('http')) results.push(img.src);
+                        });
 
                         return [...new Set(results)]; // De-duplicate
                     }
                 """)
                 
+                image_urls = image_data
                 print(f"BrowserSearcher: Found {len(image_urls)} candidate images.")
+                
+                if not image_urls:
+                    print("BrowserSearcher: DEBUG - No images found. Sniffing DOM...")
+                    html = await page.content()
+                    print(f"BrowserSearcher: DOM Snippet: {html[:1000]}")
+                
                 await browser.close()
                 
             except Exception as e:

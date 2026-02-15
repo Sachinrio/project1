@@ -193,8 +193,47 @@ class AIGeneratorService:
         except Exception as e:
             print(f"DEBUG: Source 1 CRASHED: {e}")
 
-        # --- Source 2: Curated Fallback (Last Resort) ---
-        print("Scraped candidates failed or were 'busy'. Using curated fallback.")
+        # --- Source 2: Category-Aware Fallback (High Relevance) ---
+        print(f"Scraped candidates for '{query}' failed. Using category-aware fallback.")
+        
+        # Categorized relevance map (Unsplash high-quality event photos)
+        category_map = {
+            "Tech": [
+                "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80", # Tech grid
+                "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1000&q=80"  # Server/Code
+            ],
+            "Medical": [
+                "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1000&q=80", # Hospital/care
+                "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1000&q=80"  # Medical equipment
+            ],
+            "Music": [
+                "https://images.unsplash.com/photo-1514525253361-bee8d41df430?auto=format&fit=crop&w=1000&q=80", # Concert
+                "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1000&q=80"  # DJ/Music
+            ],
+            "Health": [
+                "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80", # Yoga/Wellness
+                "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=80"  # Fitness
+            ],
+            "Business": [
+                "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=80", # Meeting
+                "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80"  # Office building
+            ]
+        }
+        
+        # Detect category or keywords for fallback
+        category = "General"
+        search_lower = query.lower()
+        if any(x in search_lower for x in ["tech", "ai", "coding", "software"]): category = "Tech"
+        elif any(x in search_lower for x in ["medical", "health", "hospital", "doctor", "care"]): category = "Medical"
+        elif any(x in search_lower for x in ["music", "concert", "dj", "party"]): category = "Music"
+        elif any(x in search_lower for x in ["yoga", "workout", "fitness", "run"]): category = "Health"
+        elif any(x in search_lower for x in ["business", "meeting", "corp", "startup"]): category = "Business"
+
+        if category in category_map:
+            print(f"DEBUG: Using {category} category fallback for '{query}'")
+            return random.choice(category_map[category])
+
+        # Last Resort: Curated General Event Fallback
         fallbacks = [
             "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&w=1000&q=80",
             "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=80",
