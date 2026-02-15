@@ -131,27 +131,18 @@ class AIGeneratorService:
             if "description" in result:
                 result["description"] = self._clean_description(result["description"])
 
-            # Generate Image (DuckDuckGo Search using exact title)
-            search_term = title
-            
-            if search_term:
-                print(f"Searching for image using: {search_term}")
-                image_url = await self._search_image(search_term)
-                if image_url:
-                    result["imageUrl"] = image_url
-                    print(f"Image found: {result['imageUrl']}")
-                else:
-                    # Fallback to title if detailed prompt finds nothing
-                    if search_term != title:
-                        print(f"No image found for prompt, retrying with title: {title}")
-                        image_url = await self._search_image(title)
-                        if image_url:
-                            result["imageUrl"] = image_url
-                        else:
-                             result["imageUrl"] = ""
-                    else:
-                        result["imageUrl"] = ""
-            else:
+            # 4. Generate Image (STRICT DuckDuckGo Search)
+            # Use a global 22-second deadline for the entire search process
+            # This ensures we respond before Render's 30-second timeout
+            print(f"DEBUG: Starting Strict DDG Search (22s limit) for: {title}")
+            try:
+                image_url = await asyncio.wait_for(self._search_image(title), timeout=22.0)
+                result["imageUrl"] = image_url or ""
+            except asyncio.TimeoutError:
+                print("DEBUG: Image search hit global 22s limit. Returning empty image to prevent 504.")
+                result["imageUrl"] = ""
+            except Exception as search_err:
+                print(f"DEBUG: Image search crashed: {search_err}")
                 result["imageUrl"] = ""
 
             return result
@@ -171,21 +162,21 @@ class AIGeneratorService:
         """
         search_queries = [
             f"{query} event image", # Stage 1: Specific
-            query,                 # Stage 2: Broader (Title only)
-            f"{query} wallpaper"    # Stage 3: Visual focus
+            query                  # Stage 2: Broader (Title only)
         ]
 
+        # Stage 3 is removed to save time. 2 stages is enough for 20 seconds.
         for i, search_query in enumerate(search_queries):
             try:
                 print(f"DEBUG: DDG Search Stage {i+1} - Query: {search_query}")
                 results = await browser_searcher.search_images(search_query)
                 
                 if not results:
-                    print(f"DEBUG: DDG Stage {i+1} returned NO results. Retrying...")
+                    print(f"DEBUG: DDG Stage {i+1} returned NO results.")
                     continue
 
-                # Test top 3 candidates for cleanliness
-                candidates = results[:3]
+                # Test top 2 candidates (reduced from 3 to save time)
+                candidates = results[:2]
                 print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
                 
                 for j, img_url in enumerate(candidates):
@@ -194,13 +185,11 @@ class AIGeneratorService:
                         print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
                         return img_url
                     else:
-                        print(f"DEBUG: REJECTED - Image {j+1} was 'busy' or failed check.")
+                        print(f"DEBUG: REJECTED - Image {j+1} failed check.")
                 
-                print(f"DEBUG: All candidates in Stage {i+1} rejected. Moving to next query Stage...")
             except Exception as e:
-                print(f"DEBUG: DDG Search Stage {i+1} CRASHED: {e}")
+                print(f"DEBUG: DDG Search Stage {i+1} Error: {e}")
 
-        print("STRICT DDG: No suitable images found after all retries. Returning empty.")
         return ""
 
 
