@@ -50,3 +50,4 @@ langchain-core==0.1.23
 langchain-google-genai==0.0.9
 langchain-groq==0.0.1
 duckduckgo-search>=6.0.0
+Pillow==10.2.0

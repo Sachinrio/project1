@@ -265,27 +265,48 @@ class AIGeneratorService:
         """
         Uses Gemini Vision to detect if an image is suitable (no text/logos).
         Downloads image first to bypass 403 Forbidden blocks.
+        Optimizes size to prevent 504 Deadline Exceeded errors.
         """
         if not self.llm_google:
             return True
         try:
             import requests
             import base64
+            import io
+            from PIL import Image
             from langchain_core.messages import HumanMessage
             
-            # 1. Download image with browser-like headers to bypass 403s
+            # 1. Download image with browser-like headers
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
             response = requests.get(image_url, headers=headers, timeout=10)
             if response.status_code != 200:
                 print(f"Failed to download image for Vision check ({response.status_code}): {image_url}")
-                return False # Skip images we can't access
+                return False
                 
-            # 2. Convert to Base64
-            image_data = base64.b64encode(response.content).decode("utf-8")
+            # 2. Optimize & Resize to prevent 504 timeouts
+            try:
+                img = Image.open(io.BytesIO(response.content))
+                # Convert to RGB if necessary (e.g. RGBA/PNG)
+                if img.mode != 'RGB':
+                    img = img.convert('RGB')
+                
+                # Resize if larger than 800px on either dimension
+                max_size = 800
+                if img.width > max_size or img.height > max_size:
+                    img.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+                
+                # Save back to bytes as JPEG with compression
+                buffer = io.BytesIO()
+                img.save(buffer, format="JPEG", quality=80)
+                image_data = base64.b64encode(buffer.getvalue()).decode("utf-8")
+                
+            except Exception as resize_err:
+                print(f"Image optimization failed, using raw: {resize_err}")
+                image_data = base64.b64encode(response.content).decode("utf-8")
             
-            # 3. Vision prompt using base64 data
+            # 3. Vision prompt using optimized base64 data
             message = HumanMessage(
                 content=[
                     {"type": "text", "text": "Does this image contain any significant text, logos, or watermarks? Answer ONLY 'YES' or 'NO'."},
@@ -297,19 +318,21 @@ class AIGeneratorService:
             )
             
             try:
+                # Add explicit internal timeout for the AI call
                 response = await self.llm_google.ainvoke([message])
                 decision = response.content.strip().upper()
                 return "NO" in decision
             except Exception as e:
-                # Catch 429 ResourceExhausted or other API errors
-                if "429" in str(e) or "QUOTA" in str(e).upper():
-                    print(f"Gemini quota exceeded (429), bypassing vision filter for: {image_url}")
+                # Catch 429 Quota or 504 Deadline Exceeded
+                err_str = str(e).upper()
+                if any(x in err_str for x in ["429", "504", "QUOTA", "DEADLINE", "TIMEOUT"]):
+                    print(f"Gemini API limit/timeout hit ({e}), bypassing vision filter for: {image_url}")
                     return True # Graceful bypass
-                raise e # Re-raise unexpected errors to outer block
+                raise e
             
         except Exception as e:
             print(f"Vision check failed or bypassed for {image_url}: {e}")
-            return True # Conservative: use it if check fails
+            return True # Conservative fallback
 
 
     def _clean_description(self, text: str) -> str:
