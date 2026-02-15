@@ -163,83 +163,45 @@ class AIGeneratorService:
 
     async def _search_image(self, query: str) -> Optional[str]:
         """
-        Multi-source search strategy (Playwright-Based):
-        1. DuckDuckGo Browser Scraping (Requested by user)
-        2. Pollinations.ai (AI Generation - High Reliability Fallback)
-        3. Curated Fallback
-        All results are filtered by Gemini Vision.
+        STRICT DuckDuckGo Search Strategy:
+        1. Tries specific query: "{title} event image"
+        2. Tries broader query: "{title}"
+        3. Tries general query: "{category} event" (if available contextually)
+        Returns ONLY images found on live DuckDuckGo results. No AI/curated fallbacks.
         """
-        # --- Source 1: Browser-Based DDG Scraping ---
-        try:
-            # User specifically asked for "[title] event image"
-            search_query = f"{query} event image"
-            print(f"DEBUG: Source 1 (Browser Scraping) - Query: {search_query}")
-            
-            results = await browser_searcher.search_images(search_query)
-            
-            if not results:
-                print("DEBUG: Source 1 returned NO candidate images.")
-            else:
-                # Limit to 3 candidates to ensure we fit in Render's 30s timeout
+        search_queries = [
+            f"{query} event image", # Stage 1: Specific
+            query,                 # Stage 2: Broader (Title only)
+            f"{query} wallpaper"    # Stage 3: Visual focus
+        ]
+
+        for i, search_query in enumerate(search_queries):
+            try:
+                print(f"DEBUG: DDG Search Stage {i+1} - Query: {search_query}")
+                results = await browser_searcher.search_images(search_query)
+                
+                if not results:
+                    print(f"DEBUG: DDG Stage {i+1} returned NO results. Retrying...")
+                    continue
+
+                # Test top 3 candidates for cleanliness
                 candidates = results[:3]
-                print(f"DEBUG: Source 1 found {len(results)} total, testing top {len(candidates)} with Vision...")
-                for i, img_url in enumerate(candidates):
-                    print(f"DEBUG: Checking candidate {i+1}/{len(candidates)}: {img_url}")
+                print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
+                
+                for j, img_url in enumerate(candidates):
+                    print(f"DEBUG: Checking candidate {j+1}/{len(candidates)}: {img_url}")
                     if await self._is_image_clean(img_url):
-                        print(f"DEBUG: SUCCESS - Image {i+1} is clean: {img_url}")
+                        print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
                         return img_url
                     else:
-                        print(f"DEBUG: REJECTED - Image {i+1} was 'busy' or failed check.")
-        except Exception as e:
-            print(f"DEBUG: Source 1 CRASHED: {e}")
+                        print(f"DEBUG: REJECTED - Image {j+1} was 'busy' or failed check.")
+                
+                print(f"DEBUG: All candidates in Stage {i+1} rejected. Moving to next query Stage...")
+            except Exception as e:
+                print(f"DEBUG: DDG Search Stage {i+1} CRASHED: {e}")
 
-        # --- Source 2: Category-Aware Fallback (High Relevance) ---
-        print(f"Scraped candidates for '{query}' failed. Using category-aware fallback.")
-        
-        # Categorized relevance map (Unsplash high-quality event photos)
-        category_map = {
-            "Tech": [
-                "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1000&q=80", # Tech grid
-                "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1000&q=80"  # Server/Code
-            ],
-            "Medical": [
-                "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?auto=format&fit=crop&w=1000&q=80", # Hospital/care
-                "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1000&q=80"  # Medical equipment
-            ],
-            "Music": [
-                "https://images.unsplash.com/photo-1514525253361-bee8d41df430?auto=format&fit=crop&w=1000&q=80", # Concert
-                "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1000&q=80"  # DJ/Music
-            ],
-            "Health": [
-                "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=1000&q=80", # Yoga/Wellness
-                "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=1000&q=80"  # Fitness
-            ],
-            "Business": [
-                "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1000&q=80", # Meeting
-                "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80"  # Office building
-            ]
-        }
-        
-        # Detect category or keywords for fallback
-        category = "General"
-        search_lower = query.lower()
-        if any(x in search_lower for x in ["tech", "ai", "coding", "software"]): category = "Tech"
-        elif any(x in search_lower for x in ["medical", "health", "hospital", "doctor", "care"]): category = "Medical"
-        elif any(x in search_lower for x in ["music", "concert", "dj", "party"]): category = "Music"
-        elif any(x in search_lower for x in ["yoga", "workout", "fitness", "run"]): category = "Health"
-        elif any(x in search_lower for x in ["business", "meeting", "corp", "startup"]): category = "Business"
-
-        if category in category_map:
-            print(f"DEBUG: Using {category} category fallback for '{query}'")
-            return random.choice(category_map[category])
-
-        # Last Resort: Curated General Event Fallback
-        fallbacks = [
-            "https://images.unsplash.com/photo-1540575861501-7ad05823c9f5?auto=format&fit=crop&w=1000&q=80",
-            "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&w=1000&q=80",
-            "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?auto=format&fit=crop&w=1000&q=80"
-        ]
-        return random.choice(fallbacks)
+        print("STRICT DDG: No suitable images found after all retries. Returning empty.")
+        return ""
 
 
 
