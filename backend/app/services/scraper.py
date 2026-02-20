@@ -295,10 +295,11 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
                             "raw_data": {"source": "eventbrite_api"}
                         }
                         
-                        if is_business_event(event_data):
-                            cleaned_events.append(event_data)
-                        else:
-                            print(f"  [Filtered] Non-business event: {event_data['title']}")
+                        # Eventbrite 'business' category already filters for business events.
+                        # We don't strictly enforce is_business_event here to avoid dropping valid events.
+                        cleaned_events.append(event_data)
+                        if not is_business_event(event_data):
+                            print(f"  [Note] Event passed but lacks strict keywords: {event_data['title']}")
                     else:
                         print(f"Skipping {event_id} due to API failure.")
                         # Optional: Fallback to scraping if API fails? 
