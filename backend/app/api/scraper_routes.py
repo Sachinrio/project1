@@ -40,6 +40,8 @@ async def trigger_refresh():
     # On Render, we want the logs to show up in the main dashboard, so we inherit stdout/stderr
     subprocess.Popen(
         [python_exe, "-u", worker_script], 
+        stdout=sys.stdout,
+        stderr=sys.stderr,
         creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0,
         env=env
     )
