@@ -143,5 +143,6 @@ async def manual_scrape():
     return {"message": "Scraper triggered via Legacy Endpoint."}
 
 @app.get("/")
+@app.head("/")
 def root():
     return {"message": "Infinite BZ Backend is Running with Multi-Source Scraper 🚀"}
