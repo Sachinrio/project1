@@ -1,4 +1,3 @@
-from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 from pydantic import EmailStr
 import os
 from dotenv import load_dotenv
@@ -10,39 +9,24 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 import tempfile
 from urllib.parse import quote
+import resend
+import asyncio
 
 load_dotenv() # Load variables from .env file
 
 # Configuration: Read from Environment Variables
-MAIL_USERNAME = os.getenv("MAIL_USERNAME")
-MAIL_PASSWORD = os.getenv("MAIL_PASSWORD")
-MAIL_FROM = os.getenv("MAIL_FROM", MAIL_USERNAME) # Default to username if not set
-MAIL_PORT = int(os.getenv("MAIL_PORT", 587))
-MAIL_SERVER = os.getenv("MAIL_SERVER", "smtp.gmail.com")
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+resend.api_key = RESEND_API_KEY
 
-# Check for Real SMTP and valid credentials
-ENABLE_EMAIL = bool(MAIL_USERNAME and MAIL_PASSWORD and not MAIL_USERNAME.startswith("your_") and not MAIL_PASSWORD.startswith("your_"))
+# Use the configured Mail From or fallback to Resend's testing domain
+MAIL_FROM = os.getenv("MAIL_FROM") or os.getenv("RESEND_FROM") or "onboarding@resend.dev"
 
-conf = None
-if ENABLE_EMAIL:
-    try:
-        conf = ConnectionConfig(
-            MAIL_USERNAME = MAIL_USERNAME,
-            MAIL_PASSWORD = MAIL_PASSWORD,
-            MAIL_FROM = MAIL_FROM,
-            MAIL_PORT = MAIL_PORT,
-            MAIL_SERVER = MAIL_SERVER,
-            MAIL_STARTTLS = True,
-            MAIL_SSL_TLS = False,
-            USE_CREDENTIALS = True,
-            VALIDATE_CERTS = True
-        )
-    except Exception as e:
-        print(f"CRITICAL: Email configuration failed: {e}")
-        # We generally don't want to crash app import, but this disables email features.
-        ENABLE_EMAIL = False
+ENABLE_EMAIL = bool(RESEND_API_KEY and RESEND_API_KEY.startswith("re_"))
+
+if not ENABLE_EMAIL:
+    print("WARNING: RESEND_API_KEY is missing or invalid in .env. Email processing is DISABLED.")
 else:
-    print("WARNING: MAIL_USERNAME or MAIL_PASSWORD missing or using placeholder values in .env. Email sending is DISABLED.")
+    print(f"INFO: Resend API initialized. Sending emails FROM: {MAIL_FROM}")
 
 async def send_reset_email(email: EmailStr, otp: str):
     """
@@ -54,13 +38,14 @@ async def send_reset_email(email: EmailStr, otp: str):
 
     print(f"Sending OTP email to {email} via {MAIL_SERVER}...")
     try:
-        message = MessageSchema(
-            subject="Password Reset Request - Infinite BZ",
-            recipients=[email],
-            body=f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": "Password Reset Request - Infinite BZ",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-                    <div style="max-w-md: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                         <h2 style="color: #333;">Password Reset</h2>
                         <p>You requested a password reset for Infinite BZ.</p>
                         <p>Your OTP code is:</p>
@@ -70,12 +55,10 @@ async def send_reset_email(email: EmailStr, otp: str):
                     </div>
                 </body>
             </html>
-            """,
-            subtype=MessageType.html
-        )
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        print("Email sent successfully.")
+            """
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Email sent successfully via Resend.")
         return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send email via SMTP: {e}")
@@ -91,13 +74,14 @@ async def send_verification_email(email: EmailStr, otp: str):
 
     print(f"Sending Verification OTP to {email} via {MAIL_SERVER}...")
     try:
-        message = MessageSchema(
-            subject="Verify your email - Infinite BZ",
-            recipients=[email],
-            body=f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": "Verify your email - Infinite BZ",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
-                    <div style="max-w-md: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
+                    <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
                         <h2 style="color: #333;">Email Verification</h2>
                         <p>Welcome to Infinite BZ! Please verify your email address.</p>
                         <p>Your verification code is:</p>
@@ -107,12 +91,10 @@ async def send_verification_email(email: EmailStr, otp: str):
                     </div>
                 </body>
             </html>
-            """,
-            subtype=MessageType.html
-        )
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        print("Verification email sent successfully.")
+            """
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Verification email sent successfully via Resend.")
         return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send email via SMTP: {e}")
@@ -146,16 +128,14 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
         </html>
         """
         
-        message = MessageSchema(
-            subject=f"Successfully Registered: {event_title}",
-            recipients=[email],
-            body=body,
-            subtype=MessageType.html
-        )
-        
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        print("Ticket Email sent successfully.")
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": f"Successfully Registered: {event_title}",
+            "html": body
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Ticket Email sent successfully via Resend.")
         return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send ticket email via SMTP: {e}")
@@ -194,17 +174,25 @@ async def send_organizer_notification_email(email: EmailStr, organizer_name: str
         </html>
         """
         
-        message = MessageSchema(
-            subject=f"New Registration: {event_title} - {attendee_name}",
-            recipients=[recipient],     # Sending TO the sender/admin
-            body=body,
-            subtype=MessageType.html,
-            attachments=[ticket_path]
-        )
+        # Read the generated ticket PDF for the attachment
+        with open(ticket_path, "rb") as f:
+            pdf_bytes = f.read()
+
+        params = {
+            "from": MAIL_FROM,
+            "to": [recipient],
+            "subject": f"New Registration: {event_title} - {attendee_name}",
+            "html": body,
+            "attachments": [
+                {
+                    "filename": f"Ticket_{attendee_name.replace(' ', '_')}.pdf",
+                    "content": list(pdf_bytes)
+                }
+            ]
+        }
         
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        print("organizer notification sent.")
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Organizer notification sent via Resend.")
         return True
     except Exception as e:
         print(f"Failed to send organizer notification: {e}")
@@ -384,19 +372,13 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
             temp_file.write(pdf_buffer.getvalue())
             temp_file_path = temp_file.name
 
-        # Create attachments with file path
-        attachments = [
-            {
-                "file": temp_file_path,
-                "filename": f"{event_data.get('title', 'event')}_ticket.pdf",
-                "headers": {"Content-Type": "application/pdf"}
-            }
-        ]
+        pdf_bytes = pdf_buffer.getvalue()
 
-        message = MessageSchema(
-            subject=f"Your Event Ticket for {event_data.get('title', 'Event')}",
-            recipients=[email],
-            body=f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": f"Your Event Ticket for {event_data.get('title', 'Event')}",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
@@ -414,20 +396,19 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
                 </body>
             </html>
             """,
-            subtype=MessageType.html,
-            attachments=attachments
-        )
-        fm = FastMail(conf)
-        await fm.send_message(message)
-        print("Event ticket email sent successfully.")
+            "attachments": [
+                {
+                    "filename": f"{event_data.get('title', 'event').replace(' ', '_')}_ticket.pdf",
+                    "content": list(pdf_bytes)
+                }
+            ]
+        }
+        
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Event ticket email sent successfully via Resend.")
         return True
     except Exception as e:
-        print(f"ERROR: Failed to send event ticket email: {e}")
-        print("Please check your Gmail credentials. Make sure:")
-        print("1. 2-Factor Authentication is enabled on your Gmail account")
-        print("2. You generated an App Password (not your regular password)")
-        print("3. The App Password is entered correctly without spaces")
-        print("4. Your Gmail account allows less secure apps or has the correct settings")
+        print(f"ERROR: Failed to send event ticket email via Resend: {e}")
         return False
     finally:
         # Clean up temporary file
