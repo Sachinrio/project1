@@ -137,13 +137,17 @@ class AIGeneratorService:
             print(f"DEBUG: Starting Strict DDG Search (22s limit) for: {title}")
             try:
                 image_url = await asyncio.wait_for(self._search_image(title), timeout=22.0)
-                result["imageUrl"] = image_url or ""
+                if not image_url:
+                    print("DEBUG: Image search returned nothing. Using reliable fallback.")
+                    result["imageUrl"] = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
+                else:
+                    result["imageUrl"] = image_url
             except asyncio.TimeoutError:
-                print("DEBUG: Image search hit global 22s limit. Returning empty image to prevent 504.")
-                result["imageUrl"] = ""
+                print("DEBUG: Image search hit global 22s limit. Returning fallback image to prevent 504.")
+                result["imageUrl"] = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
             except Exception as search_err:
-                print(f"DEBUG: Image search crashed: {search_err}")
-                result["imageUrl"] = ""
+                print(f"DEBUG: Image search crashed heavily: {search_err}. Using fallback.")
+                result["imageUrl"] = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
 
             return result
 
@@ -160,37 +164,42 @@ class AIGeneratorService:
         3. Tries general query: "{category} event" (if available contextually)
         Returns ONLY images found on live DuckDuckGo results. No AI/curated fallbacks.
         """
-        search_queries = [
-            f"{query} event image", # Stage 1: Specific
-            query                  # Stage 2: Broader (Title only)
-        ]
+        try:
+            search_queries = [
+                f"{query} event image", # Stage 1: Specific
+                query                  # Stage 2: Broader (Title only)
+            ]
 
-        # Stage 3 is removed to save time. 2 stages is enough for 20 seconds.
-        for i, search_query in enumerate(search_queries):
-            try:
-                print(f"DEBUG: DDG Search Stage {i+1} - Query: {search_query}")
-                results = await browser_searcher.search_images(search_query)
-                
-                if not results:
-                    print(f"DEBUG: DDG Stage {i+1} returned NO results.")
-                    continue
+            # Stage 3 is removed to save time. 2 stages is enough for 20 seconds.
+            for i, search_query in enumerate(search_queries):
+                try:
+                    print(f"DEBUG: DDG Search Stage {i+1} - Query: {search_query}")
+                    results = await browser_searcher.search_images(search_query)
+                    
+                    if not results:
+                        print(f"DEBUG: DDG Stage {i+1} returned NO results.")
+                        continue
 
-                # Test top 2 candidates (reduced from 3 to save time)
-                candidates = results[:2]
-                print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
-                
-                for j, img_url in enumerate(candidates):
-                    print(f"DEBUG: Checking candidate {j+1}/{len(candidates)}: {img_url}")
-                    if await self._is_image_clean(img_url):
-                        print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
-                        return img_url
-                    else:
-                        print(f"DEBUG: REJECTED - Image {j+1} failed check.")
-                
-            except Exception as e:
-                print(f"DEBUG: DDG Search Stage {i+1} Error: {e}")
+                    # Test top 2 candidates (reduced from 3 to save time)
+                    candidates = results[:2]
+                    print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
+                    
+                    for j, img_url in enumerate(candidates):
+                        print(f"DEBUG: Checking candidate {j+1}/{len(candidates)}: {img_url}")
+                        if await self._is_image_clean(img_url):
+                            print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
+                            return img_url
+                        else:
+                            print(f"DEBUG: REJECTED - Image {j+1} failed check.")
+                            
+                except Exception as stage_err:
+                    print(f"DEBUG: DDG Search Stage {i+1} Error: {stage_err}")
 
-        return ""
+            return ""
+            
+        except Exception as e:
+            print(f"DEBUG: _search_image completely crashed ({e}). Returning None.")
+            return None
 
 
 

@@ -149,12 +149,8 @@ class BrowserSearcher:
                 
             except Exception as e:
                 print(f"BrowserSearcher Error: {e}")
-                if 'browser' in locals():
-                    try:
-                        await browser.close()
-                    except:
-                        pass
-                    
+                
+        # If we exited the async context block or hit an error, return whatever we have
         return image_urls[:max_results]
 
 # Singleton instance
