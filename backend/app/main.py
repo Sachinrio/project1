@@ -6,6 +6,23 @@ if sys.platform == 'win32':
     if not isinstance(asyncio.get_event_loop_policy(), asyncio.WindowsProactorEventLoopPolicy):
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
+import logging
+import os
+from apscheduler.triggers.cron import CronTrigger # Added this import as it was in the instruction's snippet
+
+# --- CLOUD DEPLOYMENT FIX: CUSTOM PLAYWRIGHT PATH ---
+# Inject custom local path for Playwright browsers before any scrapers load
+# This is crucial for Render because they don't natively preserve ~/.cache layers
+script_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # Root backend dir
+pw_path = os.path.join(script_dir, "pw-browsers")
+if os.path.exists(pw_path):
+    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = pw_path
+    print(f"STARTUP: Set PLAYWRIGHT_BROWSERS_PATH = {pw_path}")
+# ---------------------------------------------------
+
+# Set up generic logger
+logging.basicConfig(level=logging.INFO)
+
 from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
