@@ -131,19 +131,19 @@ class AIGeneratorService:
             if "description" in result:
                 result["description"] = self._clean_description(result["description"])
 
-            # 4. Generate Image (STRICT DuckDuckGo Search)
-            # Use a global 22-second deadline for the entire search process
-            # This ensures we respond before Render's 30-second timeout
-            print(f"DEBUG: Starting Strict DDG Search (22s limit) for: {title}")
+            # 4. Generate Image (DuckDuckGo Lite Proxy)
+            from .image_scraper import image_scraper_service
+            print(f"DEBUG: Starting Fast DDG Proxy Image Search for: {title}")
             try:
-                image_url = await asyncio.wait_for(self._search_image(title), timeout=22.0)
+                # Use a fast 10-second timeout
+                image_url = await asyncio.wait_for(image_scraper_service.get_image_url(f"{title} image without text"), timeout=10.0)
                 if not image_url:
-                    print("DEBUG: Image search returned nothing. Using reliable fallback.")
+                    print("DEBUG: Proxy Image search returned nothing. Using reliable fallback.")
                     result["imageUrl"] = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
                 else:
                     result["imageUrl"] = image_url
             except asyncio.TimeoutError:
-                print("DEBUG: Image search hit global 22s limit. Returning fallback image to prevent 504.")
+                print("DEBUG: Image search hit global 10s limit. Returning fallback image.")
                 result["imageUrl"] = "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1000&q=80"
             except Exception as search_err:
                 print(f"DEBUG: Image search crashed heavily: {search_err}. Using fallback.")
