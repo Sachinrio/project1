@@ -166,8 +166,7 @@ class AIGeneratorService:
         """
         try:
             search_queries = [
-                f"{query} event image", # Stage 1: Specific
-                query                  # Stage 2: Broader (Title only)
+                f"{query} image without text"
             ]
 
             # Stage 3 is removed to save time. 2 stages is enough for 20 seconds.
@@ -180,17 +179,10 @@ class AIGeneratorService:
                         print(f"DEBUG: DDG Stage {i+1} returned NO results.")
                         continue
 
-                    # Test top 2 candidates (reduced from 3 to save time)
-                    candidates = results[:2]
-                    print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
-                    
-                    for j, img_url in enumerate(candidates):
-                        print(f"DEBUG: Checking candidate {j+1}/{len(candidates)}: {img_url}")
-                        if await self._is_image_clean(img_url):
-                            print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
-                            return img_url
-                        else:
-                            print(f"DEBUG: REJECTED - Image {j+1} failed check.")
+                    # Just return the very first image immediately
+                    first_img = results[0]
+                    print(f"DEBUG: SUCCESS - Grabbed first image directly: {first_img}")
+                    return first_img
                             
                 except Exception as stage_err:
                     print(f"DEBUG: DDG Search Stage {i+1} Error: {stage_err}")
