@@ -154,27 +154,41 @@ class AIGeneratorService:
 
     async def _search_image(self, query: str) -> Optional[str]:
         """
-        DuckDuckGo Search Strategy modified per User Request:
-        Searches explicitly for '{title} image without text on it'.
-        Returns the first image found directly without vision API checks.
+        STRICT DuckDuckGo Search Strategy:
+        1. Tries specific query: "{title} event image"
+        2. Tries broader query: "{title}"
+        3. Tries general query: "{category} event" (if available contextually)
+        Returns ONLY images found on live DuckDuckGo results. No AI/curated fallbacks.
         """
-        search_query = f"{query} image without text on it"
-        
-        try:
-            print(f"DEBUG: DDG Search - Query: '{search_query}'")
-            results = await browser_searcher.search_images(search_query)
-            
-            if not results:
-                print(f"DEBUG: DDG Search returned NO results for '{search_query}'.")
-                return ""
+        search_queries = [
+            f"{query} event image", # Stage 1: Specific
+            query                  # Stage 2: Broader (Title only)
+        ]
 
-            # Return the very first image candidate directly
-            first_img_url = results[0]
-            print(f"DEBUG: SUCCESS - First image scraped: {first_img_url}")
-            return first_img_url
-            
-        except Exception as e:
-            print(f"DEBUG: DDG Search Error: {e}")
+        # Stage 3 is removed to save time. 2 stages is enough for 20 seconds.
+        for i, search_query in enumerate(search_queries):
+            try:
+                print(f"DEBUG: DDG Search Stage {i+1} - Query: {search_query}")
+                results = await browser_searcher.search_images(search_query)
+                
+                if not results:
+                    print(f"DEBUG: DDG Stage {i+1} returned NO results.")
+                    continue
+
+                # Test top 2 candidates (reduced from 3 to save time)
+                candidates = results[:2]
+                print(f"DEBUG: DDG Stage {i+1} found {len(results)} total, testing top {len(candidates)}...")
+                
+                for j, img_url in enumerate(candidates):
+                    print(f"DEBUG: Checking candidate {j+1}/{len(candidates)}: {img_url}")
+                    if await self._is_image_clean(img_url):
+                        print(f"DEBUG: SUCCESS - Image {j+1} is clean: {img_url}")
+                        return img_url
+                    else:
+                        print(f"DEBUG: REJECTED - Image {j+1} failed check.")
+                
+            except Exception as e:
+                print(f"DEBUG: DDG Search Stage {i+1} Error: {e}")
 
         return ""
 

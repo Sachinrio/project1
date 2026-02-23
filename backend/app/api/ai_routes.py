@@ -17,12 +17,7 @@ async def generate_event(request: GenerateEventRequest):
     Generates event details (description, agenda, tags, image) using AI.
     """
     try:
-        import os
-        # Ensure Playwright path is correct for Render (same as scraper_routes.py)
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.abspath(os.path.join(current_dir, "../.."))
-        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(project_root, "pw-browsers")
-        
+        # 1. Generate Content
         # 1. Generate Content
         content = await ai_service.generate_event_content(request.title, request.category, request.start_time, request.end_time)
         
