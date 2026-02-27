@@ -18,6 +18,11 @@ pw_path = os.path.join(script_dir, "pw-browsers")
 if os.path.exists(pw_path):
     os.environ["PLAYWRIGHT_BROWSERS_PATH"] = pw_path
     print(f"STARTUP: Set PLAYWRIGHT_BROWSERS_PATH = {pw_path}")
+
+# Detect if we are running on Render based on standard RENDER env var
+if os.environ.get("RENDER"):
+    os.environ["IS_RENDER"] = "true"
+    print("STARTUP: Render Environment Detected. Setting IS_RENDER=true")
 # ---------------------------------------------------
 
 # Set up generic logger

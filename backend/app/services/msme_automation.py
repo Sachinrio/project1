@@ -1,4 +1,5 @@
 import asyncio
+import os
 from sqlmodel import select
 from sqlalchemy.orm import sessionmaker
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -30,9 +31,11 @@ async def run_msme_automation(registration_id: int):
         
     # Launch Playwright Automaton with Evasive Flags
     print("MSME AUTOMATION: Spinning up Chromium engine...")
+    is_render = os.environ.get("IS_RENDER", "false").lower() == "true"
+    
     async with async_playwright() as p:
         browser = await p.chromium.launch(
-            headless=False, 
+            headless=is_render, 
             args=[
                 '--start-maximized',
                 '--disable-blink-features=AutomationControlled' # Bypass basic bot detection
@@ -436,12 +439,68 @@ async def run_msme_automation(registration_id: int):
                                     inp = page.locator(f"input[placeholder*='{locators_placeholder[idx]}' i]").first
                                     if await inp.count() > 0:
                                         await inp.fill(val)
-                            
-                            # State and District are dropdowns - complex to handle generically without exact html, skipping complex logic for MVP
+                                        
+                            # 13a. Plant State & District (Dropdowns)
+                            if len(p_parts) > 7:
+                                state_val = p_parts[7]
+                                state_select = page.locator("select[id*='State' i]").first
+                                if await state_select.count() > 0:
+                                    options = await state_select.locator("option").all()
+                                    for opt in options:
+                                        if state_val.lower() in (await opt.inner_text()).lower():
+                                            await state_select.select_option(value=await opt.get_attribute("value"))
+                                            await page.wait_for_timeout(2000) # Wait for postback to load districts
+                                            break
+                            if len(p_parts) > 8:
+                                dist_val = p_parts[8]
+                                dist_select = page.locator("select[id*='District' i]").first
+                                if await dist_select.count() > 0:
+                                    options = await dist_select.locator("option").all()
+                                    for opt in options:
+                                        if dist_val.lower() in (await opt.inner_text()).lower():
+                                            await dist_select.select_option(value=await opt.get_attribute("value"))
+                                            await page.wait_for_timeout(1000)
+                                            break
+
                             add_plant_btn = page.locator("button:has-text('Add Plant'), input[value*='Add Plant' i]").first
                             if await add_plant_btn.count() > 0:
                                 await add_plant_btn.click()
                                 await page.wait_for_timeout(2000)
+
+                        # 13b. Official Address of Enterprise
+                        print("MSME AUTOMATION: Filling Official Address...")
+                        if hasattr(phase2_reg, 'official_address') and phase2_reg.official_address:
+                            o_parts = [p.strip() for p in getattr(phase2_reg, 'official_address').split(',')]
+                            locators_placeholder = ['Flat', 'Premises', 'Village', 'Block', 'Road', 'City', 'Pin']
+                            
+                            for idx, val in enumerate(o_parts):
+                                if idx < len(locators_placeholder):
+                                    # Target the LAST matching placeholder for Official Address
+                                    inp = page.locator(f"input[placeholder*='{locators_placeholder[idx]}' i]").last
+                                    if await inp.count() > 0:
+                                        await inp.fill(val)
+                                        
+                            # Official State & District (Dropdowns)
+                            if len(o_parts) > 7:
+                                state_val = o_parts[7]
+                                state_select = page.locator("select[id*='State' i]").last
+                                if await state_select.count() > 0:
+                                    options = await state_select.locator("option").all()
+                                    for opt in options:
+                                        if state_val.lower() in (await opt.inner_text()).lower():
+                                            await state_select.select_option(value=await opt.get_attribute("value"))
+                                            await page.wait_for_timeout(2000)
+                                            break
+                            if len(o_parts) > 8:
+                                dist_val = o_parts[8]
+                                dist_select = page.locator("select[id*='District' i]").last
+                                if await dist_select.count() > 0:
+                                    options = await dist_select.locator("option").all()
+                                    for opt in options:
+                                        if dist_val.lower() in (await opt.inner_text()).lower():
+                                            await dist_select.select_option(value=await opt.get_attribute("value"))
+                                            await page.wait_for_timeout(1000)
+                                            break
 
                         # 14. Previous Registration
                         print("MSME AUTOMATION: Selecting Previous Registration...")
