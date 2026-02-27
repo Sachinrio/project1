@@ -49,7 +49,12 @@ export const LogoMarquee = ({ events = [] }) => {
             <div className="absolute left-0 top-0 bottom-0 w-20 bg-gradient-to-r from-[#fdfdff] to-transparent z-10"></div>
             <div className="absolute right-0 top-0 bottom-0 w-20 bg-gradient-to-l from-[#fdfdff] to-transparent z-10"></div>
 
-            <div className="flex w-max animate-marquee gap-20 group-hover:[animation-play-state:paused]">
+            <div
+                className="flex w-max gap-20 group-hover:[animation-play-state:paused]"
+                style={{
+                    animation: 'logo-marquee-horizontal 40s linear infinite'
+                }}
+            >
                 {/* Triple duplication for smooth infinite loop */}
                 {[...sources, ...sources, ...sources, ...sources].map((logo, idx) => (
                     <div key={idx} className="flex items-center gap-2 grayscale hover:grayscale-0 transition-all duration-300">
@@ -60,15 +65,12 @@ export const LogoMarquee = ({ events = [] }) => {
                 ))}
             </div>
 
-            <style jsx>{`
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-25%); } // Adjusted based on 4x duplication
-        }
-        .animate-marquee {
-          animation: marquee 40s linear infinite;
-        }
-      `}</style>
+            <style>{`
+                @keyframes logo-marquee-horizontal {
+                    0% { transform: translateX(-50%); }
+                    100% { transform: translateX(0); }
+                }
+            `}</style>
         </div>
     );
 };

@@ -9,6 +9,9 @@ import OrganizerCheckInPage from './components/OrganizerCheckInPage';
 import ErrorBoundary from './components/ErrorBoundary';
 import OrganizerCheckIn from './components/OrganizerCheckIn';
 import EventRegisterPage from './components/EventRegisterPage';
+import ChatWidget from './components/ChatWidget';
+import PackagesPricingPage from './components/PackagesPricingPage';
+import AllServicesPage from './components/AllServicesPage';
 
 export default function App() {
   const [events, setEvents] = useState([]);
@@ -22,6 +25,7 @@ export default function App() {
 
   // View State: 'landing' or 'feed' or 'auth' or 'dashboard'
   const [currentView, setCurrentView] = useState('landing');
+  const [viewParams, setViewParams] = useState({});
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
 
   useEffect(() => {
@@ -164,9 +168,10 @@ export default function App() {
         <LandingPage
           events={events}
           user={user}
-          onNavigate={(view, params) => {
+          onNavigate={(view, params = {}) => {
             window.scrollTo(0, 0);
             setCurrentView(view);
+            setViewParams(params);
           }}
           onLogin={() => {
             if (user) {
@@ -204,12 +209,12 @@ export default function App() {
               const completeness = calculateProfileCompleteness(userData);
               console.log("Profile completeness:", completeness);
               if (completeness >= 86) {
-                setCurrentView('dashboard');
+                navigateTo('dashboard');
               } else {
-                setCurrentView('settings');
+                navigateTo('settings');
               }
             } else {
-              setCurrentView('landing');
+              navigateTo('landing');
             }
           }}
         />
@@ -220,17 +225,15 @@ export default function App() {
           <Dashboard
             user={user}
             onLogout={handleLogout}
-            onNavigate={(view, eventId) => {
-              console.log("App onNavigate:", view, eventId);
-              window.scrollTo(0, 0);
-
+            onNavigate={(view, eventId, params = {}) => {
+              console.log("App onNavigate:", view, eventId, params);
               if (view === 'check-in') {
                 if (eventId) {
                   setCheckInEventId(eventId);
                 }
-                setCurrentView(view);
+                navigateTo(view, params);
               } else {
-                setCurrentView(view);
+                navigateTo(view, params);
               }
             }}
             initialView={initialDashboardView}
@@ -298,7 +301,30 @@ export default function App() {
           }}
         />
       )}
+
+      {currentView === 'packages-pricing' && (
+        <PackagesPricingPage
+          onNavigate={(view, params = {}) => {
+            window.scrollTo(0, 0);
+            setCurrentView(view || 'landing');
+            setViewParams(params);
+          }}
+        />
+      )}
+
+      {currentView === 'all-services' && (
+        <AllServicesPage
+          selectedTier={viewParams.tier}
+          onNavigate={(view, params = {}) => {
+            window.scrollTo(0, 0);
+            setCurrentView(view || 'packages-pricing');
+            setViewParams(params);
+          }}
+        />
+      )}
+
+      {/* Global Chat Widget */}
+      <ChatWidget />
     </>
   );
 }
-

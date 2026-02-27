@@ -1,10 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Search, LogIn, UserPlus, Bell, Calendar, MapPin, Clock } from 'lucide-react';
+import { Search, LogIn, UserPlus, Bell, Calendar, MapPin, Clock, Rocket, ChevronDown } from 'lucide-react';
+import ServiceCheckoutModal from './ServiceCheckoutModal';
 
-export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }) => {
+export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch, onNavigate }) => {
     const [hasNotifications, setHasNotifications] = useState(false);
     const [showNotifications, setShowNotifications] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const [isStartupMenuOpen, setIsStartupMenuOpen] = useState(false);
+
+    // Service Checkout State
+    const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
+    const [selectedService, setSelectedService] = useState({ name: '', price: 0 });
 
     useEffect(() => {
         const checkNotifications = () => {
@@ -52,11 +58,47 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }
         }
     };
 
+    const handleServiceClick = (serviceString) => {
+        // Only open modal if there is a price attached to the service
+        if (serviceString.includes(' for Rs.')) {
+            const parts = serviceString.split(' for Rs.');
+            setSelectedService({
+                name: parts[0],
+                price: parseInt(parts[1], 10)
+            });
+            setIsServiceModalOpen(true);
+            setIsStartupMenuOpen(false); // close dropdown
+        }
+    };
+
+    const startupServices = [
+        "Complete GST Registration for Rs.99",
+        "PAN Registration for Rs.199",
+        "Website Development for Rs.4999",
+        "Logo Design for Rs.499",
+        "Domain Registration for Rs.1000",
+        "Host for one site Rs.1500",
+        "Host for two site Rs.2500",
+        "Payment gateway for Rs.999",
+        "MSME Registration for Rs.99",
+        "Current A/C Opening for Rs.99",
+        "Helpdesk & Services",
+        "MOA & AOA for Rs.499",
+        "EPF & ESIC for Rs.1999",
+        "Professional Tax Enrollment for Rs.299",
+        "Statutory Auditor for Rs.1999",
+        "Shop & Establishment License for Rs.1000",
+        "FSSAI for Rs.1000",
+        "Import Export code for Rs.1000",
+        "Amazon/Flipkart Seller Account for Rs.1000",
+        "ROC/GST Returns for Rs.1000"
+    ];
+
     return (
         <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 py-4 mb-0 border-b border-fuchsia-100/50">
-            {/* Search Bar - Reduced size and centered */}
-            <div className="flex-1 flex justify-center max-w-2xl">
-                <div className="w-full relative group flex items-center bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all">
+            {/* Search Bar - Left Aligned */}
+            <div className="flex-1 flex justify-start">
+                <div className="w-full max-w-lg relative group flex items-center bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all">
                     {/* Search Input */}
                     <div className="flex-1 flex items-center px-4">
                         <input
@@ -89,8 +131,23 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }
                 </div>
             </div>
 
+            {/* Center: Startup Solution */}
+            <div className="flex-1 flex justify-center relative z-50">
+                <button
+                    onClick={() => {
+                        if (onNavigate) {
+                            onNavigate('packages-pricing');
+                        }
+                    }}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white rounded-xl font-bold text-sm hover:from-fuchsia-700 hover:to-purple-700 transition-all shadow-lg shadow-fuchsia-600/20"
+                >
+                    <Rocket size={18} />
+                    <span>Startup Solution</span>
+                </button>
+            </div>
+
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4 ml-8 relative">
+            <div className="flex-1 flex items-center justify-end gap-5 relative">
                 <button
                     onClick={onSignup}
                     className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
@@ -120,6 +177,15 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch }
                     </button>
                 )}
             </div>
+
+            {/* Service Checkout Modal */}
+            <ServiceCheckoutModal
+                isOpen={isServiceModalOpen}
+                onClose={() => setIsServiceModalOpen(false)}
+                serviceName={selectedService.name}
+                price={selectedService.price}
+                user={user}
+            />
         </div>
     );
 };

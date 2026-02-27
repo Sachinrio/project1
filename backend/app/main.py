@@ -147,6 +147,8 @@ app.include_router(payment_router, prefix="/api/v1")
 from app.api.contact import router as contact_router
 app.include_router(contact_router, prefix="/api/v1")
 
+from app.api.chat_routes import router as chat_router
+app.include_router(chat_router, prefix="/api")
 
 # Mount uploads directory to serve images
 import os

@@ -5,6 +5,10 @@ from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
+# Import schemas to ensure they are registered with SQLModel before metadata.create_all runs
+from app.models.schemas import *
+from app.models.msme_schema import MSMERegistration, ChatSession
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")

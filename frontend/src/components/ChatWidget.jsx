@@ -6,6 +6,7 @@ import ReactMarkdown from 'react-markdown';
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
     const [isMinimized, setIsMinimized] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
     const [message, setMessage] = useState('');
     const [chatHistory, setChatHistory] = useState([
         { role: 'assistant', text: "Hello! I am **Infinite AI**, your dedicated event assistant. How can I help you explore Chennai today?" }
@@ -13,12 +14,52 @@ export default function ChatWidget() {
     const [isTyping, setIsTyping] = useState(false);
     const scrollRef = useRef(null);
 
-    const starterChips = [
-        { label: "📅 Upcoming Events", query: "Show me upcoming events in Chennai" },
-        { label: "📍 Near Me", query: "Show me events near me" },
-        { label: "🎟️ Free Tickets", query: "Are there any free events?" },
-        { label: "💻 Tech Meetups", query: "Show me tech events" }
-    ];
+    // Global listener to open chat from anywhere
+    useEffect(() => {
+        const handleOpenChat = async (e) => {
+            setIsVisible(true);
+            setIsOpen(true);
+            setIsMinimized(false);
+            if (e.detail?.prompt) {
+                const triggerMsg = e.detail.prompt;
+                setChatHistory([{ role: 'user', text: triggerMsg }]);
+                setIsTyping(true);
+
+                try {
+                    const token = localStorage.getItem('token');
+                    const res = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(token && { 'Authorization': `Bearer ${token}` })
+                        },
+                        body: JSON.stringify({
+                            message: triggerMsg,
+                            user_location: "Chennai",
+                            current_page: window.location.pathname
+                        }),
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+                        setChatHistory(prev => [...prev, { role: 'assistant', text: data.reply }]);
+                    } else {
+                        throw new Error(`Server returned ${res.status}`);
+                    }
+                } catch (err) {
+                    console.error("Auto Chat Error:", err);
+                    setChatHistory(prev => [...prev, { role: 'assistant', text: "_Error:_ Unable to reach Infinite AI Core. Please check backend connection." }]);
+                } finally {
+                    setIsTyping(false);
+                }
+            }
+        };
+
+        window.addEventListener('open-chat', handleOpenChat);
+        return () => window.removeEventListener('open-chat', handleOpenChat);
+    }, []);
+
+
 
     useEffect(() => {
         if (scrollRef.current) {
@@ -39,9 +80,13 @@ export default function ChatWidget() {
             const location = "Chennai";
             const page = window.location.pathname;
 
+            const token = localStorage.getItem('token');
             const res = await fetch('/api/chat', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` })
+                },
                 body: JSON.stringify({
                     message: userMessage,
                     user_location: location,
@@ -82,6 +127,8 @@ export default function ChatWidget() {
             return <div className="text-slate-200 whitespace-pre-wrap">{text}</div>;
         }
     };
+
+    if (!isVisible) return null;
 
     return (
         <div className="fixed bottom-8 right-8 z-[9999] flex flex-col items-end pointer-events-none">
@@ -132,7 +179,7 @@ export default function ChatWidget() {
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.8, y: 100 }}
                         transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                        className={`absolute bottom-20 right-0 w-[360px] flex flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-slate-900/80 shadow-[0_32px_128px_rgba(0,0,0,0.6)] backdrop-blur-[20px] pointer-events-auto ${isMinimized ? 'h-20' : 'h-[560px]'}`}
+                        className={`fixed z-[9990] flex flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-slate-900/80 shadow-[0_32px_128px_rgba(0,0,0,0.6)] backdrop-blur-[20px] pointer-events-auto transition-all duration-300 ${isMinimized ? 'w-[360px] h-20 bottom-24 right-8' : 'w-[95vw] md:w-[80vw] max-w-5xl h-[85vh] m-auto inset-0'}`}
                     >
                         <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-slate-800 p-4 flex items-center justify-between border-b border-white/10 relative overflow-hidden">
                             <div className="absolute inset-0 bg-white/5 opacity-30 blur-2xl pointer-events-none"></div>
@@ -157,7 +204,7 @@ export default function ChatWidget() {
                                 {/* Conversation Area */}
                                 <div
                                     ref={scrollRef}
-                                    className="flex-1 overflow-y-auto p-6 space-y-8 no-scroll scroll-smooth bg-gradient-to-b from-transparent to-slate-950/20 shadow-inner"
+                                    className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 md:space-y-8 no-scroll scroll-smooth bg-gradient-to-b from-transparent to-slate-950/20 shadow-inner"
                                 >
                                     {chatHistory.map((chat, index) => (
                                         <div key={index} className={`flex ${chat.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -193,25 +240,7 @@ export default function ChatWidget() {
                                         </div>
                                     )}
 
-                                    {chatHistory.length === 1 && !isTyping && (
-                                        <div className="pt-6 space-y-3">
-                                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-[0.2em] text-center mb-4">Quick Protocols</p>
-                                            <div className="flex flex-wrap gap-2 justify-center">
-                                                {starterChips.map((chip, i) => (
-                                                    <motion.button
-                                                        key={i}
-                                                        type="button"
-                                                        whileHover={{ scale: 1.05, y: -2 }}
-                                                        whileTap={{ scale: 0.95 }}
-                                                        onClick={() => handleSendMessage(chip.query)}
-                                                        className="px-4 py-2.5 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-slate-300 hover:bg-primary-500 hover:text-white hover:border-primary-400 transition-all shadow-lg backdrop-blur-md cursor-pointer"
-                                                    >
-                                                        {chip.label}
-                                                    </motion.button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
+
                                 </div>
 
                                 <div className="p-6 bg-gradient-to-t from-slate-950/80 to-transparent border-t border-white/5">

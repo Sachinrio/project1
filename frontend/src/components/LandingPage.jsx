@@ -127,6 +127,7 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
                         user={user}
                         events={events}
                         onSearch={(query) => setSearchQuery(query)}
+                        onNavigate={onNavigate}
                     />
 
                     <main className="flex-grow">
