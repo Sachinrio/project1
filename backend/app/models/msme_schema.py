@@ -29,6 +29,21 @@ class MSMERegistrationBase(SQLModel):
     business_commenced: Optional[str] = None
     date_of_commencement: Optional[str] = None
 
+    # Phase 3 Fields
+    bank_name: Optional[str] = None
+    ifsc_code: Optional[str] = None
+    bank_account_number: Optional[str] = None
+    major_activity: Optional[str] = None
+    major_activity_under_services: Optional[str] = None
+    nic_search_term: Optional[str] = None
+    nic_activity_type: Optional[str] = None
+    nic_2_digit: Optional[str] = None
+    nic_4_digit: Optional[str] = None
+    nic_5_digit: Optional[str] = None
+    persons_employed_male: Optional[str] = None
+    persons_employed_female: Optional[str] = None
+    persons_employed_others: Optional[str] = None
+
     otp_code: Optional[str] = None
     status: str = Field(default="IN_PROGRESS") # IN_PROGRESS, AUTOMATING, COMPLETED, FAILED
 class MSMERegistration(MSMERegistrationBase, table=True):

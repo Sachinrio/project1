@@ -433,12 +433,33 @@ async def run_msme_automation(registration_id: int):
                                     pass
                             
                             # Sequential fill
-                            locators_placeholder = ['Flat', 'Premises', 'Village', 'Block', 'Road', 'City', 'Pin']
+                            # Avoid placeholder matching as "Block" matches "Flat/Door/Block No."
+                            # IDs typically follow txtplantdoorno, txtplantpremises, txtplantvillage, txtplantblock...
+                            input_selectors = [
+                                "input[id*='plantdoorno' i]",
+                                "input[id*='plantpremises' i]",
+                                "input[id*='plantvillage' i]",
+                                "input[id*='plantblock' i]",
+                                "input[id*='plantroad' i]",
+                                "input[id*='plantcity' i]",
+                                "input[id*='plantpin' i]"
+                            ]
                             for idx, val in enumerate(p_parts):
-                                if idx < len(locators_placeholder):
-                                    inp = page.locator(f"input[placeholder*='{locators_placeholder[idx]}' i]").first
+                                if idx < len(input_selectors):
+                                    inp = page.locator(input_selectors[idx]).first
                                     if await inp.count() > 0:
                                         await inp.fill(val)
+                                        
+                                    # Fallback if specific ID pattern fails, use safter partial matches
+                                    else:
+                                        fallbacks = ['Flat', 'Premises', 'Village', 'Block', 'Road', 'City', 'Pin']
+                                        if fallbacks[idx] == 'Block':
+                                            exact_inp = page.locator("input[placeholder='Block']").first
+                                        else:
+                                            exact_inp = page.locator(f"input[placeholder*='{fallbacks[idx]}' i]").first
+                                            
+                                        if await exact_inp.count() > 0:
+                                            await exact_inp.fill(val)
                                         
                             # 13a. Plant State & District (Dropdowns)
                             if len(p_parts) > 7:
@@ -471,14 +492,34 @@ async def run_msme_automation(registration_id: int):
                         print("MSME AUTOMATION: Filling Official Address...")
                         if hasattr(phase2_reg, 'official_address') and phase2_reg.official_address:
                             o_parts = [p.strip() for p in getattr(phase2_reg, 'official_address').split(',')]
-                            locators_placeholder = ['Flat', 'Premises', 'Village', 'Block', 'Road', 'City', 'Pin']
+                            # The official address fields typically have these IDs or names:
+                            # txtoffdoorno, txtoffpremises, txtoffvillage, txtoffblock, txtoffroad, txtoffcity, txtoffpin
+                            input_selectors = [
+                                "input[id*='offdoorno' i]",
+                                "input[id*='offpremises' i]",
+                                "input[id*='offvillage' i]",
+                                "input[id*='offblock' i]",
+                                "input[id*='offroad' i]",
+                                "input[id*='offcity' i]",
+                                "input[id*='offpin' i]"
+                            ]
                             
                             for idx, val in enumerate(o_parts):
-                                if idx < len(locators_placeholder):
-                                    # Target the LAST matching placeholder for Official Address
-                                    inp = page.locator(f"input[placeholder*='{locators_placeholder[idx]}' i]").last
+                                if idx < len(input_selectors):
+                                    # Target specific ID
+                                    inp = page.locator(input_selectors[idx]).first
                                     if await inp.count() > 0:
                                         await inp.fill(val)
+                                    else:
+                                        # Fallback to placeholder matching but using safer partial matches
+                                        fallbacks = ['Flat', 'Premises', 'Village', 'Block', 'Road', 'City', 'Pin']
+                                        if fallbacks[idx] == 'Block':
+                                            exact_inp = page.locator("input[placeholder='Block']").last
+                                        else:
+                                            exact_inp = page.locator(f"input[placeholder*='{fallbacks[idx]}' i]").last
+                                            
+                                        if await exact_inp.count() > 0:
+                                            await exact_inp.fill(val)
                                         
                             # Official State & District (Dropdowns)
                             if len(o_parts) > 7:
@@ -529,8 +570,143 @@ async def run_msme_automation(registration_id: int):
                                 await doc_input.fill(str(phase2_reg.date_of_commencement))
                                                 
                         print("MSME AUTOMATION: Phase 2 Form Filling Complete!")
+
+                        # --- NEW PHASE 3 FORM FILLING ---
+                        print("MSME AUTOMATION: Starting Phase 3 Form Filling...")
+
+                        # 16. Bank Details
+                        print("MSME AUTOMATION: Filling Bank Details...")
+                        if phase2_reg.bank_name:
+                            # Use exact text from screenshot or very broad placeholder
+                            bank_inp = page.locator("input[placeholder*='ENTER BANK NAME' i], input[placeholder*='बैंक विवरण' i]").first
+                            if await bank_inp.count() > 0:
+                                await bank_inp.scroll_into_view_if_needed()
+                                await bank_inp.fill(str(phase2_reg.bank_name))
+                                
+                        if phase2_reg.ifsc_code:
+                            ifsc_inp = page.locator("input[placeholder*='SBIN00' i], input[placeholder*='IFSC' i]").first
+                            if await ifsc_inp.count() > 0:
+                                await ifsc_inp.fill(str(phase2_reg.ifsc_code))
+                                
+                        if phase2_reg.bank_account_number:
+                            acc_inp = page.locator("input[placeholder*='Example:- 30478' i], input[placeholder*='Bank Account Number' i]").first
+                            if await acc_inp.count() > 0:
+                                await acc_inp.fill(str(phase2_reg.bank_account_number))
+
+                        # 17. Major Activity (Radio)
+                        print("MSME AUTOMATION: Selecting Major Activity...")
+                        if phase2_reg.major_activity:
+                            act = phase2_reg.major_activity.strip()
+                            # Locate the radio button by its adjacent label
+                            act_container = page.locator("div, table, tr, td").filter(has_text=re.compile(r"17\.\s*Major Activity", re.I)).last
+                            if await act_container.count() > 0:
+                                act_lbl = act_container.locator("label").filter(has_text=re.compile(act, re.I)).first
+                                if await act_lbl.count() > 0:
+                                    try:
+                                        await act_lbl.click(force=True)
+                                    except:
+                                        await act_lbl.locator("input").evaluate("el => el.click()")
+                                    await page.wait_for_timeout(2000) # Wait for ASP.NET Postback
+
+                        # 17.1 Major Activity Under Services (Conditional Radio)
+                        if hasattr(phase2_reg, 'major_activity_under_services') and phase2_reg.major_activity_under_services:
+                            print("MSME AUTOMATION: Selecting Major Activity Under Services...")
+                            sub_act = phase2_reg.major_activity_under_services.strip()
+                            sub_container = page.locator("div, table, tr, td").filter(has_text=re.compile(r"17\.1\s*Major Activity Under Services", re.I)).last
+                            if await sub_container.count() > 0:
+                                sub_lbl = sub_container.locator("label").filter(has_text=re.compile(sub_act, re.I)).first
+                                if await sub_lbl.count() > 0:
+                                    try:
+                                        await sub_lbl.click(force=True)
+                                    except:
+                                        await sub_lbl.locator("input").evaluate("el => el.click()")
+                                    await page.wait_for_timeout(2000) # Wait for ASP.NET Postback
+
+                        # 18. NIC Codes (3-Step Dropdown Process)
+                        print("MSME AUTOMATION: Processing NIC Codes...")
+                        if hasattr(phase2_reg, 'nic_activity_type') and phase2_reg.nic_activity_type:
+                            nic_type = phase2_reg.nic_activity_type.strip()
+                            print(f"MSME AUTOMATION: Selecting NIC Activity Type: {nic_type}")
+                            
+                            # Safest approach: find all labels matching the text, click the LAST one to hit Step 18 instead of Step 17.
+                            nic_radio_lbl = page.locator("label").filter(has_text=re.compile(nic_type, re.I)).last
+                            if await nic_radio_lbl.count() > 0:
+                                try:
+                                    await nic_radio_lbl.click(force=True)
+                                except:
+                                    await nic_radio_lbl.locator("input").evaluate("el => el.click()")
+                                await page.wait_for_timeout(2000) # Wait for ASP.NET Postback
+                            else:
+                                print(f"MSME AUTOMATION WARNING: Could not find NIC radio button for {nic_type}")
+                                
+                        if hasattr(phase2_reg, 'nic_2_digit') and phase2_reg.nic_2_digit:
+                            print(f"MSME AUTOMATION: Selecting NIC 2 Digit Code: {phase2_reg.nic_2_digit}")
+                            nic2_select = page.locator("select[id*='ddlnic2' i], select[id*='nic2' i]").first
+                            if await nic2_select.count() > 0:
+                                options = await nic2_select.locator("option").all()
+                                selected = False
+                                for opt in options:
+                                    if phase2_reg.nic_2_digit.lower() in (await opt.inner_text()).lower():
+                                        await nic2_select.select_option(value=await opt.get_attribute("value"))
+                                        await page.wait_for_timeout(2000)
+                                        selected = True
+                                        break
+                                if not selected:
+                                    print(f"MSME AUTOMATION WARNING: Option {phase2_reg.nic_2_digit} not found in NIC 2 dropdown.")
+                                        
+                        if hasattr(phase2_reg, 'nic_4_digit') and phase2_reg.nic_4_digit:
+                            print(f"MSME AUTOMATION: Selecting NIC 4 Digit Code: {phase2_reg.nic_4_digit}")
+                            nic4_select = page.locator("select[id*='ddlnic4' i], select[id*='nic4' i]").first
+                            if await nic4_select.count() > 0:
+                                options = await nic4_select.locator("option").all()
+                                for opt in options:
+                                    if phase2_reg.nic_4_digit.lower() in (await opt.inner_text()).lower():
+                                        await nic4_select.select_option(value=await opt.get_attribute("value"))
+                                        await page.wait_for_timeout(2000)
+                                        break
+                                        
+                        if hasattr(phase2_reg, 'nic_5_digit') and phase2_reg.nic_5_digit:
+                            print(f"MSME AUTOMATION: Selecting NIC 5 Digit Code: {phase2_reg.nic_5_digit}")
+                            nic5_select = page.locator("select[id*='ddlnic5' i], select[id*='nic5' i]").first
+                            if await nic5_select.count() > 0:
+                                options = await nic5_select.locator("option").all()
+                                for opt in options:
+                                    if phase2_reg.nic_5_digit.lower() in (await opt.inner_text()).lower():
+                                        await nic5_select.select_option(value=await opt.get_attribute("value"))
+                                        await page.wait_for_timeout(1000)
+                                        break
+                                        
+                        # Click Add Activity Button
+                        add_act_btn = page.locator("button:has-text('Add Activity'), input[value*='Add Activity' i]").first
+                        if await add_act_btn.count() > 0:
+                            await add_act_btn.scroll_into_view_if_needed()
+                            await add_act_btn.click()
+                            print("MSME AUTOMATION: 'Add Activity' clicked.")
+                            await page.wait_for_timeout(2000)
+
+                        # 19. Persons Employed
+                        print("MSME AUTOMATION: Filling Persons Employed...")
+                        if phase2_reg.persons_employed_male:
+                            male_inp = page.locator("input[id*='Male' i], input[placeholder*='Example:- 20' i]").nth(0)
+                            if await male_inp.count() > 0:
+                                await male_inp.scroll_into_view_if_needed()
+                                await male_inp.fill(str(phase2_reg.persons_employed_male))
+                                
+                        if phase2_reg.persons_employed_female:
+                            female_inp = page.locator("input[id*='Female' i], input[placeholder*='Example:- 20' i]").nth(1)
+                            if await female_inp.count() > 0:
+                                await female_inp.scroll_into_view_if_needed()
+                                await female_inp.fill(str(phase2_reg.persons_employed_female))
+                                
+                        if phase2_reg.persons_employed_others:
+                            others_inp = page.locator("input[id*='Others' i], input[placeholder*='Example:- 20' i]").nth(2)
+                            if await others_inp.count() > 0:
+                                await others_inp.scroll_into_view_if_needed()
+                                await others_inp.fill(str(phase2_reg.persons_employed_others))
+
+                        print("MSME AUTOMATION: Phase 3 Form Filling Complete! 🎉")
                     except Exception as phase2_e:
-                        print(f"MSME AUTOMATION PHASE 2 ERROR: {phase2_e}")
+                        print(f"MSME AUTOMATION PHASE 2/3 ERROR: {phase2_e}")
 
                 # Mark as complete in DB
                 async with async_session() as final_session:

@@ -69,7 +69,7 @@ async def send_reset_email(email: EmailStr, otp: str):
         print(f"FAILED TO SEND EMAIL to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending OTP email to {email} via {MAIL_SERVER}...")
+    print(f"Sending OTP email to {email}...")
     try:
         html_content = f"""
             <html>
@@ -101,7 +101,7 @@ async def send_verification_email(email: EmailStr, otp: str):
         print(f"FAILED TO SEND EMAIL to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending Verification OTP to {email} via {MAIL_SERVER}...")
+    print(f"Sending Verification OTP to {email}...")
     try:
         html_content = f"""
             <html>
@@ -133,7 +133,7 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
         print(f"FAILED TO SEND TICKET to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending Ticket to {email} via {MAIL_SERVER}...")
+    print(f"Sending Ticket to {email}...")
     try:
         body = f"""
         <html>
@@ -367,7 +367,7 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
 
     temp_file_path = None
     try:
-        print(f"Attempting to send ticket email to {email} using {MAIL_SERVER}:{MAIL_PORT} with user {MAIL_USERNAME}")
+        print(f"Attempting to send ticket email to {email} using Mailjet")
 
         # Generate unique ticket number
         import uuid
