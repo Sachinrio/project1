@@ -15,8 +15,8 @@ from mailjet_rest import Client
 load_dotenv() # Load variables from .env file
 
 # Configuration: Mailjet API Keys
-MAILJET_API_KEY = "732e2cd9fe4e164adf7ea5af96390f39"
-MAILJET_API_SECRET = "854b11593301985a75c0243064a09353"
+MAILJET_API_KEY = os.getenv("MAILJET_API_KEY")
+MAILJET_API_SECRET = os.getenv("MAILJET_API_SECRET")
 MAIL_FROM = os.getenv("MAIL_FROM") or "sachinsrmrmps@gmail.com" # Required verified sender for Mailjet
 MAIL_FROM_NAME = "Infinite BZ"
 
