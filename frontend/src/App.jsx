@@ -28,6 +28,12 @@ export default function App() {
   const [viewParams, setViewParams] = useState({});
   const [authMode, setAuthMode] = useState('login'); // 'login' | 'signup'
 
+  const navigateTo = (view, params = {}) => {
+    window.scrollTo(0, 0);
+    setCurrentView(view);
+    setViewParams(params);
+  };
+
   useEffect(() => {
     // Parse query params for deep linking
     const params = new URLSearchParams(window.location.search);
@@ -84,7 +90,7 @@ export default function App() {
       userData.profile_image
     ];
     // Check for non-empty strings. dependent on how backend returns nulls (usually null)
-    const filledFields = fields.filter(field => field && typeof field === 'string' && field.trim() !== '').length;
+    const filledFields = fields.filter(field => field !== null && field !== undefined && String(field).trim() !== '').length;
     const totalFields = fields.length;
     return Math.round((filledFields / totalFields) * 100);
   };
@@ -138,6 +144,14 @@ export default function App() {
           } else {
             setCurrentView('dashboard');
           }
+        } else if (currentView === 'landing' || currentView === 'auth') {
+             // Redirect user on page load if they have a valid session
+             const completeness = calculateProfileCompleteness(userData);
+             if (completeness >= 86) {
+                 setCurrentView('dashboard');
+             } else {
+                 setCurrentView('settings');
+             }
         }
         return userData;
       } else {

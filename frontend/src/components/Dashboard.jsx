@@ -12,7 +12,7 @@ import MyRegistrationsPage from './MyRegistrationsPage';
 import NotificationsPage from './NotificationsPage';
 import Sidebar from './Sidebar';
 import EventTicketPage from './EventTicketPage';
-
+import SettingsPage from './SettingsPage';
 export default function Dashboard({ user, onLogout, onNavigate, initialView, initialEventId }) {
     const [stats, setStats] = useState({
         total_users: 0,
@@ -421,7 +421,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                     else if (view === 'my-events') setActiveView('my-events');
                     else if (view === 'my-registrations') setActiveView('my-registrations');
                     else if (view === 'notifications') setActiveView('notifications');
-                    else if (view === 'settings') onNavigate('settings');
+                    else if (view === 'settings') setActiveView('settings');
                     else onNavigate(view); // Catch-all for check-in or others
                 }}
                 onLogout={onLogout}
@@ -471,6 +471,15 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
 
                                     // Navigate back to feed
                                     setActiveView('feed');
+                                }}
+                            />
+                        ) : activeView === 'settings' ? (
+                            <SettingsPage
+                                user={user}
+                                hideSidebar={true}
+                                onNavigate={(view) => {
+                                    if (view === 'dashboard') setActiveView('feed');
+                                    else onNavigate(view);
                                 }}
                             />
                         ) : (
@@ -524,7 +533,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
 
                                                 {showProfileMenu && (
                                                     <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
-                                                        <button onClick={() => onNavigate('settings')} className="w-full text-left px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-3 transition-colors">
+                                                        <button onClick={() => { setActiveView('settings'); setShowProfileMenu(false); }} className="w-full text-left px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-3 transition-colors">
                                                             <Settings size={18} /> Settings
                                                         </button>
                                                         <div className="h-px bg-slate-50 mx-2 my-1" />
