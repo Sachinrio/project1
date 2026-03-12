@@ -9,57 +9,24 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib.utils import ImageReader
 import tempfile
 from urllib.parse import quote
+import resend
 import asyncio
-from mailjet_rest import Client
 
 load_dotenv() # Load variables from .env file
 
-# Configuration: Mailjet API Keys
-MAILJET_API_KEY = os.getenv("MAILJET_API_KEY")
-MAILJET_API_SECRET = os.getenv("MAILJET_API_SECRET")
-MAIL_FROM = os.getenv("MAIL_FROM") or "sachinsrmrmps@gmail.com" # Required verified sender for Mailjet
-MAIL_FROM_NAME = "Infinite BZ"
+# Configuration: Read from Environment Variables
+RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+resend.api_key = RESEND_API_KEY
 
-mailjet = Client(auth=(MAILJET_API_KEY, MAILJET_API_SECRET), version='v3.1')
-ENABLE_EMAIL = True
+# Use the configured Mail From or fallback to Resend's testing domain
+MAIL_FROM = os.getenv("MAIL_FROM") or os.getenv("RESEND_FROM") or "onboarding@resend.dev"
 
-print(f"INFO: Mailjet API initialized. Sending emails FROM: {MAIL_FROM}")
+ENABLE_EMAIL = bool(RESEND_API_KEY and RESEND_API_KEY.startswith("re_"))
 
-async def send_mailjet_email(to_email: str, subject: str, html_part: str, attachments: list = None):
-    data = {
-      'Messages': [
-        {
-          "From": {
-            "Email": MAIL_FROM,
-            "Name": MAIL_FROM_NAME
-          },
-          "To": [
-            {
-              "Email": to_email,
-              "Name": to_email
-            }
-          ],
-          "Subject": subject,
-          "TextPart": "",
-          "HTMLPart": html_part,
-          "CustomID": "InfiniteBZ"
-        }
-      ]
-    }
-    
-    if attachments:
-        data['Messages'][0]['Attachments'] = attachments
-
-    try:
-        result = await asyncio.to_thread(mailjet.send.create, data=data)
-        if result.status_code == 200:
-            return True
-        else:
-            print(f"Mailjet Error: {result.status_code} - {result.json()}")
-            return False
-    except Exception as e:
-        print(f"Exception sending via Mailjet: {e}")
-        return False
+if not ENABLE_EMAIL:
+    print("WARNING: RESEND_API_KEY is missing or invalid in .env. Email processing is DISABLED.")
+else:
+    print(f"INFO: Resend API initialized. Sending emails FROM: {MAIL_FROM}")
 
 async def send_reset_email(email: EmailStr, otp: str):
     """
@@ -69,9 +36,13 @@ async def send_reset_email(email: EmailStr, otp: str):
         print(f"FAILED TO SEND EMAIL to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending OTP email to {email}...")
+    print(f"Sending OTP email to {email} via {MAIL_SERVER}...")
     try:
-        html_content = f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": "Password Reset Request - Infinite BZ",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
@@ -85,10 +56,10 @@ async def send_reset_email(email: EmailStr, otp: str):
                 </body>
             </html>
             """
-        success = await send_mailjet_email(email, "Password Reset Request - Infinite BZ", html_content)
-        if success:
-            print("Email sent successfully via Mailjet.")
-        return success
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Email sent successfully via Resend.")
+        return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send email via SMTP: {e}")
         return False
@@ -101,9 +72,13 @@ async def send_verification_email(email: EmailStr, otp: str):
         print(f"FAILED TO SEND EMAIL to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending Verification OTP to {email}...")
+    print(f"Sending Verification OTP to {email} via {MAIL_SERVER}...")
     try:
-        html_content = f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": "Verify your email - Infinite BZ",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
@@ -117,10 +92,10 @@ async def send_verification_email(email: EmailStr, otp: str):
                 </body>
             </html>
             """
-        success = await send_mailjet_email(email, "Verify your email - Infinite BZ", html_content)
-        if success:
-            print("Verification email sent successfully via Mailjet.")
-        return success
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Verification email sent successfully via Resend.")
+        return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send email via SMTP: {e}")
         return False
@@ -133,7 +108,7 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
         print(f"FAILED TO SEND TICKET to {email}: Email credentials not configured.")
         return False
 
-    print(f"Sending Ticket to {email}...")
+    print(f"Sending Ticket to {email} via {MAIL_SERVER}...")
     try:
         body = f"""
         <html>
@@ -153,11 +128,15 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
         </html>
         """
         
-        subject = f"Successfully Registered: {event_title}"
-        success = await send_mailjet_email(email, subject, body)
-        if success:
-            print("Ticket Email sent successfully via Mailjet.")
-        return success
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": f"Successfully Registered: {event_title}",
+            "html": body
+        }
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Ticket Email sent successfully via Resend.")
+        return True
     except Exception as e:
         print(f"EXTREME ERROR: Failed to send ticket email via SMTP: {e}")
         return False
@@ -199,18 +178,22 @@ async def send_organizer_notification_email(email: EmailStr, organizer_name: str
         with open(ticket_path, "rb") as f:
             pdf_bytes = f.read()
 
-        attachments = [
-            {
-                "ContentType": "application/pdf",
-                "Filename": f"Ticket_{attendee_name.replace(' ', '_')}.pdf",
-                "Base64Content": base64.b64encode(pdf_bytes).decode('utf-8')
-            }
-        ]
+        params = {
+            "from": MAIL_FROM,
+            "to": [recipient],
+            "subject": f"New Registration: {event_title} - {attendee_name}",
+            "html": body,
+            "attachments": [
+                {
+                    "filename": f"Ticket_{attendee_name.replace(' ', '_')}.pdf",
+                    "content": list(pdf_bytes)
+                }
+            ]
+        }
         
-        success = await send_mailjet_email(recipient, f"New Registration: {event_title} - {attendee_name}", body, attachments)
-        if success:
-            print("Organizer notification sent via Mailjet.")
-        return success
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Organizer notification sent via Resend.")
+        return True
     except Exception as e:
         print(f"Failed to send organizer notification: {e}")
         return False
@@ -367,7 +350,7 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
 
     temp_file_path = None
     try:
-        print(f"Attempting to send ticket email to {email} using Mailjet")
+        print(f"Attempting to send ticket email to {email} using {MAIL_SERVER}:{MAIL_PORT} with user {MAIL_USERNAME}")
 
         # Generate unique ticket number
         import uuid
@@ -391,16 +374,11 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
 
         pdf_bytes = pdf_buffer.getvalue()
 
-        attachments = [
-            {
-                "ContentType": "application/pdf",
-                "Filename": f"{event_data.get('title', 'event').replace(' ', '_')}_ticket.pdf",
-                "Base64Content": base64.b64encode(pdf_bytes).decode('utf-8')
-            }
-        ]
-        
-        subject = f"Your Event Ticket for {event_data.get('title', 'Event')}"
-        html_content = f"""
+        params = {
+            "from": MAIL_FROM,
+            "to": [email],
+            "subject": f"Your Event Ticket for {event_data.get('title', 'Event')}",
+            "html": f"""
             <html>
                 <body style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
                     <div style="max-width: 600px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px;">
@@ -417,12 +395,18 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
                     </div>
                 </body>
             </html>
-            """
-            
-        success = await send_mailjet_email(email, subject, html_content, attachments)
-        if success:
-            print("Event ticket email sent successfully via Mailjet.")
-        return success
+            """,
+            "attachments": [
+                {
+                    "filename": f"{event_data.get('title', 'event').replace(' ', '_')}_ticket.pdf",
+                    "content": list(pdf_bytes)
+                }
+            ]
+        }
+        
+        await asyncio.to_thread(resend.Emails.send, params)
+        print("Event ticket email sent successfully via Resend.")
+        return True
     except Exception as e:
         print(f"ERROR: Failed to send event ticket email via Resend: {e}")
         return False
