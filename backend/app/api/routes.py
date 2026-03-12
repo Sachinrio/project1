@@ -727,7 +727,8 @@ async def register_for_event(
                 name=current_user.full_name or "Attendee",
                 event_title=event.title,
                 event_id=event.id,
-                ticket_id=confirmation_id
+                ticket_id=confirmation_id,
+                ticket_path=ticket_path
             )
 
             # 3. Send Notification Email to Organizer/Sender (BACKGROUND TASK)
