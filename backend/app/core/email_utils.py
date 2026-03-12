@@ -27,6 +27,9 @@ async def send_mailjet_email(to_email: str, subject: str, html_part: str, attach
     """
     Core helper to send emails via Mailjet API v3.1
     """
+    print(f"DEBUG: Attempting to send Mailjet email to {to_email}...")
+    print(f"DEBUG: Using MAIL_FROM: {MAIL_FROM}")
+    
     if not MAILJET_API_KEY or not MAILJET_API_SECRET:
         print("ERROR: Mailjet API keys are missing from environment.")
         return False
@@ -57,13 +60,16 @@ async def send_mailjet_email(to_email: str, subject: str, html_part: str, attach
     try:
         result = await asyncio.to_thread(mailjet.send.create, data=data)
         if result.status_code == 200:
-            print(f"Email sent successfully to {to_email}")
+            print(f"SUCCESS: Mailjet accepted email to {to_email}")
+            print(f"DEBUG: Mailjet Response Body: {result.json()}")
             return True
         else:
-            print(f"Mailjet Error: {result.status_code} - {result.json()}")
+            print(f"MAILJET API FAILURE: Status {result.status_code}")
+            print(f"DEBUG: Request Data sent: {data}")
+            print(f"DEBUG: Error Response Body: {result.json()}")
             return False
     except Exception as e:
-        print(f"Exception sending via Mailjet: {e}")
+        print(f"EXCEPTION sending via Mailjet: {type(e).__name__}: {e}")
         return False
 
 async def send_reset_email(email: EmailStr, otp: str):

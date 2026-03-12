@@ -696,6 +696,10 @@ async def register_for_event(
     # Check if Internal Event (InfiniteBZ)
     # User Request: Send mail for Infinite_BZ events only
     is_internal = event.raw_data.get("source") == "InfiniteBZ"
+    
+    print(f"DEBUG: Registering for event_id={event_id}, source={event.raw_data.get('source')}, is_internal={is_internal}")
+    print(f"DEBUG: Authenticated current_user: {current_user.email}")
+    
     email_status = "SKIPPED_EXTERNAL"
     email_sent = False
 
@@ -743,6 +747,7 @@ async def register_for_event(
                 ticket_path=ticket_path
             )
             
+            print(f"DEBUG: Queuing background tasks for {current_user.email}")
             email_status = "QUEUED_IN_BACKGROUND"
             email_sent = True
             
