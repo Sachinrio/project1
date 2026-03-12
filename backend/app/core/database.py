@@ -35,7 +35,14 @@ connect_args = {}
 if "render.com" in DATABASE_URL or "neon.tech" in DATABASE_URL:
     connect_args = {"ssl": "require"}
 
-engine = create_async_engine(DATABASE_URL, echo=False, future=True, connect_args=connect_args)
+engine = create_async_engine(
+    DATABASE_URL, 
+    echo=False, 
+    future=True, 
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300
+)
 
 async def init_db():
     async with engine.begin() as conn:
