@@ -95,9 +95,9 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch, 
     ];
 
     return (
-        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md flex items-center justify-between px-8 py-4 mb-0 border-b border-fuchsia-100/50">
+        <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md flex items-center justify-between px-4 lg:px-8 py-4 mb-0 border-b border-fuchsia-100/50">
             {/* Search Bar - Left Aligned */}
-            <div className="flex-1 flex justify-start">
+            <div className="flex-1 flex justify-start pl-14 lg:pl-0">
                 <div className="w-full max-w-lg relative group flex items-center bg-white border border-slate-200 rounded-full p-1.5 shadow-sm hover:shadow-md transition-all">
                     {/* Search Input */}
                     <div className="flex-1 flex items-center px-4">
@@ -114,25 +114,23 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch, 
                         />
                     </div>
 
-
-
-                    {/* Location Display */}
-                    <div className="hidden sm:flex items-center px-4 w-48 text-slate-600 font-bold text-sm whitespace-nowrap cursor-pointer hover:text-fuchsia-600 transition-colors border-l border-slate-200 h-full">
+                    {/* Location Display - Hidden on Mobile */}
+                    <div className="hidden lg:flex items-center px-4 w-48 text-slate-600 font-bold text-sm whitespace-nowrap cursor-pointer hover:text-fuchsia-600 transition-colors border-l border-slate-200 h-full">
                         Chennai, IN
                     </div>
 
                     {/* Search Button */}
                     <button
                         onClick={handleSearchSubmit}
-                        className="bg-fuchsia-600 text-white p-3 rounded-full hover:bg-fuchsia-700 transition-colors shadow-lg shadow-fuchsia-600/20"
+                        className="bg-fuchsia-600 text-white p-2.5 lg:p-3 rounded-full hover:bg-fuchsia-700 transition-colors shadow-lg shadow-fuchsia-600/20"
                     >
                         <Search size={18} />
                     </button>
                 </div>
             </div>
 
-            {/* Center: Startup Solution */}
-            <div className="flex-1 flex justify-center relative z-50">
+            {/* Center: Startup Solution - Hidden on Mobile */}
+            <div className="hidden lg:flex flex-1 justify-center relative z-50">
                 <button
                     onClick={() => {
                         if (onNavigate) {
@@ -147,33 +145,36 @@ export const TopNavigation = ({ onLogin, onSignup, user, events = [], onSearch, 
             </div>
 
             {/* Right Side Actions */}
-            <div className="flex-1 flex items-center justify-end gap-5 relative">
-                <button
-                    onClick={onSignup}
-                    className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
-                >
-                    <UserPlus size={18} />
-                    <span>Sign Up</span>
-                </button>
+            <div className="flex items-center justify-end gap-2 lg:gap-5 relative">
+                {!user && (
+                    <button
+                        onClick={onSignup}
+                        className="hidden lg:flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+                    >
+                        <UserPlus size={18} />
+                        <span>Sign Up</span>
+                    </button>
+                )}
                 {user ? (
                     <div
                         onClick={onLogin}
                         className="flex flex-col items-center cursor-pointer group"
                     >
-                        <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform">
+                        <div className="w-9 h-9 lg:w-10 lg:h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold shadow-md group-hover:scale-105 transition-transform">
                             {user.email?.charAt(0).toUpperCase() || 'U'}
                         </div>
-                        <span className="text-[10px] font-bold text-slate-500 mt-1 max-w-[100px] truncate group-hover:text-slate-900 transition-colors">
+                        <span className="hidden lg:block text-[10px] font-bold text-slate-500 mt-1 max-w-[100px] truncate group-hover:text-slate-900 transition-colors">
                             {user.email}
                         </span>
                     </div>
                 ) : (
                     <button
                         onClick={onLogin}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
+                        className="flex items-center gap-2 px-4 lg:px-5 py-2 lg:py-2.5 bg-slate-900 text-white rounded-xl font-bold text-sm hover:bg-slate-800 transition-all shadow-lg shadow-slate-900/20"
                     >
                         <LogIn size={18} />
-                        <span>Log In</span>
+                        <span className="hidden lg:block">Log In</span>
+                        <span className="lg:hidden">In</span>
                     </button>
                 )}
             </div>

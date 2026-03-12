@@ -120,7 +120,7 @@ export default function LandingPage({ onNavigate, onLogin, onSignup, events, use
                 <PublicSidebar onLogin={onLogin} onSignup={onSignup} onDiscover={scrollToFeed} onSummit={scrollToSummit} onNetwork={scrollToNetwork} />
 
                 {/* Main Content Area - Offset for Sidebar */}
-                <div className="flex-1 flex flex-col pl-20 lg:pl-64 transition-all duration-300">
+                <div className="flex-1 flex flex-col pl-0 lg:pl-64 transition-all duration-300">
                     <TopNavigation
                         onLogin={onLogin}
                         onSignup={onSignup}

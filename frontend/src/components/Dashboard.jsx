@@ -431,7 +431,7 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
             {/* MAIN CONTENT WRAPPER */}
             <main className="flex-1 lg:ml-64 h-screen bg-[#F8FAFF] overflow-hidden">
                 <div className="h-full flex flex-col overflow-hidden">
-                    <div className="flex-1 overflow-y-auto px-8 py-10 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto px-4 md:px-8 py-10 custom-scrollbar">
                         {activeView === 'my-events' ? (
                             <MyEvents
                                 key={refreshForMyEvents}
