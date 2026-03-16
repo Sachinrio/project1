@@ -13,16 +13,11 @@ load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    # Fallback or error if not set
-    print("Database URL not found, checking for platform-specific defaults...")
-    if os.getenv("RENDER"):
-        print("Running on Render, using internal database URL")
-        DATABASE_URL = "postgresql+asyncpg://infinitetechai:g1ycmCmCWLIHQhW7lwe8di70DuDopUWj@dpg-d671ds8boq4c73asch2g-a/infinitetechai_97nv"
-    else:
-        print("Running locally, using localhost")
-        DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/infinite_bz"
+    print("CRITICAL: DATABASE_URL not found in environment variables!")
+    # No more hardcoded fallbacks to prevent accidental connections to stale databases
+    raise ValueError("DATABASE_URL is not set. Please check your environment variables.")
 else:
-    print(f"Database URL found: {DATABASE_URL[:20]}... (masked)")
+    print(f"DATABASE STARTUP: Using URL starting with {DATABASE_URL[:20]}...")
 
 # Ensure asyncpg is used
 if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
@@ -32,8 +27,11 @@ elif DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
 
 # Fix for Render/Neon SSL issues
 connect_args = {}
+# Only require SSL for external connections to Render/Neon
 if "render.com" in DATABASE_URL or "neon.tech" in DATABASE_URL:
-    connect_args = {"ssl": "require"}
+    if "internal" not in DATABASE_URL:
+        connect_args["ssl"] = "require"
+        print("DATABASE: SSL required for external connection.")
 
 engine = create_async_engine(
     DATABASE_URL, 
