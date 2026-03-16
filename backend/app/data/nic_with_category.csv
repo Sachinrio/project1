@@ -1,0 +1,554 @@
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Category
+"01,Crop and animal production,0111,Growing of cereals (except rice),01111,Growing of wheat",Services
+"01,Crop and animal production,0111,Growing of cereals (except rice),01112,Growing of maize",Services
+"01,Crop and animal production,0111,Growing of cereals (except rice),01119,Growing of other cereals",Services
+"01,Crop and animal production,0112,Growing of rice,01121,Growing of rice",Services
+"01,Crop and animal production,0113,Growing of vegetables and melons,01131,Growing of vegetables",Services
+"01,Crop and animal production,0113,Growing of vegetables and melons,01132,Growing of melons",Services
+"01,Crop and animal production,0114,Growing of sugar cane,01141,Growing of sugarcane",Services
+"01,Crop and animal production,0115,Growing of tobacco,01151,Growing of tobacco",Services
+"01,Crop and animal production,0116,Growing of fibre crops,01161,Growing of cotton",Services
+"01,Crop and animal production,0116,Growing of fibre crops,01169,Growing of other fibre crops",Services
+"01,Crop and animal production,0121,Growing of grapes,01211,Growing of grapes",Services
+"01,Crop and animal production,0122,Growing of tropical fruits,01221,Growing of mangoes",Services
+"01,Crop and animal production,0122,Growing of tropical fruits,01222,Growing of bananas",Services
+"01,Crop and animal production,0141,Raising of cattle and buffaloes,01411,Dairy farming",Services
+"01,Crop and animal production,0141,Raising of cattle and buffaloes,01412,Breeding of cattle",Services
+,Services
+"02,Forestry and logging,0210,Silviculture and forestry,02101,Growing of timber",Services
+"02,Forestry and logging,0210,Silviculture and forestry,02102,Growing of bamboo",Services
+"02,Forestry and logging,0210,Silviculture and forestry,02109,Other forestry activities",Services
+"02,Forestry and logging,0220,Logging,02201,Logging operations",Services
+"02,Forestry and logging,0220,Logging,02202,Production of firewood",Services
+,Services
+"03,Fishing and aquaculture,0311,Marine fishing,03111,Deep sea fishing",Services
+"03,Fishing and aquaculture,0311,Marine fishing,03112,Coastal fishing",Services
+"03,Fishing and aquaculture,0311,Marine fishing,03119,Other marine fishing",Services
+"03,Fishing and aquaculture,0312,Freshwater fishing,03121,River fishing",Services
+"03,Fishing and aquaculture,0312,Freshwater fishing,03122,Lake fishing",Services
+"03,Fishing and aquaculture,0321,Marine aquaculture,03211,Marine fish farming",Services
+"03,Fishing and aquaculture,0321,Marine aquaculture,03212,Shrimp farming",Services
+"03,Fishing and aquaculture,0322,Freshwater aquaculture,03221,Freshwater fish farming",Services
+,Services
+"05,Mining of coal and lignite,0510,Mining of hard coal,05101,Underground coal mining",Services
+"05,Mining of coal and lignite,0510,Mining of hard coal,05102,Open cast coal mining",Services
+"05,Mining of coal and lignite,0520,Mining of lignite,05201,Mining of lignite",Services
+"05,Mining of coal and lignite,0520,Mining of lignite,05202,Lignite briquettes production",Services
+,Services
+"06,Extraction of crude petroleum,0610,Extraction of crude petroleum,06101,Extraction of crude petroleum",Services
+"06,Extraction of crude petroleum,0610,Extraction of crude petroleum,06102,Offshore petroleum extraction",Services
+"06,Extraction of crude petroleum,0620,Extraction of natural gas,06201,Extraction of natural gas",Services
+"06,Extraction of crude petroleum,0620,Extraction of natural gas,06202,Production of hydrocarbon liquids",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"07,Mining of metal ores,0710,Mining of iron ores,07101,Iron ore mining",Services
+"07,Mining of metal ores,0710,Mining of iron ores,07102,Iron ore beneficiation",Services
+"07,Mining of metal ores,0721,Mining of uranium and thorium ores,07211,Uranium ore mining",Services
+"07,Mining of metal ores,0721,Mining of uranium and thorium ores,07212,Thorium ore mining",Services
+"07,Mining of metal ores,0729,Mining of other non-ferrous metal ores,07291,Aluminium ore mining",Services
+"07,Mining of metal ores,0729,Mining of other non-ferrous metal ores,07292,Copper ore mining",Services
+"07,Mining of metal ores,0729,Mining of other non-ferrous metal ores,07293,Lead and zinc ore mining",Services
+"07,Mining of metal ores,0729,Mining of other non-ferrous metal ores,07299,Other non-ferrous metal ores mining",Services
+,Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08101,Quarrying of marble",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08102,Quarrying of granite",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08103,Quarrying of sandstone",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08104,Quarrying of slate",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08105,Quarrying of limestone",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08106,Quarrying of gypsum",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08107,Mining of clays",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08108,Mining of sand",Services
+"08,Other mining and quarrying,0810,Quarrying of stone sand and clay,08109,Other stone quarrying",Services
+,Services
+"08,Other mining and quarrying,0891,Mining of chemical and fertilizer minerals,08911,Mining of rock phosphate",Services
+"08,Other mining and quarrying,0891,Mining of chemical and fertilizer minerals,08912,Mining of potash",Services
+"08,Other mining and quarrying,0891,Mining of chemical and fertilizer minerals,08913,Mining of sulphur",Services
+"08,Other mining and quarrying,0891,Mining of chemical and fertilizer minerals,08919,Other fertilizer minerals",Services
+,Services
+"08,Other mining and quarrying,0892,Extraction of peat,08921,Extraction of peat",Services
+"08,Other mining and quarrying,0893,Extraction of salt,08931,Extraction of salt by evaporation",Services
+"08,Other mining and quarrying,0893,Extraction of salt,08932,Rock salt mining",Services
+,Services
+"08,Other mining and quarrying,0899,Other mining and quarrying n.e.c.,08991,Precious stone mining",Services
+"08,Other mining and quarrying,0899,Other mining and quarrying n.e.c.,08992,Semi-precious stone mining",Services
+"08,Other mining and quarrying,0899,Other mining and quarrying n.e.c.,08999,Other mining activities",Services
+,Services
+"09,Mining support services,0910,Support activities for petroleum and natural gas extraction,09101,Oil and gas extraction support services",Services
+"09,Mining support services,0910,Support activities for petroleum and natural gas extraction,09102,Oil drilling services",Services
+"09,Mining support services,0990,Support activities for other mining and quarrying,09901,Mining exploration services",Services
+"09,Mining support services,0990,Support activities for other mining and quarrying,09902,Mining drainage services",Services
+"09,Mining support services,0990,Support activities for other mining and quarrying,09909,Other mining support services",Services
+,Services
+"10,Manufacture of food products,1010,Processing and preserving of meat,10101,Processing and preserving of meat",Services
+"10,Manufacture of food products,1010,Processing and preserving of meat,10102,Processing and preserving of poultry meat",Services
+"10,Manufacture of food products,1020,Processing and preserving of fish,10201,Fish freezing",Services
+"10,Manufacture of food products,1020,Processing and preserving of fish,10202,Fish drying",Services
+"10,Manufacture of food products,1020,Processing and preserving of fish,10203,Fish canning",Services
+"10,Manufacture of food products,1030,Processing and preserving of fruit and vegetables,10301,Fruit juice manufacturing",Services
+"10,Manufacture of food products,1030,Processing and preserving of fruit and vegetables,10302,Vegetable canning",Services
+"10,Manufacture of food products,1040,Manufacture of vegetable and animal oils and fats,10401,Manufacture of vegetable oils",Services
+"10,Manufacture of food products,1040,Manufacture of vegetable and animal oils and fats,10402,Manufacture of animal oils",Services
+"10,Manufacture of food products,1050,Manufacture of dairy products,10501,Milk processing",Services
+"10,Manufacture of food products,1050,Manufacture of dairy products,10502,Butter manufacturing",Services
+"10,Manufacture of food products,1050,Manufacture of dairy products,10503,Cheese manufacturing",Services
+"10,Manufacture of food products,1061,Manufacture of grain mill products,10611,Rice milling",Services
+"10,Manufacture of food products,1061,Manufacture of grain mill products,10612,Flour milling",Services
+"10,Manufacture of food products,1061,Manufacture of grain mill products,10613,Grain milling",Services
+"10,Manufacture of food products,1071,Manufacture of bakery products,10711,Bread manufacturing",Services
+"10,Manufacture of food products,1071,Manufacture of bakery products,10712,Biscuit manufacturing",Services
+"10,Manufacture of food products,1071,Manufacture of bakery products,10713,Cake manufacturing",Services
+"10,Manufacture of food products,1079,Manufacture of other food products,10791,Papad manufacturing",Services
+"10,Manufacture of food products,1079,Manufacture of other food products,10792,Pickle manufacturing",Services
+"10,Manufacture of food products,1079,Manufacture of other food products,10793,Sauce manufacturing",Services
+"10,Manufacture of food products,1079,Manufacture of other food products,10799,Other food products",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"11,Manufacture of beverages,1101,Distilling rectifying and blending of spirits,11011,Distilling neutral spirits",Services
+"11,Manufacture of beverages,1101,Distilling rectifying and blending of spirits,11012,Blending of spirits",Services
+"11,Manufacture of beverages,1101,Distilling rectifying and blending of spirits,11019,Other distilled beverages",Services
+"11,Manufacture of beverages,1102,Manufacture of wines,11021,Wine manufacturing",Services
+"11,Manufacture of beverages,1103,Manufacture of malt liquors and malt,11031,Beer manufacturing",Services
+"11,Manufacture of beverages,1103,Manufacture of malt liquors and malt,11032,Malt manufacturing",Services
+"11,Manufacture of beverages,1104,Manufacture of soft drinks production of mineral waters,11041,Soft drinks manufacturing",Services
+"11,Manufacture of beverages,1104,Manufacture of soft drinks production of mineral waters,11042,Mineral water bottling",Services
+"11,Manufacture of beverages,1104,Manufacture of soft drinks production of mineral waters,11049,Other non-alcoholic beverages",Services
+,Services
+"12,Manufacture of tobacco products,1200,Manufacture of tobacco products,12001,Cigarette manufacturing",Services
+"12,Manufacture of tobacco products,1200,Manufacture of tobacco products,12002,Bidi manufacturing",Services
+"12,Manufacture of tobacco products,1200,Manufacture of tobacco products,12003,Cigar manufacturing",Services
+"12,Manufacture of tobacco products,1200,Manufacture of tobacco products,12004,Chewing tobacco manufacturing",Services
+"12,Manufacture of tobacco products,1200,Manufacture of tobacco products,12009,Other tobacco products",Services
+,Services
+"13,Manufacture of textiles,1311,Preparation and spinning of textile fibres,13111,Cotton spinning",Services
+"13,Manufacture of textiles,1311,Preparation and spinning of textile fibres,13112,Synthetic fibre spinning",Services
+"13,Manufacture of textiles,1311,Preparation and spinning of textile fibres,13119,Other textile fibre spinning",Services
+"13,Manufacture of textiles,1312,Weaving of textiles,13121,Cotton weaving",Services
+"13,Manufacture of textiles,1312,Weaving of textiles,13122,Synthetic textile weaving",Services
+"13,Manufacture of textiles,1313,Finishing of textiles,13131,Bleaching and dyeing of textiles",Services
+"13,Manufacture of textiles,1313,Finishing of textiles,13132,Printing of textiles",Services
+"13,Manufacture of textiles,1391,Manufacture of knitted and crocheted fabrics,13911,Knitted fabric manufacturing",Services
+"13,Manufacture of textiles,1392,Manufacture of made-up textile articles,13921,Bed linen manufacturing",Services
+"13,Manufacture of textiles,1393,Manufacture of carpets and rugs,13931,Carpet manufacturing",Services
+"13,Manufacture of textiles,1399,Manufacture of other textiles n.e.c.,13991,Embroidered textile manufacturing",Services
+"13,Manufacture of textiles,1399,Manufacture of other textiles n.e.c.,13999,Other textile products",Services
+,Services
+"14,Manufacture of wearing apparel,1410,Manufacture of wearing apparel except fur apparel,14101,Men clothing manufacturing",Services
+"14,Manufacture of wearing apparel,1410,Manufacture of wearing apparel except fur apparel,14102,Women clothing manufacturing",Services
+"14,Manufacture of wearing apparel,1410,Manufacture of wearing apparel except fur apparel,14103,Children clothing manufacturing",Services
+"14,Manufacture of wearing apparel,1420,Manufacture of articles of fur,14201,Fur apparel manufacturing",Services
+"14,Manufacture of wearing apparel,1430,Manufacture of knitted and crocheted apparel,14301,Knitted garments manufacturing",Services
+,Services
+"15,Manufacture of leather products,1511,Tanning and dressing of leather,15111,Tanning of leather",Services
+"15,Manufacture of leather products,1511,Tanning and dressing of leather,15112,Leather finishing",Services
+"15,Manufacture of leather products,1512,Manufacture of luggage handbags saddlery,15121,Handbag manufacturing",Services
+"15,Manufacture of leather products,1512,Manufacture of luggage handbags saddlery,15122,Travel goods manufacturing",Services
+"15,Manufacture of leather products,1520,Manufacture of footwear,15201,Leather footwear manufacturing",Services
+"15,Manufacture of leather products,1520,Manufacture of footwear,15202,Rubber footwear manufacturing",Services
+"15,Manufacture of leather products,1520,Manufacture of footwear,15209,Other footwear manufacturing",Services
+,Services
+"16,Manufacture of wood products,1610,Sawmilling and planing of wood,16101,Sawmilling",Services
+"16,Manufacture of wood products,1610,Sawmilling and planing of wood,16102,Wood planing",Services
+"16,Manufacture of wood products,1621,Manufacture of veneer sheets and plywood,16211,Plywood manufacturing",Services
+"16,Manufacture of wood products,1621,Manufacture of veneer sheets and plywood,16212,Veneer sheet manufacturing",Services
+"16,Manufacture of wood products,1622,Manufacture of builders carpentry and joinery,16221,Doors and windows manufacturing",Services
+"16,Manufacture of wood products,1623,Manufacture of wooden containers,16231,Wooden box manufacturing",Services
+"16,Manufacture of wood products,1629,Manufacture of other wood products,16291,Cork products manufacturing",Services
+"16,Manufacture of wood products,1629,Manufacture of other wood products,16299,Other wood products",Services
+,Services
+"17,Manufacture of paper products,1701,Manufacture of pulp paper and paperboard,17011,Pulp manufacturing",Services
+"17,Manufacture of paper products,1701,Manufacture of pulp paper and paperboard,17012,Paper manufacturing",Services
+"17,Manufacture of paper products,1702,Manufacture of corrugated paper and containers,17021,Corrugated box manufacturing",Services
+"17,Manufacture of paper products,1702,Manufacture of corrugated paper and containers,17022,Paper carton manufacturing",Services
+"17,Manufacture of paper products,1709,Manufacture of other paper products,17091,Paper stationery manufacturing",Services
+"17,Manufacture of paper products,1709,Manufacture of other paper products,17099,Other paper products",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"18,Printing and reproduction of recorded media,1811,Printing of newspapers,18111,Newspaper printing",Services
+"18,Printing and reproduction of recorded media,1812,Other printing,18121,Book printing",Services
+"18,Printing and reproduction of recorded media,1812,Other printing,18122,Magazine printing",Services
+"18,Printing and reproduction of recorded media,1812,Other printing,18129,Other printing services",Services
+"18,Printing and reproduction of recorded media,1820,Reproduction of recorded media,18201,CD duplication",Services
+"18,Printing and reproduction of recorded media,1820,Reproduction of recorded media,18202,DVD duplication",Services
+,Services
+"19,Manufacture of petroleum products,1910,Manufacture of coke oven products,19101,Coke oven products manufacturing",Services
+"19,Manufacture of petroleum products,1920,Manufacture of refined petroleum products,19201,Petroleum refining",Services
+"19,Manufacture of petroleum products,1920,Manufacture of refined petroleum products,19202,Lubricating oil manufacturing",Services
+"19,Manufacture of petroleum products,1920,Manufacture of refined petroleum products,19203,Petroleum jelly manufacturing",Services
+"19,Manufacture of petroleum products,1920,Manufacture of refined petroleum products,19209,Other petroleum products",Services
+,Services
+"20,Manufacture of chemicals,2011,Manufacture of basic chemicals,20111,Industrial gas manufacturing",Services
+"20,Manufacture of chemicals,2011,Manufacture of basic chemicals,20112,Inorganic acid manufacturing",Services
+"20,Manufacture of chemicals,2012,Manufacture of fertilizers and nitrogen compounds,20121,Nitrogen fertilizer manufacturing",Services
+"20,Manufacture of chemicals,2012,Manufacture of fertilizers and nitrogen compounds,20122,Phosphatic fertilizer manufacturing",Services
+"20,Manufacture of chemicals,2021,Manufacture of pesticides and agrochemical products,20211,Pesticide manufacturing",Services
+"20,Manufacture of chemicals,2022,Manufacture of paints varnishes and coatings,20221,Paint manufacturing",Services
+"20,Manufacture of chemicals,2022,Manufacture of paints varnishes and coatings,20222,Varnish manufacturing",Services
+"20,Manufacture of chemicals,2023,Manufacture of soap and detergents,20231,Soap manufacturing",Services
+"20,Manufacture of chemicals,2023,Manufacture of soap and detergents,20232,Detergent manufacturing",Services
+"20,Manufacture of chemicals,2023,Manufacture of soap and detergents,20233,Toilet soap manufacturing",Services
+"20,Manufacture of chemicals,2029,Manufacture of other chemical products,20291,Adhesive manufacturing",Services
+"20,Manufacture of chemicals,2029,Manufacture of other chemical products,20299,Other chemical products",Services
+,Services
+"21,Manufacture of pharmaceuticals,2100,Manufacture of pharmaceuticals medicinal chemicals and botanical products,21001,Pharmaceutical formulation manufacturing",Services
+"21,Manufacture of pharmaceuticals,2100,Manufacture of pharmaceuticals medicinal chemicals and botanical products,21002,Medicinal chemical manufacturing",Services
+"21,Manufacture of pharmaceuticals,2100,Manufacture of pharmaceuticals medicinal chemicals and botanical products,21003,Ayurvedic medicine manufacturing",Services
+"21,Manufacture of pharmaceuticals,2100,Manufacture of pharmaceuticals medicinal chemicals and botanical products,21009,Other pharmaceutical products",Services
+,Services
+"22,Manufacture of rubber and plastic products,2211,Manufacture of rubber tyres and tubes,22111,Tyre manufacturing",Services
+"22,Manufacture of rubber and plastic products,2211,Manufacture of rubber tyres and tubes,22112,Tube manufacturing",Services
+"22,Manufacture of rubber and plastic products,2219,Manufacture of other rubber products,22191,Rubber gasket manufacturing",Services
+"22,Manufacture of rubber and plastic products,2219,Manufacture of other rubber products,22199,Other rubber products",Services
+"22,Manufacture of rubber and plastic products,2220,Manufacture of plastic products,22201,Plastic tableware manufacturing",Services
+"22,Manufacture of rubber and plastic products,2220,Manufacture of plastic products,22202,Plastic packaging goods manufacturing",Services
+"22,Manufacture of rubber and plastic products,2220,Manufacture of plastic products,22209,Other plastic products",Services
+,Services
+"23,Manufacture of non-metallic mineral products,2310,Manufacture of glass and glass products,23101,Flat glass manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2310,Manufacture of glass and glass products,23102,Glass container manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2391,Manufacture of refractory products,23911,Refractory brick manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2392,Manufacture of clay building materials,23921,Clay brick manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2393,Manufacture of cement lime and plaster,23931,Cement manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2394,Manufacture of concrete cement products,23941,Concrete block manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2395,Manufacture of articles of concrete plaster cement,23951,Cement pipe manufacturing",Services
+"23,Manufacture of non-metallic mineral products,2399,Manufacture of other non-metallic mineral products,23999,Other mineral products",Services
+,Services
+"24,Manufacture of basic metals,2410,Manufacture of basic iron and steel,24101,Pig iron manufacturing",Services
+"24,Manufacture of basic metals,2410,Manufacture of basic iron and steel,24102,Steel manufacturing",Services
+"24,Manufacture of basic metals,2420,Manufacture of basic precious and non-ferrous metals,24201,Aluminium production",Services
+"24,Manufacture of basic metals,2420,Manufacture of basic precious and non-ferrous metals,24202,Copper production",Services
+"24,Manufacture of basic metals,2431,Casting of iron and steel,24311,Iron casting",Services
+"24,Manufacture of basic metals,2431,Casting of iron and steel,24312,Steel casting",Services
+,Services
+"25,Fabricated metal products,2511,Manufacture of structural metal products,25111,Metal door manufacturing",Services
+"25,Fabricated metal products,2511,Manufacture of structural metal products,25112,Metal window manufacturing",Services
+"25,Fabricated metal products,2512,Manufacture of tanks reservoirs and containers,25121,Metal tank manufacturing",Services
+"25,Fabricated metal products,2513,Manufacture of steam generators,25131,Boiler manufacturing",Services
+"25,Fabricated metal products,2591,Forging pressing stamping and roll forming of metal,25911,Forging of metal",Services
+"25,Fabricated metal products,2599,Manufacture of other fabricated metal products,25991,Metal fastener manufacturing",Services
+"25,Fabricated metal products,2599,Manufacture of other fabricated metal products,25999,Other fabricated metal products",Services
+,Services
+"26,Manufacture of computer electronic and optical products,2610,Manufacture of electronic components,26101,Semiconductor manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2610,Manufacture of electronic components,26102,Printed circuit board manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2620,Manufacture of computers and peripheral equipment,26201,Computer manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2620,Manufacture of computers and peripheral equipment,26202,Computer peripheral manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2630,Manufacture of communication equipment,26301,Telephone equipment manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2640,Manufacture of consumer electronics,26401,Television manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2651,Manufacture of measuring instruments,26511,Measuring instrument manufacturing",Services
+"26,Manufacture of computer electronic and optical products,2660,Manufacture of irradiation electromedical equipment,26601,Medical imaging equipment manufacturing",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"27,Electrical equipment,2710,Manufacture of electric motors generators transformers,27101,Electric motor manufacturing",Services
+"27,Electrical equipment,2710,Manufacture of electric motors generators transformers,27102,Generator manufacturing",Services
+"27,Electrical equipment,2710,Manufacture of electric motors generators transformers,27103,Transformer manufacturing",Services
+"27,Electrical equipment,2720,Manufacture of batteries and accumulators,27201,Battery manufacturing",Services
+"27,Electrical equipment,2720,Manufacture of batteries and accumulators,27202,Rechargeable battery manufacturing",Services
+"27,Electrical equipment,2731,Manufacture of fibre optic cables,27311,Fibre optic cable manufacturing",Services
+"27,Electrical equipment,2732,Manufacture of other electronic and electric wires cables,27321,Electric wire manufacturing",Services
+"27,Electrical equipment,2740,Manufacture of electric lighting equipment,27401,Electric bulb manufacturing",Services
+"27,Electrical equipment,2740,Manufacture of electric lighting equipment,27402,LED lighting equipment manufacturing",Services
+"27,Electrical equipment,2750,Manufacture of domestic appliances,27501,Electric fan manufacturing",Services
+"27,Electrical equipment,2750,Manufacture of domestic appliances,27502,Refrigerator manufacturing",Services
+"27,Electrical equipment,2790,Manufacture of other electrical equipment,27901,Electrical switch manufacturing",Services
+"27,Electrical equipment,2790,Manufacture of other electrical equipment,27909,Other electrical equipment",Services
+,Services
+"28,Machinery and equipment n.e.c.,2811,Manufacture of engines and turbines,28111,Internal combustion engine manufacturing",Services
+"28,Machinery and equipment n.e.c.,2812,Manufacture of fluid power equipment,28121,Hydraulic equipment manufacturing",Services
+"28,Machinery and equipment n.e.c.,2813,Manufacture of pumps compressors taps valves,28131,Pump manufacturing",Services
+"28,Machinery and equipment n.e.c.,2814,Manufacture of bearings gears gearing elements,28141,Bearing manufacturing",Services
+"28,Machinery and equipment n.e.c.,2815,Manufacture of ovens furnaces furnace burners,28151,Industrial furnace manufacturing",Services
+"28,Machinery and equipment n.e.c.,2816,Manufacture of lifting handling equipment,28161,Crane manufacturing",Services
+"28,Machinery and equipment n.e.c.,2817,Manufacture of office machinery equipment,28171,Photocopy machine manufacturing",Services
+"28,Machinery and equipment n.e.c.,2821,Manufacture of agricultural machinery,28211,Tractor manufacturing",Services
+"28,Machinery and equipment n.e.c.,2822,Manufacture of metal forming machinery,28221,Metal cutting machine manufacturing",Services
+"28,Machinery and equipment n.e.c.,2823,Manufacture of machinery for metallurgy,28231,Metal rolling mill machinery manufacturing",Services
+"28,Machinery and equipment n.e.c.,2824,Manufacture of machinery for mining quarrying construction,28241,Mining machinery manufacturing",Services
+"28,Machinery and equipment n.e.c.,2825,Manufacture of food beverage tobacco machinery,28251,Food processing machinery manufacturing",Services
+"28,Machinery and equipment n.e.c.,2829,Manufacture of other special purpose machinery,28291,Industrial robot manufacturing",Services
+"28,Machinery and equipment n.e.c.,2829,Manufacture of other special purpose machinery,28299,Other machinery manufacturing",Services
+,Services
+"29,Motor vehicles trailers and semi-trailers,2910,Manufacture of motor vehicles,29101,Passenger car manufacturing",Services
+"29,Motor vehicles trailers and semi-trailers,2910,Manufacture of motor vehicles,29102,Commercial vehicle manufacturing",Services
+"29,Motor vehicles trailers and semi-trailers,2920,Manufacture of bodies for motor vehicles trailers,29201,Truck body manufacturing",Services
+"29,Motor vehicles trailers and semi-trailers,2930,Manufacture of parts and accessories for motor vehicles,29301,Motor vehicle parts manufacturing",Services
+"29,Motor vehicles trailers and semi-trailers,2930,Manufacture of parts and accessories for motor vehicles,29302,Automobile electrical equipment manufacturing",Services
+,Services
+"30,Other transport equipment,3011,Building of ships and floating structures,30111,Ship building",Services
+"30,Other transport equipment,3012,Building of pleasure and sporting boats,30121,Boat manufacturing",Services
+"30,Other transport equipment,3020,Manufacture of railway locomotives rolling stock,30201,Railway locomotive manufacturing",Services
+"30,Other transport equipment,3030,Manufacture of air spacecraft and related machinery,30301,Aircraft manufacturing",Services
+"30,Other transport equipment,3040,Manufacture of military fighting vehicles,30401,Military vehicle manufacturing",Services
+"30,Other transport equipment,3091,Manufacture of motorcycles,30911,Motorcycle manufacturing",Services
+"30,Other transport equipment,3092,Manufacture of bicycles invalid carriages,30921,Bicycle manufacturing",Services
+"30,Other transport equipment,3099,Manufacture of other transport equipment n.e.c.,30999,Other transport equipment manufacturing",Services
+,Services
+"31,Furniture manufacturing,3100,Manufacture of furniture,31001,Wooden furniture manufacturing",Services
+"31,Furniture manufacturing,3100,Manufacture of furniture,31002,Metal furniture manufacturing",Services
+"31,Furniture manufacturing,3100,Manufacture of furniture,31003,Plastic furniture manufacturing",Services
+"31,Furniture manufacturing,3100,Manufacture of furniture,31009,Other furniture manufacturing",Services
+,Services
+"32,Other manufacturing,3211,Manufacture of jewellery and related articles,32111,Gold jewellery manufacturing",Services
+"32,Other manufacturing,3211,Manufacture of jewellery and related articles,32112,Silver jewellery manufacturing",Services
+"32,Other manufacturing,3212,Manufacture of imitation jewellery,32121,Imitation jewellery manufacturing",Services
+"32,Other manufacturing,3220,Manufacture of musical instruments,32201,Musical instrument manufacturing",Services
+"32,Other manufacturing,3230,Manufacture of sports goods,32301,Sports equipment manufacturing",Services
+"32,Other manufacturing,3240,Manufacture of games toys,32401,Toy manufacturing",Services
+"32,Other manufacturing,3250,Manufacture of medical dental instruments supplies,32501,Medical instrument manufacturing",Services
+"32,Other manufacturing,3290,Other manufacturing n.e.c.,32901,Broom manufacturing",Services
+"32,Other manufacturing,3290,Other manufacturing n.e.c.,32909,Other manufacturing activities",Services
+,Services
+"33,Repair and installation of machinery equipment,3311,Repair of fabricated metal products,33111,Metal product repair",Services
+"33,Repair and installation of machinery equipment,3312,Repair of machinery,33121,Industrial machinery repair",Services
+"33,Repair and installation of machinery equipment,3313,Repair of electronic optical equipment,33131,Electronic equipment repair",Services
+"33,Repair and installation of machinery equipment,3314,Repair of electrical equipment,33141,Electrical equipment repair",Services
+"33,Repair and installation of machinery equipment,3315,Repair of transport equipment except motor vehicles,33151,Ship repair",Services
+"33,Repair and installation of machinery equipment,3319,Repair of other equipment,33191,Other equipment repair",Services
+"33,Repair and installation of machinery equipment,3320,Installation of industrial machinery equipment,33201,Industrial machinery installation",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"35,Electricity gas steam and air conditioning supply,3510,Electric power generation transmission and distribution,35101,Electric power generation",Services
+"35,Electricity gas steam and air conditioning supply,3510,Electric power generation transmission and distribution,35102,Electric power transmission",Services
+"35,Electricity gas steam and air conditioning supply,3510,Electric power generation transmission and distribution,35103,Electric power distribution",Services
+"35,Electricity gas steam and air conditioning supply,3520,Manufacture of gas distribution of gaseous fuels through mains,35201,Gas manufacturing",Services
+"35,Electricity gas steam and air conditioning supply,3530,Steam and air conditioning supply,35301,Steam production",Services
+,Services
+"36,Water collection treatment and supply,3600,Water collection treatment and supply,36001,Water supply services",Services
+"36,Water collection treatment and supply,3600,Water collection treatment and supply,36002,Water treatment services",Services
+,Services
+"37,Sewerage,3700,Sewerage,37001,Sewerage system operation",Services
+"37,Sewerage,3700,Sewerage,37002,Wastewater treatment",Services
+,Services
+"38,Waste collection treatment and disposal activities materials recovery,3811,Collection of non hazardous waste,38111,Household waste collection",Services
+"38,Waste collection treatment and disposal activities materials recovery,3811,Collection of non hazardous waste,38112,Commercial waste collection",Services
+"38,Waste collection treatment and disposal activities materials recovery,3812,Collection of hazardous waste,38121,Hazardous waste collection",Services
+"38,Waste collection treatment and disposal activities materials recovery,3821,Treatment and disposal of non hazardous waste,38211,Landfill operation",Services
+"38,Waste collection treatment and disposal activities materials recovery,3822,Treatment and disposal of hazardous waste,38221,Hazardous waste treatment",Services
+"38,Waste collection treatment and disposal activities materials recovery,3830,Materials recovery,38301,Recycling of metal waste",Services
+"38,Waste collection treatment and disposal activities materials recovery,3830,Materials recovery,38302,Recycling of plastic waste",Services
+,Services
+"39,Remediation activities and other waste management services,3900,Remediation activities and other waste management services,39001,Soil decontamination",Services
+"39,Remediation activities and other waste management services,3900,Remediation activities and other waste management services,39002,Pollution control services",Services
+,Services
+"41,Construction of buildings,4100,Construction of buildings,41001,Residential building construction",Services
+"41,Construction of buildings,4100,Construction of buildings,41002,Non residential building construction",Services
+,Services
+"42,Civil engineering,4210,Construction of roads and railways,42101,Road construction",Services
+"42,Civil engineering,4210,Construction of roads and railways,42102,Railway construction",Services
+"42,Civil engineering,4220,Construction of utility projects,42201,Water pipeline construction",Services
+"42,Civil engineering,4220,Construction of utility projects,42202,Power line construction",Services
+"42,Civil engineering,4290,Construction of other civil engineering projects,42901,Bridge construction",Services
+"42,Civil engineering,42909,Construction of other civil engineering projects n.e.c.,42999,Other civil engineering works",Services
+,Services
+"43,Specialised construction activities,4311,Demolition,43111,Building demolition",Services
+"43,Specialised construction activities,4312,Site preparation,43121,Land clearing",Services
+"43,Specialised construction activities,4321,Electrical installation,43211,Electrical wiring installation",Services
+"43,Specialised construction activities,4322,Plumbing heat and air conditioning installation,43221,Plumbing installation",Services
+"43,Specialised construction activities,4330,Building completion and finishing,43301,Interior finishing",Services
+"43,Specialised construction activities,4390,Other specialised construction activities,43901,Scaffolding installation",Services
+,Services
+"45,Wholesale and retail trade repair of motor vehicles and motorcycles,4510,Sale of motor vehicles,45101,Car sales",Services
+"45,Wholesale and retail trade repair of motor vehicles and motorcycles,4510,Sale of motor vehicles,45102,Commercial vehicle sales",Services
+"45,Wholesale and retail trade repair of motor vehicles and motorcycles,4520,Maintenance and repair of motor vehicles,45201,Motor vehicle repair",Services
+"45,Wholesale and retail trade repair of motor vehicles and motorcycles,4530,Sale of motor vehicle parts and accessories,45301,Motor vehicle spare parts sale",Services
+"45,Wholesale and retail trade repair of motor vehicles and motorcycles,4540,Sale maintenance and repair of motorcycles,45401,Motorcycle sales",Services
+,Services
+"46,Wholesale trade except of motor vehicles and motorcycles,4610,Wholesale on a fee or contract basis,46101,Commission agent wholesale",Services
+"46,Wholesale trade except of motor vehicles and motorcycles,4620,Wholesale of agricultural raw materials and live animals,46201,Wholesale of grains",Services
+"46,Wholesale trade except of motor vehicles and motorcycles,4630,Wholesale of food beverages and tobacco,46301,Food product wholesale",Services
+"46,Wholesale trade except of motor vehicles and motorcycles,4641,Wholesale of textiles clothing and footwear,46411,Textile wholesale",Services
+"46,Wholesale trade except of motor vehicles and motorcycles,4649,Wholesale of other household goods,46491,Electronics wholesale",Services
+,Services
+"47,Retail trade except of motor vehicles and motorcycles,4711,Retail sale in non specialised stores with food beverages or tobacco predominating,47111,Supermarket retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4719,Other retail sale in non specialised stores,47191,General store retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4721,Retail sale of food in specialised stores,47211,Fruit and vegetable retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4722,Retail sale of meat and meat products,47221,Meat retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4741,Retail sale of computers peripheral units and software,47411,Computer retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4752,Retail sale of hardware paints and glass,47521,Hardware store retail",Services
+"47,Retail trade except of motor vehicles and motorcycles,4771,Retail sale of clothing footwear and leather articles,47711,Clothing retail",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"49,Land transport and transport via pipelines,4911,Passenger rail transport interurban,49111,Passenger rail transport services",Services
+"49,Land transport and transport via pipelines,4912,Freight rail transport,49121,Rail freight transport services",Services
+"49,Land transport and transport via pipelines,4921,Urban and suburban passenger land transport,49211,City bus transport services",Services
+"49,Land transport and transport via pipelines,4922,Other passenger land transport,49221,Taxi operation services",Services
+"49,Land transport and transport via pipelines,4923,Freight transport by road,49231,Truck freight transport services",Services
+"49,Land transport and transport via pipelines,4930,Transport via pipelines,49301,Pipeline transport services",Services
+,Services
+"50,Water transport,5011,Sea and coastal passenger water transport,50111,Passenger ship transport",Services
+"50,Water transport,5012,Sea and coastal freight water transport,50121,Sea freight transport",Services
+"50,Water transport,5021,Inland passenger water transport,50211,Inland passenger boat services",Services
+"50,Water transport,5022,Inland freight water transport,50221,Inland freight transport services",Services
+,Services
+"51,Air transport,5110,Passenger air transport,51101,Airline passenger transport services",Services
+"51,Air transport,5120,Freight air transport and space transport,51201,Air cargo transport services",Services
+,Services
+"52,Warehousing and support activities for transportation,5210,Warehousing and storage,52101,Warehouse storage services",Services
+"52,Warehousing and support activities for transportation,5221,Service activities incidental to land transport,52211,Bus station operation",Services
+"52,Warehousing and support activities for transportation,5222,Service activities incidental to water transport,52221,Port operation services",Services
+"52,Warehousing and support activities for transportation,5223,Service activities incidental to air transport,52231,Airport operation services",Services
+"52,Warehousing and support activities for transportation,5224,Cargo handling,52241,Cargo loading and unloading",Services
+"52,Warehousing and support activities for transportation,5229,Other transportation support activities,52291,Freight forwarding services",Services
+,Services
+"53,Postal and courier activities,5310,Postal activities under universal service obligation,53101,Postal services",Services
+"53,Postal and courier activities,5320,Other postal and courier activities,53201,Courier services",Services
+,Services
+"55,Accommodation,5510,Short term accommodation activities,55101,Hotel accommodation services",Services
+"55,Accommodation,5520,Camping grounds recreational vehicle parks,55201,Camping site services",Services
+"55,Accommodation,5590,Other accommodation,55901,Hostel accommodation services",Services
+,Services
+"56,Food and beverage service activities,5610,Restaurants and mobile food service activities,56101,Restaurant services",Services
+"56,Food and beverage service activities,5621,Event catering activities,56211,Catering services for events",Services
+"56,Food and beverage service activities,5629,Other food service activities,56291,Industrial catering services",Services
+"56,Food and beverage service activities,5630,Beverage serving activities,56301,Bar and beverage serving services",Services
+,Services
+"58,Publishing activities,5811,Book publishing,58111,Book publishing services",Services
+"58,Publishing activities,5812,Publishing of directories and mailing lists,58121,Directory publishing",Services
+"58,Publishing activities,5813,Publishing of newspapers journals and periodicals,58131,Newspaper publishing",Services
+"58,Publishing activities,5819,Other publishing activities,58191,Online publishing services",Services
+,Services
+"59,Motion picture video and television programme production sound recording and music publishing activities,5911,Motion picture video and television programme production activities,59111,Film production services",Services
+"59,Motion picture video and television programme production sound recording and music publishing activities,5912,Motion picture video and television programme post production activities,59121,Film editing services",Services
+"59,Motion picture video and television programme production sound recording and music publishing activities,5913,Motion picture video and television programme distribution activities,59131,Film distribution services",Services
+"59,Motion picture video and television programme production sound recording and music publishing activities,5914,Motion picture projection activities,59141,Cinema theatre operations",Services
+,Services
+"60,Programming and broadcasting activities,6010,Radio broadcasting,60101,Radio broadcasting services",Services
+"60,Programming and broadcasting activities,6020,Television programming and broadcasting activities,60201,Television broadcasting services",Services
+,Services
+"61,Telecommunications,6110,Wired telecommunications activities,61101,Fixed line telecom services",Services
+"61,Telecommunications,6120,Wireless telecommunications activities,61201,Mobile telecom services",Services
+"61,Telecommunications,6130,Satellite telecommunications activities,61301,Satellite telecom services",Services
+"61,Telecommunications,6190,Other telecommunications activities,61901,Internet service provider services",Services
+,Services
+"62,Computer programming consultancy and related activities,6201,Computer programming activities,62011,Custom software development",Services
+"62,Computer programming consultancy and related activities,6202,Computer consultancy and computer facilities management activities,62021,IT consulting services",Services
+"62,Computer programming consultancy and related activities,6209,Other information technology and computer service activities,62091,Software maintenance services",Services
+,Services
+"63,Information service activities,6311,Data processing hosting and related activities,63111,Data hosting services",Services
+"63,Information service activities,6312,Web portals,63121,Web portal operation services",Services
+"63,Information service activities,6391,News agency activities,63911,News agency services",Services
+"63,Information service activities,6399,Other information service activities n.e.c.,63991,Other information service activities",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"64,Financial service activities except insurance and pension funding,6411,Central banking,64111,Central banking services",Services
+"64,Financial service activities except insurance and pension funding,6419,Other monetary intermediation,64191,Commercial banking services",Services
+"64,Financial service activities except insurance and pension funding,6420,Activities of holding companies,64201,Holding company activities",Services
+"64,Financial service activities except insurance and pension funding,6430,Trusts funds and similar financial entities,64301,Mutual fund activities",Services
+"64,Financial service activities except insurance and pension funding,6491,Financial leasing,64911,Financial leasing services",Services
+"64,Financial service activities except insurance and pension funding,6492,Other credit granting,64921,Microfinance services",Services
+"64,Financial service activities except insurance and pension funding,6499,Other financial service activities n.e.c.,64991,Other financial intermediation services",Services
+,Services
+"65,Insurance reinsurance and pension funding except compulsory social security,6511,Life insurance,65111,Life insurance services",Services
+"65,Insurance reinsurance and pension funding except compulsory social security,6512,Non life insurance,65121,General insurance services",Services
+"65,Insurance reinsurance and pension funding except compulsory social security,6520,Reinsurance,65201,Reinsurance services",Services
+"65,Insurance reinsurance and pension funding except compulsory social security,6530,Pension funding,65301,Pension fund services",Services
+,Services
+"66,Activities auxiliary to financial services and insurance activities,6611,Administration of financial markets,66111,Stock exchange operation",Services
+"66,Activities auxiliary to financial services and insurance activities,6612,Security and commodity contracts brokerage,66121,Stock brokerage services",Services
+"66,Activities auxiliary to financial services and insurance activities,6619,Other activities auxiliary to financial services,66191,Financial consultancy services",Services
+"66,Activities auxiliary to financial services and insurance activities,6621,Risk and damage evaluation,66211,Insurance risk assessment",Services
+"66,Activities auxiliary to financial services and insurance activities,6622,Activities of insurance agents and brokers,66221,Insurance brokerage services",Services
+"66,Activities auxiliary to financial services and insurance activities,6629,Other activities auxiliary to insurance and pension funding,66291,Insurance claim adjustment",Services
+,Services
+"68,Real estate activities,6810,Real estate activities with own or leased property,68101,Real estate buying and selling",Services
+"68,Real estate activities,6820,Real estate activities on a fee or contract basis,68201,Real estate agency services",Services
+,Services
+"69,Legal and accounting activities,6910,Legal activities,69101,Legal advisory services",Services
+"69,Legal and accounting activities,6920,Accounting bookkeeping and auditing activities tax consultancy,69201,Accounting and auditing services",Services
+,Services
+"70,Activities of head offices management consultancy activities,7010,Activities of head offices,70101,Corporate head office management",Services
+"70,Activities of head offices management consultancy activities,7020,Management consultancy activities,70201,Business management consulting",Services
+,Services
+"71,Architectural and engineering activities technical testing and analysis,7110,Architectural and engineering activities and related technical consultancy,71101,Architectural design services",Services
+"71,Architectural and engineering activities technical testing and analysis,7120,Technical testing and analysis,71201,Laboratory testing services",Services
+,Services
+"72,Scientific research and development,7210,Research and experimental development on natural sciences and engineering,72101,Scientific research services",Services
+"72,Scientific research and development,7220,Research and experimental development on social sciences and humanities,72201,Social science research services",Services
+,Services
+"73,Advertising and market research,7310,Advertising,73101,Advertising agency services",Services
+"73,Advertising and market research,7320,Market research and public opinion polling,73201,Market research services",Services
+,Services
+"74,Other professional scientific and technical activities,7410,Specialised design activities,74101,Graphic design services",Services
+"74,Other professional scientific and technical activities,7420,Photographic activities,74201,Photography services",Services
+"74,Other professional scientific and technical activities,7490,Other professional scientific and technical activities n.e.c.,74901,Technical consultancy services",Services
+,Services
+"75,Veterinary activities,7500,Veterinary activities,75001,Veterinary services",Services
+"NIC2_Code,NIC2_Description,NIC4_Code,NIC4_Description,NIC5_Code,NIC5_Description",Services
+"77,Rental and leasing activities,7710,Renting and leasing of motor vehicles,77101,Car rental services",Services
+"77,Rental and leasing activities,7721,Renting and leasing of recreational goods,77211,Sports equipment rental",Services
+"77,Rental and leasing activities,7722,Renting of video tapes and disks,77221,Media rental services",Services
+"77,Rental and leasing activities,7729,Renting and leasing of other personal household goods,77291,Furniture rental",Services
+"77,Rental and leasing activities,7730,Renting and leasing of other machinery equipment,77301,Industrial machinery rental",Services
+"77,Rental and leasing activities,7740,Leasing of intellectual property,77401,Trademark licensing services",Services
+,Services
+"78,Employment activities,7810,Activities of employment placement agencies,78101,Job placement agency services",Services
+"78,Employment activities,7820,Temporary employment agency activities,78201,Temporary staffing services",Services
+"78,Employment activities,7830,Other human resources provision,78301,HR outsourcing services",Services
+,Services
+"79,Travel agency tour operator reservation service activities,7911,Travel agency activities,79111,Travel agency services",Services
+"79,Travel agency tour operator reservation service activities,7912,Tour operator activities,79121,Tour operator services",Services
+"79,Travel agency tour operator reservation service activities,7990,Other reservation service activities,79901,Ticket booking services",Services
+,Services
+"80,Security and investigation activities,8010,Private security activities,80101,Security guard services",Services
+"80,Security and investigation activities,8020,Security systems service activities,80201,CCTV monitoring services",Services
+"80,Security and investigation activities,8030,Investigation activities,80301,Private investigation services",Services
+,Services
+"81,Services to buildings and landscape activities,8110,Combined facilities support activities,81101,Facility management services",Services
+"81,Services to buildings and landscape activities,8121,General cleaning of buildings,81211,Building cleaning services",Services
+"81,Services to buildings and landscape activities,8129,Other building and industrial cleaning activities,81291,Industrial cleaning services",Services
+"81,Services to buildings and landscape activities,8130,Landscape care and maintenance service activities,81301,Garden maintenance services",Services
+,Services
+"82,Office administrative office support and other business support activities,8211,Combined office administrative service activities,82111,Office administrative support",Services
+"82,Office administrative office support and other business support activities,8219,Photocopying document preparation and other specialised office support activities,82191,Document preparation services",Services
+"82,Office administrative office support and other business support activities,8220,Activities of call centres,82201,Call centre services",Services
+"82,Office administrative office support and other business support activities,8230,Organisation of conventions and trade shows,82301,Event management services",Services
+"82,Office administrative office support and other business support activities,8291,Activities of collection agencies and credit bureaus,82911,Debt collection services",Services
+"82,Office administrative office support and other business support activities,8292,Packaging activities,82921,Packaging services",Services
+"82,Office administrative office support and other business support activities,8299,Other business support service activities n.e.c.,82991,Business support services",Services
+,Services
+"84,Public administration and defence compulsory social security,8411,General public administration activities,84111,Government administration services",Services
+"84,Public administration and defence compulsory social security,8421,Foreign affairs,84211,Foreign affairs administration",Services
+"84,Public administration and defence compulsory social security,8422,Defence activities,84221,Military defence services",Services
+"84,Public administration and defence compulsory social security,8423,Public order and safety activities,84231,Police services",Services
+,Services
+"85,Education,8510,Pre primary and primary education,85101,Primary school education",Services
+"85,Education,8520,Secondary education,85201,Secondary school education",Services
+"85,Education,8530,Higher education,85301,University education",Services
+"85,Education,8541,Sports and recreation education,85411,Sports training services",Services
+"85,Education,8542,Cultural education,85421,Music and dance education",Services
+"85,Education,8550,Other education,85501,Coaching classes",Services
+"85,Education,8560,Educational support activities,85601,Educational consultancy services",Services
+,Services
+"86,Human health activities,8610,Hospital activities,86101,Hospital services",Services
+"86,Human health activities,8620,Medical and dental practice activities,86201,Doctor clinic services",Services
+"86,Human health activities,8690,Other human health activities,86901,Physiotherapy services",Services
+,Services
+"87,Residential care activities,8710,Residential nursing care facilities,87101,Nursing home services",Services
+"87,Residential care activities,8720,Residential care for mental health and substance abuse,87201,Mental health care facilities",Services
+"87,Residential care activities,8730,Residential care for the elderly and disabled,87301,Elderly care home services",Services
+"87,Residential care activities,8790,Other residential care activities,87901,Rehabilitation centre services",Services
+,Services
+"88,Social work activities without accommodation,8810,Social work activities without accommodation for the elderly and disabled,88101,Senior citizen care services",Services
+"88,Social work activities without accommodation,8890,Other social work activities without accommodation,88901,Community social services",Services
+,Services
+"90,Creative arts and entertainment activities,9000,Creative arts and entertainment activities,90001,Performing arts services",Services
+,Services
+"91,Libraries archives museums and other cultural activities,9101,Library and archive activities,91011,Library services",Services
+"91,Libraries archives museums and other cultural activities,9102,Museums activities and operation of historical sites and buildings,91021,Museum operation services",Services
+"91,Libraries archives museums and other cultural activities,9103,Botanical and zoological gardens and nature reserves activities,91031,Zoo operation services",Services
+,Services
+"92,Gambling and betting activities,9200,Gambling and betting activities,92001,Casino services",Services
+,Services
+"93,Sports activities and amusement and recreation activities,9311,Operation of sports facilities,93111,Stadium operation services",Services
+"93,Sports activities and amusement and recreation activities,9312,Activities of sports clubs,93121,Sports club services",Services
+"93,Sports activities and amusement and recreation activities,9319,Other sports activities,93191,Sports coaching services",Services
+"93,Sports activities and amusement and recreation activities,9321,Activities of amusement parks and theme parks,93211,Amusement park operation",Services
+"93,Sports activities and amusement and recreation activities,9329,Other amusement and recreation activities,93291,Recreational activity services",Services
+,Services
+"94,Activities of membership organisations,9411,Activities of business and employers membership organisations,94111,Business association services",Services
+"94,Activities of membership organisations,9420,Activities of trade unions,94201,Trade union services",Services
+"94,Activities of membership organisations,9491,Activities of religious organisations,94911,Religious organisation services",Services
+"94,Activities of membership organisations,9499,Activities of other membership organisations n.e.c.,94991,Social organisation services",Services
+,Services
+"95,Repair of computers and personal and household goods,9511,Repair of computers and peripheral equipment,95111,Computer repair services",Services
+"95,Repair of computers and personal and household goods,9512,Repair of communication equipment,95121,Mobile phone repair services",Services
+"95,Repair of computers and personal and household goods,9521,Repair of consumer electronics,95211,Television repair services",Services
+"95,Repair of computers and personal and household goods,9522,Repair of household appliances and home garden equipment,95221,Home appliance repair",Services
+"95,Repair of computers and personal and household goods,9523,Repair of footwear and leather goods,95231,Shoe repair services",Services
+"95,Repair of computers and personal and household goods,9524,Repair of furniture and home furnishings,95241,Furniture repair services",Services
+"95,Repair of computers and personal and household goods,9529,Repair of other personal and household goods,95291,Other repair services",Services
+,Services
+"96,Other personal service activities,9601,Washing and dry cleaning of textile and fur products,96011,Laundry services",Services
+"96,Other personal service activities,9602,Hairdressing and other beauty treatment,96021,Beauty salon services",Services
+"96,Other personal service activities,9603,Funeral and related activities,96031,Funeral services",Services
+"96,Other personal service activities,9609,Other personal service activities n.e.c.,96091,Astrology and personal consultancy services",Services

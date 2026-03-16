@@ -1,0 +1,2266 @@
+{
+  "manufacturing": {
+    "01": {
+      "description": "Crop and animal production",
+      "nic4": {
+        "0111": {
+          "description": "Growing of cereals (except rice)",
+          "nic5": {
+            "01111": "Growing of wheat",
+            "01112": "Growing of maize",
+            "01119": "Growing of other cereals"
+          }
+        },
+        "0112": {
+          "description": "Growing of rice",
+          "nic5": {
+            "01121": "Growing of rice"
+          }
+        },
+        "0113": {
+          "description": "Growing of vegetables and melons",
+          "nic5": {
+            "01131": "Growing of vegetables",
+            "01132": "Growing of melons"
+          }
+        },
+        "0114": {
+          "description": "Growing of sugar cane",
+          "nic5": {
+            "01141": "Growing of sugarcane"
+          }
+        },
+        "0115": {
+          "description": "Growing of tobacco",
+          "nic5": {
+            "01151": "Growing of tobacco"
+          }
+        },
+        "0116": {
+          "description": "Growing of fibre crops",
+          "nic5": {
+            "01161": "Growing of cotton",
+            "01169": "Growing of other fibre crops"
+          }
+        },
+        "0121": {
+          "description": "Growing of grapes",
+          "nic5": {
+            "01211": "Growing of grapes"
+          }
+        },
+        "0122": {
+          "description": "Growing of tropical fruits",
+          "nic5": {
+            "01221": "Growing of mangoes",
+            "01222": "Growing of bananas"
+          }
+        },
+        "0141": {
+          "description": "Raising of cattle and buffaloes",
+          "nic5": {
+            "01411": "Dairy farming",
+            "01412": "Breeding of cattle"
+          }
+        }
+      }
+    },
+    "02": {
+      "description": "Forestry and logging",
+      "nic4": {
+        "0210": {
+          "description": "Silviculture and forestry",
+          "nic5": {
+            "02101": "Growing of timber",
+            "02102": "Growing of bamboo",
+            "02109": "Other forestry activities"
+          }
+        },
+        "0220": {
+          "description": "Logging",
+          "nic5": {
+            "02201": "Logging operations",
+            "02202": "Production of firewood"
+          }
+        }
+      }
+    },
+    "03": {
+      "description": "Fishing and aquaculture",
+      "nic4": {
+        "0311": {
+          "description": "Marine fishing",
+          "nic5": {
+            "03111": "Deep sea fishing",
+            "03112": "Coastal fishing",
+            "03119": "Other marine fishing"
+          }
+        },
+        "0312": {
+          "description": "Freshwater fishing",
+          "nic5": {
+            "03121": "River fishing",
+            "03122": "Lake fishing"
+          }
+        },
+        "0321": {
+          "description": "Marine aquaculture",
+          "nic5": {
+            "03211": "Marine fish farming",
+            "03212": "Shrimp farming"
+          }
+        },
+        "0322": {
+          "description": "Freshwater aquaculture",
+          "nic5": {
+            "03221": "Freshwater fish farming"
+          }
+        }
+      }
+    },
+    "05": {
+      "description": "Mining of coal and lignite",
+      "nic4": {
+        "0510": {
+          "description": "Mining of hard coal",
+          "nic5": {
+            "05101": "Underground coal mining",
+            "05102": "Open cast coal mining"
+          }
+        },
+        "0520": {
+          "description": "Mining of lignite",
+          "nic5": {
+            "05201": "Mining of lignite",
+            "05202": "Lignite briquettes production"
+          }
+        }
+      }
+    },
+    "06": {
+      "description": "Extraction of crude petroleum",
+      "nic4": {
+        "0610": {
+          "description": "Extraction of crude petroleum",
+          "nic5": {
+            "06101": "Extraction of crude petroleum",
+            "06102": "Offshore petroleum extraction"
+          }
+        },
+        "0620": {
+          "description": "Extraction of natural gas",
+          "nic5": {
+            "06201": "Extraction of natural gas",
+            "06202": "Production of hydrocarbon liquids"
+          }
+        }
+      }
+    },
+    "07": {
+      "description": "Mining of metal ores",
+      "nic4": {
+        "0710": {
+          "description": "Mining of iron ores",
+          "nic5": {
+            "07101": "Iron ore mining",
+            "07102": "Iron ore beneficiation"
+          }
+        },
+        "0721": {
+          "description": "Mining of uranium and thorium ores",
+          "nic5": {
+            "07211": "Uranium ore mining",
+            "07212": "Thorium ore mining"
+          }
+        },
+        "0729": {
+          "description": "Mining of other non-ferrous metal ores",
+          "nic5": {
+            "07291": "Aluminium ore mining",
+            "07292": "Copper ore mining",
+            "07293": "Lead and zinc ore mining",
+            "07299": "Other non-ferrous metal ores mining"
+          }
+        }
+      }
+    },
+    "08": {
+      "description": "Other mining and quarrying",
+      "nic4": {
+        "0810": {
+          "description": "Quarrying of stone sand and clay",
+          "nic5": {
+            "08101": "Quarrying of marble",
+            "08102": "Quarrying of granite",
+            "08103": "Quarrying of sandstone",
+            "08104": "Quarrying of slate",
+            "08105": "Quarrying of limestone",
+            "08106": "Quarrying of gypsum",
+            "08107": "Mining of clays",
+            "08108": "Mining of sand",
+            "08109": "Other stone quarrying"
+          }
+        },
+        "0891": {
+          "description": "Mining of chemical and fertilizer minerals",
+          "nic5": {
+            "08911": "Mining of rock phosphate",
+            "08912": "Mining of potash",
+            "08913": "Mining of sulphur",
+            "08919": "Other fertilizer minerals"
+          }
+        },
+        "0892": {
+          "description": "Extraction of peat",
+          "nic5": {
+            "08921": "Extraction of peat"
+          }
+        },
+        "0893": {
+          "description": "Extraction of salt",
+          "nic5": {
+            "08931": "Extraction of salt by evaporation",
+            "08932": "Rock salt mining"
+          }
+        },
+        "0899": {
+          "description": "Other mining and quarrying n.e.c.",
+          "nic5": {
+            "08991": "Precious stone mining",
+            "08992": "Semi-precious stone mining",
+            "08999": "Other mining activities"
+          }
+        }
+      }
+    },
+    "09": {
+      "description": "Mining support services",
+      "nic4": {
+        "0910": {
+          "description": "Support activities for petroleum and natural gas extraction",
+          "nic5": {
+            "09101": "Oil and gas extraction support services",
+            "09102": "Oil drilling services"
+          }
+        },
+        "0990": {
+          "description": "Support activities for other mining and quarrying",
+          "nic5": {
+            "09901": "Mining exploration services",
+            "09902": "Mining drainage services",
+            "09909": "Other mining support services"
+          }
+        }
+      }
+    },
+    "10": {
+      "description": "Manufacture of food products",
+      "nic4": {
+        "1010": {
+          "description": "Processing and preserving of meat",
+          "nic5": {
+            "10101": "Processing and preserving of meat",
+            "10102": "Processing and preserving of poultry meat"
+          }
+        },
+        "1020": {
+          "description": "Processing and preserving of fish",
+          "nic5": {
+            "10201": "Fish freezing",
+            "10202": "Fish drying",
+            "10203": "Fish canning"
+          }
+        },
+        "1030": {
+          "description": "Processing and preserving of fruit and vegetables",
+          "nic5": {
+            "10301": "Fruit juice manufacturing",
+            "10302": "Vegetable canning"
+          }
+        },
+        "1040": {
+          "description": "Manufacture of vegetable and animal oils and fats",
+          "nic5": {
+            "10401": "Manufacture of vegetable oils",
+            "10402": "Manufacture of animal oils"
+          }
+        },
+        "1050": {
+          "description": "Manufacture of dairy products",
+          "nic5": {
+            "10501": "Milk processing",
+            "10502": "Butter manufacturing",
+            "10503": "Cheese manufacturing"
+          }
+        },
+        "1061": {
+          "description": "Manufacture of grain mill products",
+          "nic5": {
+            "10611": "Rice milling",
+            "10612": "Flour milling",
+            "10613": "Grain milling"
+          }
+        },
+        "1071": {
+          "description": "Manufacture of bakery products",
+          "nic5": {
+            "10711": "Bread manufacturing",
+            "10712": "Biscuit manufacturing",
+            "10713": "Cake manufacturing"
+          }
+        },
+        "1079": {
+          "description": "Manufacture of other food products",
+          "nic5": {
+            "10791": "Papad manufacturing",
+            "10792": "Pickle manufacturing",
+            "10793": "Sauce manufacturing",
+            "10799": "Other food products"
+          }
+        }
+      }
+    },
+    "11": {
+      "description": "Manufacture of beverages",
+      "nic4": {
+        "1101": {
+          "description": "Distilling rectifying and blending of spirits",
+          "nic5": {
+            "11011": "Distilling neutral spirits",
+            "11012": "Blending of spirits",
+            "11019": "Other distilled beverages"
+          }
+        },
+        "1102": {
+          "description": "Manufacture of wines",
+          "nic5": {
+            "11021": "Wine manufacturing"
+          }
+        },
+        "1103": {
+          "description": "Manufacture of malt liquors and malt",
+          "nic5": {
+            "11031": "Beer manufacturing",
+            "11032": "Malt manufacturing"
+          }
+        },
+        "1104": {
+          "description": "Manufacture of soft drinks",
+          "nic5": {
+            "11041": "Soft drinks manufacturing",
+            "11042": "Mineral water bottling",
+            "11049": "Other non-alcoholic beverages"
+          }
+        }
+      }
+    },
+    "12": {
+      "description": "Manufacture of tobacco products",
+      "nic4": {
+        "1200": {
+          "description": "Manufacture of tobacco products",
+          "nic5": {
+            "12001": "Cigarette manufacturing",
+            "12002": "Bidi manufacturing",
+            "12003": "Cigar manufacturing",
+            "12004": "Chewing tobacco manufacturing",
+            "12009": "Other tobacco products"
+          }
+        }
+      }
+    },
+    "13": {
+      "description": "Manufacture of textiles",
+      "nic4": {
+        "1311": {
+          "description": "Preparation and spinning of textile fibres",
+          "nic5": {
+            "13111": "Cotton spinning",
+            "13112": "Synthetic fibre spinning",
+            "13119": "Other textile fibre spinning"
+          }
+        },
+        "1312": {
+          "description": "Weaving of textiles",
+          "nic5": {
+            "13121": "Cotton weaving",
+            "13122": "Synthetic textile weaving"
+          }
+        },
+        "1313": {
+          "description": "Finishing of textiles",
+          "nic5": {
+            "13131": "Bleaching and dyeing of textiles",
+            "13132": "Printing of textiles"
+          }
+        },
+        "1391": {
+          "description": "Manufacture of knitted and crocheted fabrics",
+          "nic5": {
+            "13911": "Knitted fabric manufacturing"
+          }
+        },
+        "1392": {
+          "description": "Manufacture of made-up textile articles",
+          "nic5": {
+            "13921": "Bed linen manufacturing"
+          }
+        },
+        "1393": {
+          "description": "Manufacture of carpets and rugs",
+          "nic5": {
+            "13931": "Carpet manufacturing"
+          }
+        },
+        "1399": {
+          "description": "Manufacture of other textiles n.e.c.",
+          "nic5": {
+            "13991": "Embroidered textile manufacturing",
+            "13999": "Other textile products"
+          }
+        }
+      }
+    },
+    "14": {
+      "description": "Manufacture of wearing apparel",
+      "nic4": {
+        "1410": {
+          "description": "Manufacture of wearing apparel except fur apparel",
+          "nic5": {
+            "14101": "Men clothing manufacturing",
+            "14102": "Women clothing manufacturing",
+            "14103": "Children clothing manufacturing"
+          }
+        },
+        "1420": {
+          "description": "Manufacture of articles of fur",
+          "nic5": {
+            "14201": "Fur apparel manufacturing"
+          }
+        },
+        "1430": {
+          "description": "Manufacture of knitted and crocheted apparel",
+          "nic5": {
+            "14301": "Knitted garments manufacturing"
+          }
+        }
+      }
+    },
+    "15": {
+      "description": "Manufacture of leather products",
+      "nic4": {
+        "1511": {
+          "description": "Tanning and dressing of leather",
+          "nic5": {
+            "15111": "Tanning of leather",
+            "15112": "Leather finishing"
+          }
+        },
+        "1512": {
+          "description": "Manufacture of luggage handbags saddlery",
+          "nic5": {
+            "15121": "Handbag manufacturing",
+            "15122": "Travel goods manufacturing"
+          }
+        },
+        "1520": {
+          "description": "Manufacture of footwear",
+          "nic5": {
+            "15201": "Leather footwear manufacturing",
+            "15202": "Rubber footwear manufacturing",
+            "15209": "Other footwear manufacturing"
+          }
+        }
+      }
+    },
+    "16": {
+      "description": "Manufacture of wood products",
+      "nic4": {
+        "1610": {
+          "description": "Sawmilling and planing of wood",
+          "nic5": {
+            "16101": "Sawmilling",
+            "16102": "Wood planing"
+          }
+        },
+        "1621": {
+          "description": "Manufacture of veneer sheets and plywood",
+          "nic5": {
+            "16211": "Plywood manufacturing",
+            "16212": "Veneer sheet manufacturing"
+          }
+        },
+        "1622": {
+          "description": "Manufacture of builders carpentry and joinery",
+          "nic5": {
+            "16221": "Doors and windows manufacturing"
+          }
+        },
+        "1623": {
+          "description": "Manufacture of wooden containers",
+          "nic5": {
+            "16231": "Wooden box manufacturing"
+          }
+        },
+        "1629": {
+          "description": "Manufacture of other wood products",
+          "nic5": {
+            "16291": "Cork products manufacturing",
+            "16299": "Other wood products"
+          }
+        }
+      }
+    },
+    "17": {
+      "description": "Manufacture of paper products",
+      "nic4": {
+        "1701": {
+          "description": "Manufacture of pulp paper and paperboard",
+          "nic5": {
+            "17011": "Pulp manufacturing",
+            "17012": "Paper manufacturing"
+          }
+        },
+        "1702": {
+          "description": "Manufacture of corrugated paper and containers",
+          "nic5": {
+            "17021": "Corrugated box manufacturing",
+            "17022": "Paper carton manufacturing"
+          }
+        },
+        "1709": {
+          "description": "Manufacture of other paper products",
+          "nic5": {
+            "17091": "Paper stationery manufacturing",
+            "17099": "Other paper products"
+          }
+        }
+      }
+    },
+    "18": {
+      "description": "Printing and reproduction of recorded media",
+      "nic4": {
+        "1811": {
+          "description": "Printing of newspapers",
+          "nic5": {
+            "18111": "Newspaper printing"
+          }
+        },
+        "1812": {
+          "description": "Other printing",
+          "nic5": {
+            "18121": "Book printing",
+            "18122": "Magazine printing",
+            "18129": "Other printing services"
+          }
+        },
+        "1820": {
+          "description": "Reproduction of recorded media",
+          "nic5": {
+            "18201": "CD duplication",
+            "18202": "DVD duplication"
+          }
+        }
+      }
+    },
+    "19": {
+      "description": "Manufacture of petroleum products",
+      "nic4": {
+        "1910": {
+          "description": "Manufacture of coke oven products",
+          "nic5": {
+            "19101": "Coke oven products manufacturing"
+          }
+        },
+        "1920": {
+          "description": "Manufacture of refined petroleum products",
+          "nic5": {
+            "19201": "Petroleum refining",
+            "19202": "Lubricating oil manufacturing",
+            "19203": "Petroleum jelly manufacturing",
+            "19209": "Other petroleum products"
+          }
+        }
+      }
+    },
+    "20": {
+      "description": "Manufacture of chemicals",
+      "nic4": {
+        "2011": {
+          "description": "Manufacture of basic chemicals",
+          "nic5": {
+            "20111": "Industrial gas manufacturing",
+            "20112": "Inorganic acid manufacturing"
+          }
+        },
+        "2012": {
+          "description": "Manufacture of fertilizers and nitrogen compounds",
+          "nic5": {
+            "20121": "Nitrogen fertilizer manufacturing",
+            "20122": "Phosphatic fertilizer manufacturing"
+          }
+        },
+        "2021": {
+          "description": "Manufacture of pesticides and agrochemical products",
+          "nic5": {
+            "20211": "Pesticide manufacturing"
+          }
+        },
+        "2022": {
+          "description": "Manufacture of paints varnishes and coatings",
+          "nic5": {
+            "20221": "Paint manufacturing",
+            "20222": "Varnish manufacturing"
+          }
+        },
+        "2023": {
+          "description": "Manufacture of soap and detergents",
+          "nic5": {
+            "20231": "Soap manufacturing",
+            "20232": "Detergent manufacturing",
+            "20233": "Toilet soap manufacturing"
+          }
+        },
+        "2029": {
+          "description": "Manufacture of other chemical products",
+          "nic5": {
+            "20291": "Adhesive manufacturing",
+            "20299": "Other chemical products"
+          }
+        }
+      }
+    },
+    "21": {
+      "description": "Manufacture of pharmaceuticals",
+      "nic4": {
+        "2100": {
+          "description": "Manufacture of pharmaceuticals medicinal chemicals and botanical products",
+          "nic5": {
+            "21001": "Pharmaceutical formulation manufacturing",
+            "21002": "Medicinal chemical manufacturing",
+            "21003": "Ayurvedic medicine manufacturing",
+            "21009": "Other pharmaceutical products"
+          }
+        }
+      }
+    },
+    "22": {
+      "description": "Manufacture of rubber and plastic products",
+      "nic4": {
+        "2211": {
+          "description": "Manufacture of rubber tyres and tubes",
+          "nic5": {
+            "22111": "Tyre manufacturing",
+            "22112": "Tube manufacturing"
+          }
+        },
+        "2219": {
+          "description": "Manufacture of other rubber products",
+          "nic5": {
+            "22191": "Rubber gasket manufacturing",
+            "22199": "Other rubber products"
+          }
+        },
+        "2220": {
+          "description": "Manufacture of plastic products",
+          "nic5": {
+            "22201": "Plastic tableware manufacturing",
+            "22202": "Plastic packaging goods manufacturing",
+            "22209": "Other plastic products"
+          }
+        }
+      }
+    },
+    "23": {
+      "description": "Manufacture of non-metallic mineral products",
+      "nic4": {
+        "2310": {
+          "description": "Manufacture of glass and glass products",
+          "nic5": {
+            "23101": "Flat glass manufacturing",
+            "23102": "Glass container manufacturing"
+          }
+        },
+        "2391": {
+          "description": "Manufacture of refractory products",
+          "nic5": {
+            "23911": "Refractory brick manufacturing"
+          }
+        },
+        "2392": {
+          "description": "Manufacture of clay building materials",
+          "nic5": {
+            "23921": "Clay brick manufacturing"
+          }
+        },
+        "2393": {
+          "description": "Manufacture of cement lime and plaster",
+          "nic5": {
+            "23931": "Cement manufacturing"
+          }
+        },
+        "2394": {
+          "description": "Manufacture of concrete cement products",
+          "nic5": {
+            "23941": "Concrete block manufacturing"
+          }
+        },
+        "2395": {
+          "description": "Manufacture of articles of concrete plaster cement",
+          "nic5": {
+            "23951": "Cement pipe manufacturing"
+          }
+        },
+        "2399": {
+          "description": "Manufacture of other non-metallic mineral products",
+          "nic5": {
+            "23999": "Other mineral products"
+          }
+        }
+      }
+    },
+    "24": {
+      "description": "Manufacture of basic metals",
+      "nic4": {
+        "2410": {
+          "description": "Manufacture of basic iron and steel",
+          "nic5": {
+            "24101": "Pig iron manufacturing",
+            "24102": "Steel manufacturing"
+          }
+        },
+        "2420": {
+          "description": "Manufacture of basic precious and non-ferrous metals",
+          "nic5": {
+            "24201": "Aluminium production",
+            "24202": "Copper production"
+          }
+        },
+        "2431": {
+          "description": "Casting of iron and steel",
+          "nic5": {
+            "24311": "Iron casting",
+            "24312": "Steel casting"
+          }
+        }
+      }
+    },
+    "25": {
+      "description": "Fabricated metal products",
+      "nic4": {
+        "2511": {
+          "description": "Manufacture of structural metal products",
+          "nic5": {
+            "25111": "Metal door manufacturing",
+            "25112": "Metal window manufacturing"
+          }
+        },
+        "2512": {
+          "description": "Manufacture of tanks reservoirs and containers",
+          "nic5": {
+            "25121": "Metal tank manufacturing"
+          }
+        },
+        "2513": {
+          "description": "Manufacture of steam generators",
+          "nic5": {
+            "25131": "Boiler manufacturing"
+          }
+        },
+        "2591": {
+          "description": "Forging pressing stamping and roll forming of metal",
+          "nic5": {
+            "25911": "Forging of metal"
+          }
+        },
+        "2599": {
+          "description": "Manufacture of other fabricated metal products",
+          "nic5": {
+            "25991": "Metal fastener manufacturing",
+            "25999": "Other fabricated metal products"
+          }
+        }
+      }
+    },
+    "26": {
+      "description": "Manufacture of computer electronic and optical products",
+      "nic4": {
+        "2610": {
+          "description": "Manufacture of electronic components",
+          "nic5": {
+            "26101": "Semiconductor manufacturing",
+            "26102": "Printed circuit board manufacturing"
+          }
+        },
+        "2620": {
+          "description": "Manufacture of computers and peripheral equipment",
+          "nic5": {
+            "26201": "Computer manufacturing",
+            "26202": "Computer peripheral manufacturing"
+          }
+        },
+        "2630": {
+          "description": "Manufacture of communication equipment",
+          "nic5": {
+            "26301": "Telephone equipment manufacturing"
+          }
+        },
+        "2640": {
+          "description": "Manufacture of consumer electronics",
+          "nic5": {
+            "26401": "Television manufacturing"
+          }
+        },
+        "2651": {
+          "description": "Manufacture of measuring instruments",
+          "nic5": {
+            "26511": "Measuring instrument manufacturing"
+          }
+        },
+        "2660": {
+          "description": "Manufacture of irradiation electromedical equipment",
+          "nic5": {
+            "26601": "Medical imaging equipment manufacturing"
+          }
+        }
+      }
+    },
+    "27": {
+      "description": "Electrical equipment",
+      "nic4": {
+        "2710": {
+          "description": "Manufacture of electric motors generators transformers",
+          "nic5": {
+            "27101": "Electric motor manufacturing",
+            "27102": "Generator manufacturing",
+            "27103": "Transformer manufacturing"
+          }
+        },
+        "2720": {
+          "description": "Manufacture of batteries and accumulators",
+          "nic5": {
+            "27201": "Battery manufacturing",
+            "27202": "Rechargeable battery manufacturing"
+          }
+        },
+        "2731": {
+          "description": "Manufacture of fibre optic cables",
+          "nic5": {
+            "27311": "Fibre optic cable manufacturing"
+          }
+        },
+        "2732": {
+          "description": "Manufacture of other electronic and electric wires cables",
+          "nic5": {
+            "27321": "Electric wire manufacturing"
+          }
+        },
+        "2740": {
+          "description": "Manufacture of electric lighting equipment",
+          "nic5": {
+            "27401": "Electric bulb manufacturing",
+            "27402": "LED lighting equipment manufacturing"
+          }
+        },
+        "2750": {
+          "description": "Manufacture of domestic appliances",
+          "nic5": {
+            "27501": "Electric fan manufacturing",
+            "27502": "Refrigerator manufacturing"
+          }
+        },
+        "2790": {
+          "description": "Manufacture of other electrical equipment",
+          "nic5": {
+            "27901": "Electrical switch manufacturing",
+            "27909": "Other electrical equipment"
+          }
+        }
+      }
+    },
+    "28": {
+      "description": "Machinery and equipment n.e.c.",
+      "nic4": {
+        "2811": {
+          "description": "Manufacture of engines and turbines",
+          "nic5": {
+            "28111": "Internal combustion engine manufacturing"
+          }
+        },
+        "2812": {
+          "description": "Manufacture of fluid power equipment",
+          "nic5": {
+            "28121": "Hydraulic equipment manufacturing"
+          }
+        }
+      }
+    }
+  },
+  "services": {
+    "49": {
+      "description": "Land transport and transport via pipelines",
+      "nic4": {
+        "4911": {
+          "description": "Passenger rail transport",
+          "nic5": {
+            "49111": "Passenger rail transport services"
+          }
+        },
+        "4912": {
+          "description": "Freight rail transport",
+          "nic5": {
+            "49121": "Rail freight transport services"
+          }
+        },
+        "4921": {
+          "description": "Urban or suburban passenger land transport",
+          "nic5": {
+            "49211": "City bus transport services"
+          }
+        },
+        "4922": {
+          "description": "Other passenger land transport",
+          "nic5": {
+            "49221": "Taxi operation services"
+          }
+        },
+        "4923": {
+          "description": "Freight transport by road",
+          "nic5": {
+            "49231": "Truck freight transport services"
+          }
+        },
+        "4930": {
+          "description": "Transport via pipeline",
+          "nic5": {
+            "49301": "Pipeline transport services"
+          }
+        }
+      }
+    },
+    "50": {
+      "description": "Water transport",
+      "nic4": {
+        "5011": {
+          "description": "Sea and coastal passenger water transport",
+          "nic5": {
+            "50111": "Passenger ship transport"
+          }
+        },
+        "5012": {
+          "description": "Sea and coastal freight water transport",
+          "nic5": {
+            "50121": "Sea freight transport"
+          }
+        },
+        "5021": {
+          "description": "Inland passenger water transport",
+          "nic5": {
+            "50211": "Inland passenger boat services"
+          }
+        },
+        "5022": {
+          "description": "Inland freight water transport",
+          "nic5": {
+            "50221": "Inland freight transport services"
+          }
+        }
+      }
+    },
+    "51": {
+      "description": "Air Transport",
+      "nic4": {
+        "5110": {
+          "description": "Passenger air transport",
+          "nic5": {
+            "51101": "Airline passenger transport services"
+          }
+        },
+        "5120": {
+          "description": "Freight air transport",
+          "nic5": {
+            "51201": "Air cargo transport services"
+          }
+        }
+      }
+    },
+    "52": {
+      "description": "Warehousing and support activities for transportation",
+      "nic4": {
+        "5210": {
+          "description": "Warehousing and storage",
+          "nic5": {
+            "52101": "Warehouse storage services"
+          }
+        },
+        "5221": {
+          "description": "Service activities incidental to land transportation",
+          "nic5": {
+            "52211": "Bus station operation"
+          }
+        },
+        "5222": {
+          "description": "Service activities incidental to water transportation",
+          "nic5": {
+            "52221": "Port operation services"
+          }
+        },
+        "5223": {
+          "description": "Service activities incidental to air transportation",
+          "nic5": {
+            "52231": "Airport operation services"
+          }
+        },
+        "5224": {
+          "description": "Cargo handling",
+          "nic5": {
+            "52241": "Cargo loading and unloading"
+          }
+        },
+        "5229": {
+          "description": "Other transportation support activities",
+          "nic5": {
+            "52291": "Freight forwarding services"
+          }
+        }
+      }
+    },
+    "53": {
+      "description": "Postal and courier activities",
+      "nic4": {
+        "5310": {
+          "description": "Postal activities",
+          "nic5": {
+            "53101": "Postal services"
+          }
+        },
+        "5320": {
+          "description": "Courier activities",
+          "nic5": {
+            "53201": "Courier services"
+          }
+        }
+      }
+    },
+    "55": {
+      "description": "Accommodation",
+      "nic4": {
+        "5510": {
+          "description": "Short term accommodation activities",
+          "nic5": {
+            "55101": "Hotel accommodation services"
+          }
+        },
+        "5520": {
+          "description": "Camping grounds, recreational vehicle parks and trailer parks",
+          "nic5": {
+            "55201": "Camping site services"
+          }
+        },
+        "5590": {
+          "description": "Other accommodation",
+          "nic5": {
+            "55901": "Hostel accommodation services"
+          }
+        }
+      }
+    },
+    "56": {
+      "description": "Food and beverage service activities",
+      "nic4": {
+        "5610": {
+          "description": "Restaurants and mobile food service activities",
+          "nic5": {
+            "56101": "Restaurant services"
+          }
+        },
+        "5621": {
+          "description": "Event catering",
+          "nic5": {
+            "56211": "Catering services for events"
+          }
+        },
+        "5629": {
+          "description": "Other food service activities",
+          "nic5": {
+            "56291": "Industrial catering services"
+          }
+        },
+        "5630": {
+          "description": "Beverage serving activities",
+          "nic5": {
+            "56301": "Bar and beverage serving services"
+          }
+        }
+      }
+    },
+    "58": {
+      "description": "Publishing activities",
+      "nic4": {
+        "5811": {
+          "description": "Book publishing",
+          "nic5": {
+            "58111": "Book publishing services"
+          }
+        },
+        "5812": {
+          "description": "Publishing of directories and mailing lists",
+          "nic5": {
+            "58121": "Directory publishing"
+          }
+        },
+        "5813": {
+          "description": "Publishing of newspapers, journals and periodicals",
+          "nic5": {
+            "58131": "Newspaper publishing"
+          }
+        },
+        "5819": {
+          "description": "Other publishing activities",
+          "nic5": {
+            "58191": "Online publishing services"
+          }
+        },
+        "5820": {
+          "description": "Software publishing",
+          "nic5": {}
+        }
+      }
+    },
+    "59": {
+      "description": "Motion picture, video and television programme production, sound recording and music publishing activities",
+      "nic4": {
+        "5911": {
+          "description": "Motion picture, video and television programme production activities",
+          "nic5": {
+            "59111": "Film production services"
+          }
+        },
+        "5912": {
+          "description": "Motion picture, video and television programme post-production activities",
+          "nic5": {
+            "59121": "Film editing services"
+          }
+        },
+        "5913": {
+          "description": "Motion picture, video and television programme distribution activities",
+          "nic5": {
+            "59131": "Film distribution services"
+          }
+        },
+        "5914": {
+          "description": "Motion picture projection activities",
+          "nic5": {
+            "59141": "Cinema theatre operations"
+          }
+        },
+        "5920": {
+          "description": "Sound recording and music publishing activities",
+          "nic5": {}
+        }
+      }
+    },
+    "60": {
+      "description": "Broadcasting and programming activities",
+      "nic4": {
+        "6010": {
+          "description": "Radio broadcasting",
+          "nic5": {
+            "60101": "Radio broadcasting services"
+          }
+        },
+        "6020": {
+          "description": "Television programming and broadcasting activities",
+          "nic5": {
+            "60201": "Television broadcasting services"
+          }
+        }
+      }
+    },
+    "61": {
+      "description": "Telecommunications",
+      "nic4": {
+        "6110": {
+          "description": "Wired telecommunications activities",
+          "nic5": {
+            "61101": "Fixed line telecom services"
+          }
+        },
+        "6120": {
+          "description": "Wireless telecommunications activities",
+          "nic5": {
+            "61201": "Mobile telecom services"
+          }
+        },
+        "6130": {
+          "description": "Satellite telecommunications activities",
+          "nic5": {
+            "61301": "Satellite telecom services"
+          }
+        },
+        "6190": {
+          "description": "Other telecommunications activities",
+          "nic5": {
+            "61901": "Internet service provider services"
+          }
+        }
+      }
+    },
+    "62": {
+      "description": "Computer programming, consultancy and related activities",
+      "nic4": {
+        "6201": {
+          "description": "Computer programming activities",
+          "nic5": {
+            "62011": "Custom software development"
+          }
+        },
+        "6202": {
+          "description": "Computer consultancy and computer facilities management activities",
+          "nic5": {
+            "62021": "IT consulting services"
+          }
+        },
+        "6209": {
+          "description": "Other information technology and computer service activities",
+          "nic5": {
+            "62091": "Software maintenance services"
+          }
+        }
+      }
+    },
+    "63": {
+      "description": "Information service activities",
+      "nic4": {
+        "6311": {
+          "description": "Data processing, hosting and related activities",
+          "nic5": {
+            "63111": "Data hosting services"
+          }
+        },
+        "6312": {
+          "description": "Web portals",
+          "nic5": {
+            "63121": "Web portal operation services"
+          }
+        },
+        "6391": {
+          "description": "News agency activities",
+          "nic5": {
+            "63911": "News agency services"
+          }
+        },
+        "6399": {
+          "description": "Other information service activities n.e.c.",
+          "nic5": {
+            "63991": "Other information service activities"
+          }
+        }
+      }
+    },
+    "64": {
+      "description": "Financial service activities, except insurance and pension funding",
+      "nic4": {
+        "6411": {
+          "description": "Central banking",
+          "nic5": {
+            "64111": "Central banking services"
+          }
+        },
+        "6419": {
+          "description": "Other monetary intermediation",
+          "nic5": {
+            "64191": "Commercial banking services"
+          }
+        },
+        "6420": {
+          "description": "Activities of holding companies",
+          "nic5": {
+            "64201": "Holding company activities"
+          }
+        },
+        "6430": {
+          "description": "Trusts, funds and other financial vehicles",
+          "nic5": {
+            "64301": "Mutual fund activities"
+          }
+        },
+        "6491": {
+          "description": "Financial leasing",
+          "nic5": {
+            "64911": "Financial leasing services"
+          }
+        },
+        "6492": {
+          "description": "Other credit granting",
+          "nic5": {
+            "64921": "Microfinance services"
+          }
+        },
+        "6499": {
+          "description": "Other financial service activities, except insurance and pension funding activities, n.e.c.",
+          "nic5": {
+            "64991": "Other financial intermediation services"
+          }
+        }
+      }
+    },
+    "65": {
+      "description": "Insurance, reinsurance and pension funding, except compulsory social security",
+      "nic4": {
+        "6511": {
+          "description": "Life insurance",
+          "nic5": {
+            "65111": "Life insurance services"
+          }
+        },
+        "6512": {
+          "description": "Non-life insurance",
+          "nic5": {
+            "65121": "General insurance services"
+          }
+        },
+        "6520": {
+          "description": "Reinsurance",
+          "nic5": {
+            "65201": "Reinsurance services"
+          }
+        },
+        "6530": {
+          "description": "Pension funding",
+          "nic5": {
+            "65301": "Pension fund services"
+          }
+        }
+      }
+    },
+    "66": {
+      "description": "Other financial activities",
+      "nic4": {
+        "6611": {
+          "description": "Administration of financial markets",
+          "nic5": {
+            "66111": "Stock exchange operation"
+          }
+        },
+        "6612": {
+          "description": "Security and commodity contracts brokerage",
+          "nic5": {
+            "66121": "Stock brokerage services"
+          }
+        },
+        "6619": {
+          "description": "Activities auxiliary to financial service activities n.e.c.",
+          "nic5": {
+            "66191": "Financial consultancy services"
+          }
+        },
+        "6621": {
+          "description": "Risk and damage evaluation",
+          "nic5": {
+            "66211": "Insurance risk assessment"
+          }
+        },
+        "6622": {
+          "description": "Activities of insurance agents and brokers",
+          "nic5": {
+            "66221": "Insurance brokerage services"
+          }
+        },
+        "6629": {
+          "description": "Other activities auxiliary to insurance and pension funding",
+          "nic5": {
+            "66291": "Insurance claim adjustment"
+          }
+        },
+        "6630": {
+          "description": "Fund management activities",
+          "nic5": {}
+        }
+      }
+    },
+    "68": {
+      "description": "Real estate activities",
+      "nic4": {
+        "6810": {
+          "description": "Real estate activities with own or leased property",
+          "nic5": {
+            "68101": "Real estate buying and selling"
+          }
+        },
+        "6820": {
+          "description": "Real estate activities on a fee or contract basis",
+          "nic5": {
+            "68201": "Real estate agency services"
+          }
+        }
+      }
+    },
+    "69": {
+      "description": "Legal and accounting activities",
+      "nic4": {
+        "6910": {
+          "description": "Legal activities",
+          "nic5": {
+            "69101": "Legal advisory services"
+          }
+        },
+        "6920": {
+          "description": "Accounting, bookkeeping and auditing activities; tax consultancy",
+          "nic5": {
+            "69201": "Accounting and auditing services"
+          }
+        }
+      }
+    },
+    "70": {
+      "description": "Activities of head offices; management consultancy activities",
+      "nic4": {
+        "7010": {
+          "description": "Activities of head offices",
+          "nic5": {
+            "70101": "Corporate head office management"
+          }
+        },
+        "7020": {
+          "description": "Management consultancy activities",
+          "nic5": {
+            "70201": "Business management consulting"
+          }
+        }
+      }
+    },
+    "71": {
+      "description": "Architecture and engineering activities; technical testing and analysis",
+      "nic4": {
+        "7110": {
+          "description": "Architectural and engineering activities and related technical consultancy",
+          "nic5": {
+            "71101": "Architectural design services"
+          }
+        },
+        "7120": {
+          "description": "Technical testing and analysis",
+          "nic5": {
+            "71201": "Laboratory testing services"
+          }
+        }
+      }
+    },
+    "72": {
+      "description": "Scientific research and development",
+      "nic4": {
+        "7210": {
+          "description": "Research and experimental development on natural sciences and engineering",
+          "nic5": {
+            "72101": "Scientific research services"
+          }
+        },
+        "7220": {
+          "description": "Research and experimental development on social sciences and humanities",
+          "nic5": {
+            "72201": "Social science research services"
+          }
+        }
+      }
+    },
+    "73": {
+      "description": "Advertising and market research",
+      "nic4": {
+        "7310": {
+          "description": "Advertising",
+          "nic5": {
+            "73101": "Advertising agency services"
+          }
+        },
+        "7320": {
+          "description": "Market research and public opinion polling",
+          "nic5": {
+            "73201": "Market research services"
+          }
+        }
+      }
+    },
+    "74": {
+      "description": "Other professional, scientific and technical activities",
+      "nic4": {
+        "7410": {
+          "description": "Specialized design activities",
+          "nic5": {
+            "74101": "Graphic design services"
+          }
+        },
+        "7420": {
+          "description": "Photographic activities",
+          "nic5": {
+            "74201": "Photography services"
+          }
+        },
+        "7490": {
+          "description": "Other professional, scientific and technical activities n.e.c.",
+          "nic5": {
+            "74901": "Technical consultancy services"
+          }
+        }
+      }
+    },
+    "75": {
+      "description": "Veterinary activities",
+      "nic4": {
+        "7500": {
+          "description": "Veterinary activities",
+          "nic5": {
+            "75001": "Veterinary services"
+          }
+        }
+      }
+    },
+    "77": {
+      "description": "Rental and leasing activities",
+      "nic4": {
+        "7710": {
+          "description": "Renting and leasing of motor vehicles",
+          "nic5": {
+            "77101": "Car rental services"
+          }
+        },
+        "7721": {
+          "description": "Renting and leasing of recreational and sports goods",
+          "nic5": {
+            "77211": "Sports equipment rental"
+          }
+        },
+        "7722": {
+          "description": "Renting and leasing of video tapes and disks",
+          "nic5": {
+            "77221": "Media rental services"
+          }
+        },
+        "7729": {
+          "description": "Renting and leasing of other personal and household goods n.e.c.",
+          "nic5": {
+            "77291": "Furniture rental"
+          }
+        },
+        "7730": {
+          "description": "Renting and leasing of other machinery, equipment and tangible goods n.e.c.",
+          "nic5": {
+            "77301": "Industrial machinery rental"
+          }
+        },
+        "7740": {
+          "description": "Leasing of nonfinancial intangible assets",
+          "nic5": {
+            "77401": "Trademark licensing services"
+          }
+        }
+      }
+    },
+    "78": {
+      "description": "Employment activities",
+      "nic4": {
+        "7810": {
+          "description": "Activities of employment placement agencies",
+          "nic5": {
+            "78101": "Job placement agency services"
+          }
+        },
+        "7820": {
+          "description": "Temporary employment agency activities",
+          "nic5": {
+            "78201": "Temporary staffing services"
+          }
+        },
+        "7830": {
+          "description": "Human resources provision and management of human resources functions",
+          "nic5": {
+            "78301": "HR outsourcing services"
+          }
+        }
+      }
+    },
+    "79": {
+      "description": "Travel agency, tour operator and other reservation service activities",
+      "nic4": {
+        "7911": {
+          "description": "Travel agency activities",
+          "nic5": {
+            "79111": "Travel agency services"
+          }
+        },
+        "7912": {
+          "description": "Tour operator activities",
+          "nic5": {
+            "79121": "Tour operator services"
+          }
+        },
+        "7990": {
+          "description": "Other reservation service and related activities",
+          "nic5": {
+            "79901": "Ticket booking services"
+          }
+        }
+      }
+    },
+    "80": {
+      "description": "Security and investigation activities",
+      "nic4": {
+        "8010": {
+          "description": "Private security activities",
+          "nic5": {
+            "80101": "Security guard services"
+          }
+        },
+        "8020": {
+          "description": "Security systems service activities",
+          "nic5": {
+            "80201": "CCTV monitoring services"
+          }
+        },
+        "8030": {
+          "description": "Investigation activities",
+          "nic5": {
+            "80301": "Private investigation services"
+          }
+        }
+      }
+    },
+    "81": {
+      "description": "Services to buildings and landscape activities",
+      "nic4": {
+        "8110": {
+          "description": "Combined facilities support activities",
+          "nic5": {
+            "81101": "Facility management services"
+          }
+        },
+        "8121": {
+          "description": "General cleaning of buildings",
+          "nic5": {
+            "81211": "Building cleaning services"
+          }
+        },
+        "8129": {
+          "description": "Other building and industrial cleaning activities",
+          "nic5": {
+            "81291": "Industrial cleaning services"
+          }
+        },
+        "8130": {
+          "description": "Landscape care and maintenance service activities",
+          "nic5": {
+            "81301": "Garden maintenance services"
+          }
+        }
+      }
+    },
+    "82": {
+      "description": "Office administrative, office support and other business support activities",
+      "nic4": {
+        "8211": {
+          "description": "Combined office administrative service activities",
+          "nic5": {
+            "82111": "Office administrative support"
+          }
+        },
+        "8219": {
+          "description": "Photocopying, document preparation and other specialized office support activities",
+          "nic5": {
+            "82191": "Document preparation services"
+          }
+        },
+        "8220": {
+          "description": "Activities of call centres",
+          "nic5": {
+            "82201": "Call centre services"
+          }
+        },
+        "8230": {
+          "description": "Organization of conventions and trade shows",
+          "nic5": {
+            "82301": "Event management services"
+          }
+        },
+        "8291": {
+          "description": "Activities of collection agencies and credit bureaus",
+          "nic5": {
+            "82911": "Debt collection services"
+          }
+        },
+        "8292": {
+          "description": "Packaging activities",
+          "nic5": {
+            "82921": "Packaging services"
+          }
+        },
+        "8299": {
+          "description": "Other business support service activities n.e.c.",
+          "nic5": {
+            "82991": "Business support services"
+          }
+        }
+      }
+    },
+    "84": {
+      "description": "Public administration and defence; compulsory social security",
+      "nic4": {
+        "8411": {
+          "description": "General public administration activities",
+          "nic5": {
+            "84111": "Government administration services"
+          }
+        },
+        "8412": {
+          "description": "Regulation of the activities of providing health care, education, cultural services and other social services, excluding social security",
+          "nic5": {}
+        },
+        "8413": {
+          "description": "Regulation of and contribution to more efficient operation of businesses",
+          "nic5": {}
+        },
+        "8421": {
+          "description": "Foreign affairs",
+          "nic5": {
+            "84211": "Foreign affairs administration"
+          }
+        },
+        "8422": {
+          "description": "Defence activities",
+          "nic5": {
+            "84221": "Military defence services"
+          }
+        },
+        "8423": {
+          "description": "Public order and safety activities",
+          "nic5": {
+            "84231": "Police services"
+          }
+        },
+        "8430": {
+          "description": "Compulsory social security activities",
+          "nic5": {}
+        }
+      }
+    },
+    "85": {
+      "description": "Education",
+      "nic4": {
+        "8510": {
+          "description": "Primary education",
+          "nic5": {
+            "85101": "Primary school education"
+          }
+        },
+        "8521": {
+          "description": "General secondary education",
+          "nic5": {}
+        },
+        "8522": {
+          "description": "Technical and vocational secondary education",
+          "nic5": {}
+        },
+        "8530": {
+          "description": "Higher education",
+          "nic5": {
+            "85301": "University education"
+          }
+        },
+        "8541": {
+          "description": "Sports and recreation education",
+          "nic5": {
+            "85411": "Sports training services"
+          }
+        },
+        "8542": {
+          "description": "Cultural education",
+          "nic5": {
+            "85421": "Music and dance education"
+          }
+        },
+        "8549": {
+          "description": "Other education n.e.c.",
+          "nic5": {}
+        },
+        "8550": {
+          "description": "Educational support services",
+          "nic5": {
+            "85501": "Coaching classes"
+          }
+        }
+      }
+    },
+    "86": {
+      "description": "Human health activities",
+      "nic4": {
+        "8610": {
+          "description": "Hospital activities",
+          "nic5": {
+            "86101": "Hospital services"
+          }
+        },
+        "8620": {
+          "description": "Medical and dental practice activities",
+          "nic5": {
+            "86201": "Doctor clinic services"
+          }
+        },
+        "8690": {
+          "description": "Other human health activities",
+          "nic5": {
+            "86901": "Physiotherapy services"
+          }
+        }
+      }
+    },
+    "87": {
+      "description": "Residential care activities",
+      "nic4": {
+        "8710": {
+          "description": "Nursing care facilities",
+          "nic5": {
+            "87101": "Nursing home services"
+          }
+        },
+        "8720": {
+          "description": "Residential care activities for mental retardation, mental health and substance abuse",
+          "nic5": {
+            "87201": "Mental health care facilities"
+          }
+        },
+        "8730": {
+          "description": "Residential care activities for the elderly and disabled",
+          "nic5": {
+            "87301": "Elderly care home services"
+          }
+        },
+        "8790": {
+          "description": "Other residential care activities n.e.c.",
+          "nic5": {
+            "87901": "Rehabilitation centre services"
+          }
+        }
+      }
+    },
+    "88": {
+      "description": "Social work activities without accommodation",
+      "nic4": {
+        "8810": {
+          "description": "Social work activities without accommodation for the elderly and disabled",
+          "nic5": {
+            "88101": "Senior citizen care services"
+          }
+        },
+        "8890": {
+          "description": "Other social work activities without accommodation n.e.c.",
+          "nic5": {
+            "88901": "Community social services"
+          }
+        }
+      }
+    },
+    "90": {
+      "description": "Creative, arts and entertainment activities",
+      "nic4": {
+        "9000": {
+          "description": "Dramatic arts, music and other arts activities",
+          "nic5": {
+            "90001": "Performing arts services"
+          }
+        }
+      }
+    },
+    "91": {
+      "description": "Libraries, archives, museums and other cultural activities",
+      "nic4": {
+        "9101": {
+          "description": "Library and archives activities",
+          "nic5": {
+            "91011": "Library services"
+          }
+        },
+        "9102": {
+          "description": "Museums activities and operation of historical sites and buildings",
+          "nic5": {
+            "91021": "Museum operation services"
+          }
+        },
+        "9103": {
+          "description": "Botanical and zoological gardens and nature reserves activities",
+          "nic5": {
+            "91031": "Zoo operation services"
+          }
+        }
+      }
+    },
+    "93": {
+      "description": "Sports activities and amusement and recreation activities",
+      "nic4": {
+        "9311": {
+          "description": "Operation of sports facilities",
+          "nic5": {
+            "93111": "Stadium operation services"
+          }
+        },
+        "9312": {
+          "description": "Activities of sports clubs",
+          "nic5": {
+            "93121": "Sports club services"
+          }
+        },
+        "9319": {
+          "description": "Other sports activities",
+          "nic5": {
+            "93191": "Sports coaching services"
+          }
+        },
+        "9321": {
+          "description": "Activities of amusement parks and theme parks",
+          "nic5": {
+            "93211": "Amusement park operation"
+          }
+        },
+        "9329": {
+          "description": "Other amusement and recreation activities n.e.c.",
+          "nic5": {
+            "93291": "Recreational activity services"
+          }
+        }
+      }
+    },
+    "94": {
+      "description": "Activities of membership organizations",
+      "nic4": {
+        "9411": {
+          "description": "Activities of business and employers membership organizations",
+          "nic5": {
+            "94111": "Business association services"
+          }
+        },
+        "9412": {
+          "description": "Activities of professional membership organizations",
+          "nic5": {}
+        },
+        "9420": {
+          "description": "Activities of trade unions",
+          "nic5": {
+            "94201": "Trade union services"
+          }
+        },
+        "9491": {
+          "description": "Activities of religious organizations",
+          "nic5": {
+            "94911": "Religious organisation services"
+          }
+        },
+        "9492": {
+          "description": "Activities of political organizations",
+          "nic5": {}
+        },
+        "9499": {
+          "description": "Activities of other membership organizations n.e.c.",
+          "nic5": {
+            "94991": "Social organisation services"
+          }
+        }
+      }
+    },
+    "95": {
+      "description": "Repair of computers and personal and household goods",
+      "nic4": {
+        "9511": {
+          "description": "Repair of computers and peripheral equipment",
+          "nic5": {
+            "95111": "Computer repair services"
+          }
+        },
+        "9512": {
+          "description": "Repair of communication equipment",
+          "nic5": {
+            "95121": "Mobile phone repair services"
+          }
+        },
+        "9521": {
+          "description": "Repair of consumer electronics",
+          "nic5": {
+            "95211": "Television repair services"
+          }
+        },
+        "9522": {
+          "description": "Repair of household appliances and home and garden equipment",
+          "nic5": {
+            "95221": "Home appliance repair"
+          }
+        },
+        "9523": {
+          "description": "Repair of footwear and leather goods",
+          "nic5": {
+            "95231": "Shoe repair services"
+          }
+        },
+        "9524": {
+          "description": "Repair of furniture and home furnishings",
+          "nic5": {
+            "95241": "Furniture repair services"
+          }
+        },
+        "9529": {
+          "description": "Repair of personal and household goods, n.e.c.",
+          "nic5": {
+            "95291": "Other repair services"
+          }
+        }
+      }
+    },
+    "96": {
+      "description": "Other personal service activities",
+      "nic4": {
+        "9601": {
+          "description": "Washing and (dry-) cleaning of textile and fur products",
+          "nic5": {
+            "96011": "Laundry services"
+          }
+        },
+        "9602": {
+          "description": "Hairdressing and other beauty treatment",
+          "nic5": {
+            "96021": "Beauty salon services"
+          }
+        },
+        "9603": {
+          "description": "Funeral and related activities",
+          "nic5": {
+            "96031": "Funeral services"
+          }
+        },
+        "9609": {
+          "description": "Other personal service activities n.e.c.",
+          "nic5": {
+            "96091": "Astrology and personal consultancy services"
+          }
+        }
+      }
+    }
+  },
+  "trading": {
+    "45": {
+      "description": "Wholesale and retail trade and repair of motor vehicles and motorcycles",
+      "nic4": {
+        "4510": {
+          "description": "Sale of motor vehicles",
+          "nic5": {
+            "45101": "Car sales",
+            "45102": "Commercial vehicle sales"
+          }
+        },
+        "4520": {
+          "description": "Maintenance and repair of motor vehicles",
+          "nic5": {
+            "45201": "Motor vehicle repair"
+          }
+        },
+        "4530": {
+          "description": "Sale of motor vehicle parts and accessories",
+          "nic5": {
+            "45301": "Motor vehicle spare parts sale"
+          }
+        },
+        "4540": {
+          "description": "Sale, maintenance and repair of motorcycles and related parts and Accessories",
+          "nic5": {
+            "45401": "Motorcycle sales"
+          }
+        }
+      }
+    },
+    "46": {
+      "description": "Wholesale trade, except of motor vehicles and motorcycles",
+      "nic4": {
+        "4610": {
+          "description": "Wholesale on a fee or contract basis",
+          "nic5": {
+            "46101": "Commission agent wholesale"
+          }
+        },
+        "4620": {
+          "description": "Wholesale of agricultural raw materials and live animals",
+          "nic5": {
+            "46201": "Wholesale of grains"
+          }
+        },
+        "4630": {
+          "description": "Wholesale of food, beverages and tobacco",
+          "nic5": {
+            "46301": "Food product wholesale"
+          }
+        },
+        "4641": {
+          "description": "Wholesale of textiles, clothing and footwear",
+          "nic5": {
+            "46411": "Textile wholesale"
+          }
+        },
+        "4649": {
+          "description": "Wholesale of other household goods",
+          "nic5": {
+            "46491": "Electronics wholesale"
+          }
+        },
+        "4651": {
+          "description": "Wholesale of computers, computer peripheral equipment and software",
+          "nic5": {}
+        },
+        "4652": {
+          "description": "Wholesale of electronic and telecommunications equipment and parts",
+          "nic5": {}
+        },
+        "4653": {
+          "description": "Wholesale of agricultural machinery, equipment and supplies",
+          "nic5": {}
+        },
+        "4659": {
+          "description": "Wholesale of other machinery and equipment",
+          "nic5": {}
+        },
+        "4661": {
+          "description": "Wholesale of solid, liquid and gaseous fuels and related products",
+          "nic5": {}
+        },
+        "4662": {
+          "description": "Wholesale of metals and metal ores",
+          "nic5": {}
+        },
+        "4663": {
+          "description": "Wholesale of construction materials, hardware, plumbing and heating equipment and supplies",
+          "nic5": {}
+        },
+        "4669": {
+          "description": "Wholesale of waste and scrap and other products n.e.c.",
+          "nic5": {}
+        },
+        "4690": {
+          "description": "Non-specialized wholesale trade",
+          "nic5": {}
+        }
+      }
+    },
+    "47": {
+      "description": "Retail trade, except of motor vehicles and motorcycles",
+      "nic4": {
+        "4711": {
+          "description": "Retail sale in non-specialized stores with food, beverages or tobacco predominating",
+          "nic5": {
+            "47111": "Supermarket retail"
+          }
+        },
+        "4719": {
+          "description": "Other retail sale in non-specialized stores",
+          "nic5": {
+            "47191": "General store retail"
+          }
+        },
+        "4721": {
+          "description": "Retail sale of food in specialized stores",
+          "nic5": {
+            "47211": "Fruit and vegetable retail"
+          }
+        },
+        "4722": {
+          "description": "Retail sale of beverages in specialized stores",
+          "nic5": {
+            "47221": "Meat retail"
+          }
+        },
+        "4723": {
+          "description": "Retail sale of tobacco products in specialized stores",
+          "nic5": {}
+        },
+        "4730": {
+          "description": "Retail sale of automotive fuel in specialized stores",
+          "nic5": {}
+        },
+        "4741": {
+          "description": "Retail sale of computers, peripheral units, software and telecommunications equipment in specialized stores",
+          "nic5": {
+            "47411": "Computer retail"
+          }
+        },
+        "4742": {
+          "description": "Retail sale of audio and video equipment in specialized stores",
+          "nic5": {}
+        },
+        "4751": {
+          "description": "Retail sale of textiles in specialized stores",
+          "nic5": {}
+        },
+        "4752": {
+          "description": "Retail sale of hardware, paints and glass in specialized stores",
+          "nic5": {
+            "47521": "Hardware store retail"
+          }
+        },
+        "4753": {
+          "description": "Retail sale of carpets, rugs, wall and floor coverings in specialized stores",
+          "nic5": {}
+        },
+        "4759": {
+          "description": "Retail sale of electrical household appliances, furniture, lighting equipment and other household articles in specialized stores",
+          "nic5": {}
+        },
+        "4761": {
+          "description": "Retail sale of books, newspapers and stationary in specialized stores",
+          "nic5": {}
+        },
+        "4762": {
+          "description": "Retail sale of music and video recordings in specialized stores",
+          "nic5": {}
+        },
+        "4763": {
+          "description": "Retail sale of sporting equipment in specialized stores",
+          "nic5": {}
+        },
+        "4764": {
+          "description": "Retail sale of games and toys in specialized stores",
+          "nic5": {}
+        },
+        "4771": {
+          "description": "Retail sale of clothing, footwear and leather articles in specialized stores",
+          "nic5": {
+            "47711": "Clothing retail"
+          }
+        },
+        "4772": {
+          "description": "Retail sale of pharmaceutical and medical goods, cosmetic and toilet articles in specialized stores",
+          "nic5": {}
+        },
+        "4773": {
+          "description": "Other retail sale of new goods in specialized stores",
+          "nic5": {}
+        },
+        "4774": {
+          "description": "Retail sale of second-hand goods",
+          "nic5": {}
+        },
+        "4781": {
+          "description": "Retail sale via stalls and markets of food, beverages and tobacco products",
+          "nic5": {}
+        },
+        "4782": {
+          "description": "Retail sale via stalls and markets of textiles, clothing and footwear",
+          "nic5": {}
+        },
+        "4789": {
+          "description": "Retail sale via stalls and markets of other goods",
+          "nic5": {}
+        },
+        "4791": {
+          "description": "Retail sale via mail order houses or via Internet",
+          "nic5": {}
+        },
+        "4799": {
+          "description": "Other retail sale not in stores, stalls or markets",
+          "nic5": {}
+        }
+      }
+    }
+  }
+}

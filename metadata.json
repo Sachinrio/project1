@@ -1,0 +1,7 @@
+{
+  "name": "InfiniteBZ - Chennai Business Hub",
+  "description": "A premium business networking platform for Chennai's professional community, featuring strategic opportunities, industry insights, and event management.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

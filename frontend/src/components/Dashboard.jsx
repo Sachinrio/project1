@@ -1,0 +1,1274 @@
+import { useState, useEffect } from 'react';
+import {
+    LayoutDashboard, Users, Calendar, Settings, LogOut,
+    TrendingUp, AlertCircle, CheckCircle2, MoreHorizontal,
+    Search, Bell, Plus, Download, MessageSquare, ClipboardList, X, Eye, UserPlus, UserMinus, Trash2, MessageCircle, RefreshCw, Infinity, Building2, MapPin, Globe, RotateCcw
+} from 'lucide-react';
+import CityDropdown from './CityDropdown';
+import CreateEventModal from './create-event/CreateEventModal';
+import EventDetailModal from './EventDetailModal';
+import MyEvents from './MyEvents';
+import MyRegistrationsPage from './MyRegistrationsPage';
+import NotificationsPage from './NotificationsPage';
+import Sidebar from './Sidebar';
+import EventTicketPage from './EventTicketPage';
+import SettingsPage from './SettingsPage';
+export default function Dashboard({ user, onLogout, onNavigate, initialView, initialEventId }) {
+    const [stats, setStats] = useState({
+        total_users: 0,
+        active_events: 0,
+        ingestion_errors: 0,
+        pending_approvals: 0,
+        recent_events: []
+    });
+    const [eventsData, setEventsData] = useState({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 21
+    });
+    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState(true);
+    const [searchQuery, setSearchQuery] = useState(""); // Track input
+    const [activeSearch, setActiveSearch] = useState(""); // Track triggered search
+    const [selectedCity, setSelectedCity] = useState("All Cities");
+    const [selectedCategory, setSelectedCategory] = useState("All");
+    const [selectedSource, setSelectedSource] = useState("All");
+    const [selectedCost, setSelectedCost] = useState("All");
+    const [selectedMode, setSelectedMode] = useState("All");
+    const [selectedDate, setSelectedDate] = useState(""); // YYYY-MM-DD
+    const [showProfileMenu, setShowProfileMenu] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false);
+
+    // Initialize activeView based on prop or default to 'feed'
+    // Map 'ticket-details' from URL to 'ticket' view in Dashboard
+    const [activeView, setActiveView] = useState(initialView === 'ticket-details' ? 'ticket' : (initialView || 'feed'));
+
+    // Initialize selectedInternalEvent if deep linking to a ticket
+    // Note: We only have the ID here, so we might need to fetch the full event details in EventTicketPage or temporarily create a shell object
+    const [selectedInternalEvent, setSelectedInternalEvent] = useState(initialEventId ? { id: initialEventId } : null);
+
+    const [userActivities, setUserActivities] = useState([]);
+    const [activitiesLoading, setActivitiesLoading] = useState(false);
+
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false); // NEW STATE for Red Dot
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            const token = localStorage.getItem('token');
+            // Trigger background scrape
+            const res = await fetch('/api/v1/refresh-events', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                // Show a quick visual cue or toast
+                // e.g. toast.success("Syncing started...") or just rely on the spinner
+            } else {
+                console.error("Refresh failed", res.status);
+            }
+
+            // Wait a bit and then reload the list to see if anything appeared immediately
+            // or just to reset the spinner after a delay since it's a background task
+            setTimeout(() => {
+                fetchEvents(currentPage, activeSearch, selectedCity, selectedCategory, selectedSource, selectedCost, selectedMode, selectedDate);
+                fetchUserActivities(); // Also refresh notifications
+                setIsRefreshing(false);
+            }, 5000); // 5 seconds delay to allow some scraping to happen
+
+        } catch (err) {
+            console.error("Refresh error", err);
+            setIsRefreshing(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchDashboardStats();
+        fetchUserRegistrations(); // Fetch existing registrations to show registered status
+        fetchUserActivities(); // Fetch user activities for notifications
+    }, []);
+
+
+
+    // Poll for notifications every 30 seconds
+    useEffect(() => {
+        const pollInterval = setInterval(() => {
+            fetchUserActivities();
+        }, 30000); // 30 seconds
+
+        return () => clearInterval(pollInterval);
+    }, []);
+
+    useEffect(() => {
+        fetchEvents(currentPage, activeSearch, selectedCity, selectedCategory, selectedSource, selectedCost, selectedMode, selectedDate);
+    }, [currentPage, activeSearch, selectedCity, selectedCategory, selectedSource, selectedCost, selectedMode, selectedDate]);
+
+    const fetchDashboardStats = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/v1/admin/stats', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setStats(data);
+            }
+        } catch (err) {
+            console.error("Failed to fetch admin stats", err);
+        }
+    };
+
+    const fetchUserRegistrations = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/v1/user/registrations', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const registrations = data.registrations || [];
+                setUserRegistrations(registrations);
+                setUserRegistrationCount(registrations.length);
+                // Also update newlyRegisteredIds to include existing registrations
+                const registeredIds = registrations.map(reg => reg.id);
+                setNewlyRegisteredIds(prev => [...new Set([...prev, ...registeredIds])]);
+            }
+        } catch (err) {
+            console.error("Failed to fetch user registrations", err);
+        }
+    };
+
+    const fetchUserActivities = async () => {
+        setActivitiesLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch('/api/v1/user/activities', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                const activities = data.activities || [];
+                setUserActivities(activities);
+
+                // NOTIFICATION LOGIC:
+                // Check local storage for last seen count
+                const lastSeenCount = parseInt(localStorage.getItem('lastSeenActivityCount') || '0');
+
+                // If we have more activities than before, show Red Dot
+                if (activities.length > lastSeenCount) {
+                    setHasUnreadNotifications(true);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to fetch user activities", err);
+        } finally {
+            setActivitiesLoading(false);
+        }
+    };
+
+    const fetchEvents = async (page, search = "", city = "Chennai", category = "All", source = "All", cost = "All", mode = "All", date = "") => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            // Construct Query Params
+            const params = new URLSearchParams({
+                page: page,
+                limit: 21,
+                city: city === "All Cities" ? "all" : city,
+                category: category === "All" ? "all" : category,
+                source: source === "All" ? "all" : source,
+                is_free: cost === "All" ? "" : cost.toLowerCase(),
+                mode: mode === "All" ? "" : (mode === "In Person" ? "offline" : mode.toLowerCase()),
+                date: date
+            });
+            if (search && search.trim() !== "") {
+                params.append('search', search.trim());
+            }
+
+            const res = await fetch(`/api/v1/events?${params.toString()}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                // ROBUST HANDLING: Check if array or object
+                if (data && Array.isArray(data.data)) {
+                    // BACKEND UPGRADE: API now returns { data, total, page, limit }
+                    // FRONTEND DEDUPLICATION: Remove duplicates by title
+                    const uniqueEvents = Array.from(new Map(data.data.map(item => [item.title, item])).values());
+
+                    setEventsData({
+                        data: uniqueEvents,
+                        total: data.total,
+                        page: data.page,
+                        limit: data.limit
+                    });
+                } else if (Array.isArray(data)) {
+                    // Fallback for old structure or during transition
+                    setEventsData({
+                        data: data,
+                        total: 100, // Mock total
+                        page: page,
+                        limit: 21
+                    });
+                } else {
+                    // Fallback for empty or unexpected structure
+                    setEventsData({
+                        data: [],
+                        total: 0,
+                        page: page,
+                        limit: 10
+                    });
+                }
+            } else {
+                console.error("API Error:", res.status);
+            }
+        } catch (err) {
+            console.error("Failed to fetch events", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showCreateEventModal, setShowCreateEventModal] = useState(false);
+    const [showDetailModal, setShowDetailModal] = useState(false);
+    const [editingEvent, setEditingEvent] = useState(null); // For editing existing events
+
+
+    const [pendingEventId, setPendingEventId] = useState(null);
+    const [pendingEventTitle, setPendingEventTitle] = useState("");
+    const [pendingEventUrl, setPendingEventUrl] = useState("");
+    const [newlyRegisteredIds, setNewlyRegisteredIds] = useState([]);
+    const [userRegistrations, setUserRegistrations] = useState([]);
+    const [userRegistrationCount, setUserRegistrationCount] = useState(0);
+    const [refreshForMyEvents, setRefreshForMyEvents] = useState(0);
+
+    const handleRegisterClick = (event) => {
+        // CHECK SOURCE: If InfiniteBZ, open Detail Modal
+        if (event.raw_data?.source === 'InfiniteBZ') {
+            setSelectedInternalEvent(event);
+            setShowDetailModal(true);
+            return;
+        }
+
+        // 1. Show Confirmation Modal FIRST (User Request)
+        setPendingEventId(event.id);
+        setPendingEventTitle(event.title);
+        setPendingEventUrl(event.url);
+        setShowConfirmModal(true);
+    };
+
+    const handleInternalRegistration = async (event, payload = null) => {
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/v1/events/${event.id}/register`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload || {})
+            });
+
+            let data;
+            try {
+                data = await res.json();
+            } catch (parseErr) {
+                console.error('Failed to parse response:', parseErr);
+                alert(`Registration failed: Server error (${res.status})`);
+                return;
+            }
+
+            if (res.ok && data.status === 'SUCCESS') {
+                // Registration successful - update UI state
+                setNewlyRegisteredIds(prev => [...prev, event.id]);
+                alert('Registration successful!');
+            } else if (data.status === 'ALREADY_REGISTERED') {
+                // Already registered - still update UI
+                setNewlyRegisteredIds(prev => [...prev, event.id]);
+                alert('You are already registered for this event.');
+            } else {
+                // Registration failed - show detailed error
+                const errorMessage = typeof data.detail === 'object' ? JSON.stringify(data.detail) : (data.detail || data.message || `Server error (${res.status})`);
+                alert(`Registration failed: ${errorMessage}`);
+                console.error('Registration failed:', data);
+            }
+        } catch (err) {
+            console.error('Registration error:', err);
+            alert('Registration failed. Please check your connection and try again.');
+        }
+    };
+
+    const handleCreateEvent = async (eventData) => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert("You must be logged in to create an event.");
+                return;
+            }
+
+            // Use relative path to rely on Vite proxy and avoid CORS/URL mismatches
+            const res = await fetch('/api/v1/events', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(eventData)
+            });
+
+            // Handle session expiration
+            if (res.status === 401) {
+                localStorage.removeItem('token');
+                alert("Your session has expired. Please log in again.");
+                window.location.reload(); // Simple way to force re-auth flow
+                return;
+            }
+
+            const data = await res.json();
+
+            if (res.ok) {
+                alert("Event Created Successfully!");
+                setShowCreateEventModal(false);
+                // Refresh list
+                fetchEvents(1, activeSearch, selectedCity, selectedCategory, selectedSource, selectedCost, selectedMode, selectedDate);
+                setRefreshForMyEvents(prev => prev + 1);
+            } else {
+                console.error("Creation failed with status:", res.status, data);
+                alert(`Creation Failed: ${data.detail || data.message || "Unknown error"}`);
+            }
+        } catch (err) {
+            console.error("Create event error", err);
+            alert(`Failed to create event: ${err.message}`);
+        }
+    };
+
+    const confirmRegistration = async () => {
+        if (!pendingEventId) return;
+
+        // 1. Immediately open the external URL (Synchronous to avoid popup blocker)
+        if (pendingEventUrl) {
+            window.open(pendingEventUrl, '_blank');
+        }
+
+        // 2. Optimistically update UI
+        setNewlyRegisteredIds(prev => [...prev, pendingEventId]);
+        setShowConfirmModal(false);
+
+        try {
+            const token = localStorage.getItem('token');
+            const res = await fetch(`/api/v1/events/${pendingEventId}/register`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({})
+            });
+
+            // Optional: Handle failure by reverting state or notifying user quietly
+            // For now, we assume success or ignore tracking failure to prioritize UX
+            if (!res.ok) {
+                console.error("Background registration tracking failed", res.status);
+            }
+        } catch (err) {
+            console.error("Confirmation error", err);
+        } finally {
+            // Reset pending state
+            setPendingEventId(null);
+            setPendingEventTitle("");
+            setPendingEventUrl("");
+        }
+    };
+
+    const handleSearch = (e) => {
+        if (e.key === 'Enter') {
+            setCurrentPage(1);
+            setActiveSearch(searchQuery);
+        }
+    };
+
+    const totalPages = Math.ceil(eventsData.total / eventsData.limit);
+
+    const handlePageChange = (newPage) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
+
+    const getIcon = (type) => {
+        const icons = {
+            success: '✅',
+            info: '🔔',
+            warning: '⚠️',
+            purple: '💜'
+        };
+        return icons[type] || '📌';
+    };
+
+    return (
+        <div className="min-h-screen flex bg-[#EEF2FF] text-slate-900 overflow-hidden">
+            {/* SIDEBAR */}
+            <Sidebar
+                activePage={activeView === 'feed' ? 'dashboard' : activeView}
+                onNavigate={(view) => {
+                    if (view === 'dashboard') setActiveView('feed');
+                    else if (view === 'my-events') setActiveView('my-events');
+                    else if (view === 'my-registrations') setActiveView('my-registrations');
+                    else if (view === 'notifications') setActiveView('notifications');
+                    else if (view === 'settings') setActiveView('settings');
+                    else onNavigate(view); // Catch-all for check-in or others
+                }}
+                onLogout={onLogout}
+                onCreateClick={() => setShowCreateEventModal(true)}
+            />
+
+            {/* MAIN CONTENT WRAPPER */}
+            <main className="flex-1 lg:ml-64 h-screen bg-[#F8FAFF] overflow-hidden">
+                <div className="h-full flex flex-col overflow-hidden">
+                    <div className="flex-1 overflow-y-auto px-4 md:px-8 py-10 custom-scrollbar">
+                        {activeView === 'my-events' ? (
+                            <MyEvents
+                                key={refreshForMyEvents}
+                                onCreateNew={() => setShowCreateEventModal(true)}
+                            />
+                        ) : activeView === 'my-registrations' ? (
+                            <MyRegistrationsPage
+                                onNavigate={(view, data) => {
+                                    if (view === 'ticket-details') {
+                                        setSelectedInternalEvent(data);
+                                        setActiveView('ticket');
+                                    } else {
+                                        setActiveView('feed');
+                                    }
+                                }}
+                                user={user}
+                            />
+                        ) : activeView === 'notifications' ? (
+                            <NotificationsPage notifications={userActivities} />
+                        ) : activeView === 'ticket' ? (
+                            <EventTicketPage
+                                eventId={selectedInternalEvent?.id}
+                                user={user}
+                                onNavigate={(view) => setActiveView(view)}
+                                onCancelSuccess={() => {
+                                    // Remove from local state immediately
+                                    if (selectedInternalEvent?.id) {
+                                        setNewlyRegisteredIds(prev => prev.filter(id => id !== selectedInternalEvent.id));
+                                        setUserRegistrationCount(prev => Math.max(0, prev - 1));
+                                    }
+
+                                    // Clear deep link params from URL without reloading
+                                    if (window.history.pushState) {
+                                        const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                                        window.history.pushState({ path: newUrl }, '', newUrl);
+                                    }
+
+                                    // Navigate back to feed
+                                    setActiveView('feed');
+                                }}
+                            />
+                        ) : activeView === 'settings' ? (
+                            <SettingsPage
+                                user={user}
+                                hideSidebar={true}
+                                onNavigate={(view) => {
+                                    if (view === 'dashboard') setActiveView('feed');
+                                    else onNavigate(view);
+                                }}
+                            />
+                        ) : (
+                            <>
+                                {/* Header */}
+                                <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                                    <div className="flex flex-col">
+                                        <h1 className="text-3xl font-black text-slate-900 font-outfit tracking-tight">Events Dashboard</h1>
+                                    </div>
+
+                                    <div className="flex items-center gap-4 w-full md:w-auto">
+                                        <div className="relative flex-1 md:w-80 group">
+                                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors" size={18} />
+                                            <input
+                                                type="text"
+                                                placeholder="Search events, venues..."
+                                                className="w-full bg-white border border-slate-200 rounded-2xl pl-12 pr-4 py-3 text-sm text-slate-900 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 transition-all placeholder:text-slate-400"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                                onKeyDown={handleSearch}
+                                            />
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <button
+                                                onClick={() => setShowNotifications(!showNotifications)}
+                                                className="w-11 h-11 flex items-center justify-center rounded-2xl bg-white border border-slate-200 text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-all relative"
+                                            >
+                                                <Bell size={20} />
+                                                {hasUnreadNotifications && (
+                                                    <span className="absolute top-3 right-3 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                                                )}
+                                            </button>
+
+                                            <div className="relative">
+                                                <button
+                                                    onClick={() => setShowProfileMenu(!showProfileMenu)}
+                                                    className="h-11 px-3 flex items-center gap-3 rounded-2xl bg-white border border-slate-200 hover:border-indigo-200 transition-all group"
+                                                >
+                                                    <div className="w-7 h-7 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-700 font-black text-[10px] overflow-hidden">
+                                                        {user?.profile_image ? (
+                                                            <img src={user.profile_image} alt="" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            user?.full_name?.[0]?.toUpperCase() || 'P'
+                                                        )}
+                                                    </div>
+                                                    <span className="text-sm font-bold text-slate-700 pr-1 group-hover:text-indigo-600">
+                                                        {user?.full_name?.split(' ')[0]?.toLowerCase() || 'pradeep'}
+                                                    </span>
+                                                </button>
+
+                                                {showProfileMenu && (
+                                                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                                                        <button onClick={() => { setActiveView('settings'); setShowProfileMenu(false); }} className="w-full text-left px-5 py-3 text-sm font-bold text-slate-600 hover:bg-slate-50 hover:text-indigo-600 flex items-center gap-3 transition-colors">
+                                                            <Settings size={18} /> Settings
+                                                        </button>
+                                                        <div className="h-px bg-slate-50 mx-2 my-1" />
+                                                        <button onClick={onLogout} className="w-full text-left px-5 py-3 text-sm font-bold text-red-500 hover:bg-red-50 flex items-center gap-3 transition-colors">
+                                                            <LogOut size={18} /> Sign Out
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </header>
+
+                                {/* KPI CARDS */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                                    <StatCard
+                                        title="Total Events"
+                                        value={loading ? '...' : stats.active_events}
+                                        subtext="+12% vs last week"
+                                        subtextColor="text-green-500"
+                                        icon={<Calendar className="text-sky-500" size={24} />}
+                                    />
+                                    <StatCard
+                                        title="Free Events"
+                                        value={loading ? '...' : stats.free_events || 0}
+                                        subtext="62% of total volume"
+                                        subtextColor="text-slate-500"
+                                        icon={<Users className="text-indigo-500" size={24} />}
+                                    />
+                                    <StatCard
+                                        title="Auto-Registered"
+                                        value={loading ? '...' : userRegistrationCount}
+                                        subtext="Events you've registered for"
+                                        subtextColor="text-slate-500"
+                                        icon={<CheckCircle2 className="text-green-500" size={24} />}
+                                    />
+                                </div>
+
+                                {/* FILTERS & LIST */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h2 className="text-lg font-bold text-slate-900">Upcoming Events</h2>
+                                        <div className="flex items-center gap-2 text-sm text-slate-500">
+                                            Last updated: 5m ago
+                                            <button
+                                                onClick={handleRefresh}
+                                                disabled={isRefreshing}
+                                                className={`p-1 hover:text-sky-500 transition-all ${isRefreshing ? 'animate-spin text-sky-500' : ''}`}
+                                                title="Refresh Events"
+                                            >
+                                                <RefreshCw size={14} />
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Filter Bar */}
+                                    <div className="flex flex-wrap gap-3 mb-8">
+                                        <CityDropdown selected={selectedCity} onChange={setSelectedCity} />
+                                        <FilterDropdown
+                                            label="Industry"
+                                            options={["All", "Startup", "Business", "Tech"]}
+                                            selected={selectedCategory}
+                                            onChange={setSelectedCategory}
+                                        />
+                                        <FilterDropdown
+                                            label="Source"
+                                            options={["All", "Eventbrite", "Meetup", "AllEvents", "Trade Centre", "InfiniteBZ"]}
+                                            selected={selectedSource}
+                                            onChange={setSelectedSource}
+                                        />
+                                        <FilterDropdown
+                                            label="Cost"
+                                            options={["All", "Free", "Paid"]}
+                                            selected={selectedCost}
+                                            onChange={setSelectedCost}
+                                        />
+                                        <FilterDropdown
+                                            label="Mode"
+                                            options={["All", "Online", "In Person"]}
+                                            selected={selectedMode}
+                                            onChange={setSelectedMode}
+                                        />
+                                        <div className="ml-auto relative">
+                                            <input
+                                                type="date"
+                                                className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-medium text-slate-600 focus:outline-none focus:border-sky-500 hover:bg-slate-50 cursor-pointer relative z-0"
+                                                value={selectedDate}
+                                                onChange={(e) => setSelectedDate(e.target.value)}
+                                            />
+                                            <Calendar size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 pointer-events-none z-10" />
+                                        </div>
+
+                                        {/* Reset Filters Button */}
+                                        <button
+                                            onClick={() => {
+                                                setSelectedCity("All");
+                                                setSelectedCategory("All");
+                                                setSelectedSource("All");
+                                                setSelectedCost("All");
+                                                setSelectedMode("All");
+                                                setSelectedDate("");
+                                                setActiveSearch(""); // Clear active search
+                                                setSearchQuery(""); // Clear search input
+                                                setCurrentPage(1); // Reset to first page
+                                            }}
+                                            className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-500 hover:text-red-500 hover:border-red-200 text-sm font-bold flex items-center gap-2 transition-all shadow-sm hover:shadow h-[42px]"
+                                            title="Clear all filters"
+                                        >
+                                            <RotateCcw size={14} />
+                                            Reset
+                                        </button>
+                                    </div>
+
+                                    {/* EVENTS GRID */}
+                                    <div>
+                                        {loading && <div className="text-center py-10 text-slate-500">Loading events...</div>}
+
+                                        {!loading && eventsData.data && eventsData.data.length > 0 && (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                                {eventsData.data.map((event) => (
+                                                    <EventCard
+                                                        key={event.id}
+                                                        event={event}
+                                                        user={user}
+                                                        onNavigate={onNavigate}
+                                                        isRegistered={newlyRegisteredIds.includes(event.id)}
+                                                        onRegister={() => handleRegisterClick(event)}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {!loading && (!eventsData.data || eventsData.data.length === 0) && (
+                                            <div className="text-center py-10 text-slate-500">No events found matching criteria.</div>
+                                        )}
+                                    </div>
+
+                                    {/* PAGINATION */}
+                                    <div className="flex justify-center mt-10 gap-2">
+                                        <button
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            disabled={currentPage === 1}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 disabled:opacity-30 disabled:hover:bg-transparent text-slate-500 transition-colors"
+                                        >
+                                            ‹
+                                        </button>
+
+                                        {Array.from({ length: totalPages || 1 }, (_, i) => i + 1).map(page => (
+                                            <button
+                                                key={page}
+                                                onClick={() => handlePageChange(page)}
+                                                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-bold transition-all ${currentPage === page
+                                                    ? 'bg-primary-500 text-slate-900 shadow-lg shadow-primary-500/30'
+                                                    : 'text-slate-500 hover:bg-slate-200'
+                                                    }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        ))}
+
+                                        <button
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            disabled={currentPage === totalPages}
+                                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 disabled:opacity-30 disabled:hover:bg-transparent text-slate-500 transition-colors"
+                                        >
+                                            ›
+                                        </button>
+                                    </div>
+
+                                </div>
+
+                                {/* CONFIRMATION MODAL */}
+                                {showConfirmModal && (
+                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200">
+                                        <div className="bg-slate-800 border border-white/10 rounded-2xl p-8 max-w-md w-full shadow-2xl scale-100 animate-in zoom-in-95 duration-200">
+                                            <div className="w-16 h-16 bg-primary-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                                                <CheckCircle2 className="text-primary-500" size={32} />
+                                            </div>
+
+                                            <h3 className="text-xl font-bold text-white text-center mb-2">
+                                                Register via External Site
+                                            </h3>
+                                            <p className="text-slate-400 text-center text-sm mb-8">
+                                                You are about to be redirected to <strong>{pendingEventTitle}</strong>.
+                                                <br />Click "Yes" to proceed with registration and track it here.
+                                            </p>
+
+                                            <div className="flex gap-3">
+                                                <button
+                                                    onClick={() => {
+                                                        setShowConfirmModal(false);
+                                                        setPendingEventId(null);
+                                                        setPendingEventTitle("");
+                                                        setPendingEventUrl("");
+                                                    }}
+                                                    className="flex-1 py-3 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-bold transition-all"
+                                                >
+                                                    Cancel
+                                                </button>
+                                                <button
+                                                    onClick={confirmRegistration}
+                                                    className="flex-1 py-3 bg-primary-500 hover:bg-primary-600 text-slate-900 rounded-xl font-bold shadow-lg shadow-primary-500/20 transition-all"
+                                                >
+                                                    Yes, Proceed
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                            </>
+                        )}
+
+                        {showCreateEventModal && (
+                            <CreateEventModal
+                                isOpen={showCreateEventModal}
+                                onClose={() => setShowCreateEventModal(false)}
+                                onSave={handleCreateEvent}
+                                initialData={editingEvent}
+                                user={user}
+                            />
+                        )}
+
+                        <EventDetailModal
+                            isOpen={showDetailModal}
+                            onClose={() => setShowDetailModal(false)}
+                            event={selectedInternalEvent}
+                            onRegister={handleInternalRegistration}
+                            isRegistered={selectedInternalEvent && newlyRegisteredIds.includes(selectedInternalEvent.id)}
+                            user={user}
+                            onLogin={onLogout}
+                        />
+
+                        {/* NOTIFICATIONS MODAL */}
+                        {showNotifications && (
+                            <>
+                                <div className="fixed inset-0 z-50" onClick={() => setShowNotifications(false)} />
+                                <div className="absolute right-4 top-20 w-96 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200 max-h-96 overflow-hidden">
+                                    <div className="p-4 border-b border-slate-700">
+                                        <h3 className="text-lg font-bold text-white">Your Activities</h3>
+                                        <p className="text-sm text-slate-400">Recent and past event activities</p>
+                                    </div>
+
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {activitiesLoading ? (
+                                            <div className="p-4 text-center text-slate-500">Loading activities...</div>
+                                        ) : userActivities.length === 0 ? (
+                                            <div className="p-4 text-center text-slate-500">No activities found</div>
+                                        ) : (
+                                            userActivities.slice(0, 2).map((activity, index) => {
+                                                const getActivityIcon = (type) => {
+                                                    switch (type) {
+                                                        case 'event_created':
+                                                            return <Plus size={16} />;
+                                                        case 'event_registered':
+                                                            return <CheckCircle2 size={16} />;
+                                                        case 'new_follower':
+                                                            return <UserPlus size={16} />;
+                                                        case 'event_deleted':
+                                                            return <Trash2 size={16} />;
+                                                        default:
+                                                            return <Bell size={16} />;
+                                                    }
+                                                };
+
+                                                const getActivityColors = (type) => {
+                                                    switch (type) {
+                                                        case 'event_created':
+                                                            return 'bg-primary-500/20 text-primary-400';
+                                                        case 'event_registered':
+                                                            return 'bg-green-500/20 text-green-400';
+                                                        case 'new_follower':
+                                                            return 'bg-blue-500/20 text-blue-400';
+                                                        case 'event_deleted':
+                                                            return 'bg-red-500/20 text-red-400';
+                                                        default:
+                                                            return 'bg-slate-500/20 text-slate-400';
+                                                    }
+                                                };
+
+                                                const getActivityLabel = (type) => {
+                                                    switch (type) {
+                                                        case 'event_created':
+                                                            return 'Event Created';
+                                                        case 'event_registered':
+                                                            return 'Event Registered';
+                                                        case 'new_follower':
+                                                            return 'New Follower';
+                                                        case 'event_deleted':
+                                                            return 'Event Deleted';
+                                                        default:
+                                                            return 'Activity';
+                                                    }
+                                                };
+
+                                                return (
+                                                    <div key={index} className="p-4 border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                                                        <div className="flex items-start gap-3">
+                                                            {activity.type === 'new_follower' && activity.follower_image ? (
+                                                                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                                                    <img
+                                                                        src={activity.follower_image}
+                                                                        alt={activity.follower_name || activity.follower_email}
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={(e) => {
+                                                                            // Hide the broken image and show fallback emoji
+                                                                            e.target.style.display = 'none';
+                                                                            const fallbackDiv = e.target.nextSibling;
+                                                                            if (fallbackDiv) {
+                                                                                fallbackDiv.style.display = 'flex';
+                                                                            }
+                                                                        }}
+                                                                        style={{ display: 'block' }}
+                                                                    />
+                                                                    <div className={`w-full h-full rounded-full flex items-center justify-center text-xl font-bold shadow-md ${getActivityColors(activity.type)}`} style={{ display: 'none' }}>
+                                                                        {getIcon(activity.type)}
+                                                                    </div>
+                                                                </div>
+                                                            ) : activity.type === 'event_created' && activity.event_image ? (
+                                                                <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                                                    <img
+                                                                        src={activity.event_image}
+                                                                        alt={activity.title}
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={(e) => {
+                                                                            // Hide the broken image and show fallback emoji
+                                                                            e.target.style.display = 'none';
+                                                                            const fallbackDiv = e.target.nextSibling;
+                                                                            if (fallbackDiv) {
+                                                                                fallbackDiv.style.display = 'flex';
+                                                                            }
+                                                                        }}
+                                                                        style={{ display: 'block' }}
+                                                                    />
+                                                                    <div className={`w-full h-full rounded-full flex items-center justify-center text-xl font-bold shadow-md ${getActivityColors(activity.type)}`} style={{ display: 'none' }}>
+                                                                        {getIcon(activity.type)}
+                                                                    </div>
+                                                                </div>
+                                                            ) : activity.type === 'event_registered' && activity.image_url ? (
+                                                                <div className="w-8 h-8 rounded-lg overflow-hidden flex-shrink-0">
+                                                                    <img
+                                                                        src={activity.image_url}
+                                                                        alt={activity.title}
+                                                                        className="w-full h-full object-cover"
+                                                                        onError={(e) => {
+                                                                            // Hide the broken image and show fallback emoji
+                                                                            e.target.style.display = 'none';
+                                                                            const fallbackDiv = e.target.nextSibling;
+                                                                            if (fallbackDiv) {
+                                                                                fallbackDiv.style.display = 'flex';
+                                                                            }
+                                                                        }}
+                                                                        style={{ display: 'block' }}
+                                                                    />
+                                                                    <div className={`w-full h-full rounded-full flex items-center justify-center text-xl font-bold shadow-md ${getActivityColors(activity.type)}`} style={{ display: 'none' }}>
+                                                                        {getIcon(activity.type)}
+                                                                    </div>
+                                                                </div>
+                                                            ) : (
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${getActivityColors(activity.type)}`}>
+                                                                    {getActivityIcon(activity.type)}
+                                                                </div>
+                                                            )}
+                                                            <div className="flex-1 min-w-0">
+                                                                <p className="text-sm font-medium text-white truncate">
+                                                                    {activity.title}
+                                                                </p>
+                                                                <p className="text-xs text-slate-400 mt-1">
+                                                                    {getActivityLabel(activity.type)} • {activity.venue || activity.follower_name || 'N/A'}
+                                                                </p>
+                                                                <div className="text-xs text-slate-500 mt-1">
+                                                                    <p>{new Date(activity.date).toLocaleDateString()}</p>
+                                                                    {activity.confirmation_id && (
+                                                                        <p className="text-primary-400 font-mono font-medium mt-1">
+                                                                            ID: {activity.confirmation_id}
+                                                                        </p>
+                                                                    )}
+                                                                    {activity.follower_email && <p>{activity.follower_email}</p>}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })
+                                        )}
+                                    </div>
+
+                                    <div className="p-3 border-t border-slate-700 space-y-2">
+                                        <button
+                                            onClick={() => {
+                                                setShowNotifications(false);
+                                                setActiveView('notifications');
+                                            }}
+                                            className="w-full text-center text-sm text-primary-400 hover:text-primary-300 transition-colors"
+                                        >
+                                            Show More
+                                        </button>
+                                        <button
+                                            onClick={() => setShowNotifications(false)}
+                                            className="w-full text-center text-sm text-slate-400 hover:text-white transition-colors"
+                                        >
+                                            Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </>
+                        )}
+
+
+
+                        {/* Refresh registrations when navigating to My Registrations */}
+                        {activeView === 'my-registrations' && (
+                            <div style={{ display: 'none' }}>
+                                {/* Hidden trigger to refresh registrations when viewing My Registrations */}
+                                {(() => {
+                                    // This will trigger when activeView changes to 'my-registrations'
+                                    if (activeView === 'my-registrations') {
+                                        // We could fetch registrations here if needed, but MyRegistrationsPage handles it
+                                    }
+                                    return null;
+                                })()}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </main>
+        </div>
+    );
+}
+
+
+
+// --- SUBCOMPONENTS ---
+
+
+// function NavItem removed as it is now in Sidebar.jsx
+
+function StatCard({ title, value, subtext, subtextColor, icon }) {
+    return (
+        <div className="bg-white border border-slate-100 p-6 rounded-2xl flex items-start justify-between shadow-sm hover:shadow-md transition-shadow">
+            <div>
+                <p className="text-slate-500 text-sm font-medium mb-1">{title}</p>
+                <h3 className="text-2xl font-bold text-slate-900 mb-1">{value}</h3>
+                <p className={`text-xs ${subtextColor}`}>{subtext}</p>
+            </div>
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${icon.props.className?.includes('text-gold') ? 'bg-fuchsia-50 text-fuchsia-500' : 'bg-slate-50 text-slate-400'}`}>
+                {icon}
+            </div>
+        </div>
+    );
+}
+function FilterDropdown({ label, options, selected, onChange }) {
+    const [isOpen, setIsOpen] = useState(false);
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border transition-colors shadow-sm ${selected !== 'All'
+                    ? 'bg-fuchsia-50 border-fuchsia-200 text-fuchsia-600'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+            >
+                {label}: {selected}
+                <span className="text-[10px] opacity-50">▼</span>
+            </button>
+
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 z-10" onClick={() => setIsOpen(false)} />
+                    <div className="absolute top-full mt-2 left-0 w-40 bg-white border border-slate-200 shadow-xl rounded-lg overflow-hidden z-20">
+                        {options.map((option) => (
+                            <button
+                                key={option}
+                                onClick={() => {
+                                    onChange(option);
+                                    setIsOpen(false);
+                                }}
+                                className={`w-full text-left px-4 py-2 text-sm hover:bg-slate-50 transition-colors ${selected === option ? 'bg-fuchsia-50 text-fuchsia-600 font-semibold' : 'text-slate-600'}`}
+                            >
+                                {option}
+                            </button>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    )
+}
+
+function EventCard({ event, onRegister, isRegistered, user, onNavigate }) {
+    const [registering, setRegistering] = useState(false);
+
+    // Check if current user is the creator
+    const isCreator = user && event.raw_data?.created_by === user.email;
+
+    const handleClick = async () => {
+        if (event.raw_data?.source === 'InfiniteBZ') {
+            onRegister(); // Parent handles opening modal
+        } else {
+            // For ALL external events (Eventbrite, Meetup, AllEvents, etc.)
+            // Trigger the parent's handleRegisterClick to show confirmation modal
+            setRegistering(true);
+            await onRegister();
+            setRegistering(false);
+        }
+    };
+
+    return (
+        <div className="bg-white border border-slate-200 rounded-[1.25rem] overflow-hidden flex flex-col h-full hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 group">
+            {/* Image Section */}
+            <div className="relative aspect-[4/3] overflow-hidden shrink-0">
+                <img
+                    src={event.image_url || `https://images.unsplash.com/photo-${[
+                        "1540575861501-7cf05a4b125a",
+                        "1505373630103-89d00c2a5851",
+                        "1475721027785-f74eccf877e2",
+                        "1511795409834-ef04bbd61622",
+                        "1587825140708-dfaf72ae4b04",
+                        "1431540015161-0bf868a2d407"
+                    ][event.id % 6]}?q=80&w=1000&auto=format&fit=crop`}
+                    alt={event.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    onError={(e) => {
+                        e.target.onerror = null;
+                        const fallbacks = ["1540575861501-7cf05a4b125a", "1505373630103-89d00c2a5851", "1475721027785-f74eccf877e2", "1511795409834-ef04bbd61622"];
+                        e.target.src = `https://images.unsplash.com/photo-${fallbacks[event.id % 4]}?q=80&w=1000&auto=format&fit=crop`;
+                    }}
+                />
+
+                {/* Badges on Image */}
+                <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+                    {event.is_free && (
+                        <span className="px-2.5 py-1 bg-green-500 text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-lg">
+                            FREE
+                        </span>
+                    )}
+                    <span className="px-2.5 py-1 bg-slate-900/80 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-wider rounded-lg shadow-lg">
+                        {event.online_event ? 'ONLINE' : 'IN PERSON'}
+                    </span>
+                </div>
+            </div>
+
+            {/* Content Section */}
+            <div className="p-5 flex flex-col flex-1">
+                <h3 className="text-base font-black text-slate-900 mb-4 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors">
+                    {event.title}
+                </h3>
+
+                <div className="space-y-3 mb-6 flex-1">
+                    <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                        <Calendar size={14} className="text-indigo-500" />
+                        <span>{new Date(event.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} • {new Date(event.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+
+                    {!event.online_event && event.venue_name ? (
+                        <div className="flex items-start gap-2.5 text-xs text-slate-500 font-medium">
+                            <MapPin size={14} className="text-indigo-500 shrink-0 mt-0.5" />
+                            <span className="line-clamp-1">{event.venue_name}</span>
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                            <Globe size={14} className="text-indigo-500" />
+                            <span>Online Event</span>
+                        </div>
+                    )}
+
+                    <div className="flex items-center gap-2.5 text-xs text-slate-500 font-medium">
+                        <EventSourceBadge source={event.raw_data?.source} />
+                    </div>
+
+                    <div className="pt-2">
+                        <span className="text-[11px] text-slate-400 font-bold">By {event.organizer_name || "Unknown Organizer"}</span>
+                    </div>
+                </div>
+
+                <button
+                    onClick={handleClick}
+                    disabled={registering || isRegistered}
+                    className={`w-full py-3.5 rounded-xl font-black text-xs uppercase tracking-[0.15em] transition-all duration-300 ${isRegistered
+                        ? 'bg-green-100 text-green-700 cursor-default shadow-sm'
+                        : registering
+                            ? 'bg-slate-100 text-slate-400 cursor-wait'
+                            : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/25 active:scale-[0.98]'
+                        }`}
+                >
+                    {isRegistered ? 'Registered' : registering ? 'Processing...' : 'Register'}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function EventSourceBadge({ source }) {
+    const sourceLower = (source || "eventbrite").toLowerCase();
+
+    let label, fullName, colorClass, textColor;
+
+    if (sourceLower === 'infinitebz') {
+        label = <Infinity size={14} strokeWidth={3} className="text-white" />;
+        fullName = "InfiniteBZ";
+        colorClass = "bg-gradient-to-r from-indigo-500 to-indigo-600";
+        textColor = "text-indigo-600";
+    } else if (sourceLower === 'meetup') {
+        // Meetup - User requested "M" and "Yellow"
+        // Using yellow border/text and explicit "M"
+        label = (
+            <span className="text-[#FFD700] font-black text-sm">M</span>
+        );
+        fullName = "Meetup";
+        colorClass = "bg-white border border-[#FFD700]";
+        textColor = "text-[#FFD700]";
+    } else if (sourceLower === 'trade_centre' || sourceLower === 'ctc') {
+        // CTC Brown/Rust #A52A2A - Box Logo Style
+        label = (
+            <div className="flex items-center justify-center w-full h-full bg-[#A52A2A] text-white text-[8px] font-black leading-none">
+                TN
+            </div>
+        );
+        fullName = "Trade Centre";
+        colorClass = "bg-white border border-[#A52A2A]";
+        textColor = "text-[#A52A2A]";
+    } else if (sourceLower === 'allevents') {
+        // AllEvents Cyan #30C5DA - Hexagon 'ae'
+        label = (
+            <svg viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-[#30C5DA]">
+                <path d="M12 2l8.66 5v10L12 22l-8.66-5V7L12 2z" fill="none" stroke="currentColor" strokeWidth="2.5" />
+                <text x="12" y="16" textAnchor="middle" fontSize="11" fill="currentColor" fontWeight="bold" className="font-sans">ae</text>
+            </svg>
+        );
+        fullName = "AllEvents";
+        colorClass = "bg-white border border-[#30C5DA]";
+        textColor = "text-[#30C5DA]";
+    } else {
+        // Eventbrite Orange #F05537 - "𝓔"
+        label = (
+            <span className="text-[#F05537] font-black text-sm">E</span>
+        );
+        fullName = "Eventbrite";
+        colorClass = "bg-white border border-[#F05537]";
+        textColor = "text-[#F05537]";
+    }
+
+    return (
+        <>
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold text-white overflow-hidden ${colorClass}`}>
+                {label}
+            </div>
+            <span className={`text-xs font-medium ${textColor}`}>
+                {fullName}
+            </span>
+        </>
+    );
+}
+
+function OldCodeRemoved() { return null; }
+
+function NotificationDropdown() {
+    const [isOpen, setIsOpen] = useState(false);
+    // MOCK DATA for now
+    const [notifications, setNotifications] = useState([
+        { id: 1, title: 'Registration Successful', message: 'You are booked for "Startup Summit"!', type: 'success', time: '2m ago', isRead: false },
+        { id: 2, title: 'New Event Alert', message: '3 new tech events in Chennai.', type: 'info', time: '1h ago', isRead: false },
+        { id: 3, title: 'System Update', message: 'Dashboard colors updated successfully.', type: 'info', time: '1d ago', isRead: true }
+    ]);
+
+    const unreadCount = notifications.filter(n => !n.isRead).length;
+
+    const markAsRead = (id) => {
+        setNotifications(notifications.map(n => n.id === id ? { ...n, isRead: true } : n));
+    };
+
+    const markAllRead = () => {
+        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+    };
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`relative p-2 rounded-full transition-colors ${isOpen ? 'bg-slate-700 text-white' : 'text-slate-500 hover:text-sky-500 hover:bg-slate-800'}`}
+            >
+                <Bell size={20} />
+                {unreadCount > 0 && (
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-slate-900"></span>
+                )}
+            </button>
+
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 z-20" onClick={() => setIsOpen(false)} />
+                    <div className="absolute right-0 top-full mt-2 w-80 bg-slate-800 border border-slate-700 shadow-xl rounded-xl overflow-hidden z-30 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700 bg-slate-900/50">
+                            <h3 className="text-sm font-bold text-white">Notifications</h3>
+                            {unreadCount > 0 && (
+                                <button onClick={markAllRead} className="text-[10px] font-bold text-sky-500 hover:text-sky-400 uppercase tracking-wide">
+                                    Mark all read
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="max-h-[300px] overflow-y-auto">
+                            {notifications.length === 0 ? (
+                                <div className="p-8 text-center text-slate-500 text-sm">
+                                    No notifications yet.
+                                </div>
+                            ) : (
+                                notifications.map(n => (
+                                    <div
+                                        key={n.id}
+                                        onClick={() => markAsRead(n.id)}
+                                        className={`px-4 py-3 border-b border-slate-700/50 hover:bg-slate-700/50 transition-colors cursor-pointer flex gap-3 ${n.isRead ? 'opacity-60' : 'bg-slate-700/20'}`}
+                                    >
+                                        <div className={`mt-1 w-2 h-2 rounded-full shrink-0 ${n.type === 'success' ? 'bg-green-500' : 'bg-sky-500'}`} />
+                                        <div>
+                                            <p className={`text-sm ${n.isRead ? 'font-medium text-slate-400' : 'font-bold text-white'}`}>
+                                                {n.title}
+                                            </p>
+                                            <p className="text-xs text-slate-500 mt-0.5 line-clamp-2">
+                                                {n.message}
+                                            </p>
+                                            <p className="text-[10px] text-slate-600 mt-1.5 font-medium">{n.time}</p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                        <div className="bg-slate-900/50 px-4 py-2 text-center border-t border-slate-700">
+                            <button className="text-xs font-bold text-slate-400 hover:text-white transition-colors">
+                                View All Activity
+                            </button>
+                        </div>
+                    </div>
+                </>
+            )}
+        </div>
+    );
+}
