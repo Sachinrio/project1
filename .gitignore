@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -14,16 +13,16 @@ dist-ssr
 *.local
 
 # Editor directories and files
-.vscode/*
+.vscode/
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-=======
+
 # Python
 __pycache__/
 *.pyc
@@ -42,16 +41,12 @@ pip-delete-this-directory.txt
 nosetests.xml
 coverage.xml
 *.cover
-*.log
 .pytest_cache/
 .mypy_cache/
 
 # Node
 node_modules/
 dist/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 .pnpm-debug.log*
 
 # Environment Variables
@@ -62,11 +57,6 @@ yarn-error.log*
 .env.production.local
 
 # IDEs and Editors
-.idea/
-.vscode/
-*.swp
-*.swo
-.DS_Store
 Thumbs.db
 
 # Project Specific
@@ -77,4 +67,6 @@ chrome_profile/
 backend/tickets/
 backend/uploads/
 backend/debug_email_identity.txt
->>>>>>> ca8320614c722af5ea1b972d8929650161ba53e5
+backend/pw-browsers/
+backend/scraper.log
+frontend/node_modules/

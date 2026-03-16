@@ -15,12 +15,12 @@ export default defineConfig(({ mode }) => {
       strictPort: true,
       proxy: {
         '/api': {
-          target: 'http://127.0.0.1:8001', // Changed to local backend
+          target: 'http://127.0.0.1:8000', // Changed to local backend
           changeOrigin: true,
           secure: false,
         },
         '/uploads': {
-          target: 'http://127.0.0.1:8001',
+          target: 'http://127.0.0.1:8000',
           changeOrigin: true,
           secure: false,
         }

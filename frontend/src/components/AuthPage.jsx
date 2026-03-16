@@ -105,6 +105,9 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
             } else {
                 const text = await res.text();
                 console.error("Non-JSON response:", res.status, text);
+                if (res.status === 404 || res.status === 503 || res.status === 500) {
+                   throw new Error("Backend server unreachable or misconfigured. Please check deployment.");
+                }
                 throw new Error(`Login failed: Server returned ${res.status}. Check console for details.`);
             }
 
