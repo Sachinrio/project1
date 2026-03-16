@@ -26,6 +26,7 @@ elif DATABASE_URL and DATABASE_URL.startswith("postgresql://"):
     DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
 
 import ssl
+import traceback
 
 # Advanced Fix for Render/Neon SSL issues
 connect_args = {}
@@ -34,18 +35,15 @@ if DATABASE_URL:
     # external URLs usually have render.com or neon.tech
     if any(domain in DATABASE_URL for domain in ["render.com", "neon.tech", "pooler.supabase.com"]):
         if "internal" not in DATABASE_URL:
-            # External connection needs SSL
-            ctx = ssl.create_default_context()
-            ctx.check_hostname = False
-            ctx.verify_mode = ssl.CERT_NONE
-            connect_args["ssl"] = ctx
-            print("DATABASE: SSL (unverified) enabled for external connection.")
+            # External connection needs SSL. simplified 'True' for asyncpg
+            connect_args["ssl"] = True
+            print("DATABASE: SSL enabled for external connection.")
         else:
-            # Internal Render URLs usually don't need SSL, but if they fail, try ssl=True
+            # Internal Render URLs usually don't need SSL
             connect_args["ssl"] = False 
             print("DATABASE: Internal connection detected. SSL disabled for handshake.")
 
-# Add command timeout specifically for asyncpg if needed
+# Add command timeout specifically for asyncpg
 connect_args["command_timeout"] = 60
 
 # Create the engine with optimized pool settings
@@ -76,7 +74,8 @@ async def init_db():
             print("DATABASE: Initialization successful!")
             return
         except Exception as e:
-            print(f"DATABASE: Initialization attempt {attempt} failed: {e}")
+            print(f"DATABASE: Initialization attempt {attempt} failed.")
+            traceback.print_exc() # Show the full error in Render logs
             if attempt < max_retries:
                 print(f"DATABASE: Retrying in {retry_delay} seconds...")
                 await asyncio.sleep(retry_delay)
