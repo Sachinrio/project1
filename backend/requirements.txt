@@ -37,6 +37,7 @@ qrcode==7.4.2
 
 # Email
 mailjet-rest==1.3.4
+sendgrid==6.11.0
 email-validator>=2.0.0
 fastapi-mail==1.4.1
 
