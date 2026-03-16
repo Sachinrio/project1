@@ -1,12 +1,16 @@
-import asyncio
-from datetime import datetime
-from app.core.database import get_session
-from app.models.schemas import Event
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Hardcoded from your config
-DATABASE_URL = "postgresql+asyncpg://postgres:Sankar%40722001@localhost:5432/infinitetechai"
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql+asyncpg://postgres:Sankar%40722001@localhost:5432/infinitetechai"
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(DATABASE_URL)
 
 async def seed():

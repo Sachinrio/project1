@@ -3,12 +3,13 @@ import sqlite3
 import os
 from sqlalchemy import create_engine, text
 
-# Get DB URL from env or default
-db_url = "postgresql+asyncpg://postgres:postgres@localhost:5432/infinite_bz" 
-# Wait, let's use the actual engine config from the app
+# Get DB URL from app config
 from app.core.database import DATABASE_URL
+
 # Convert asyncpg to psycopg2 for sync run
-sync_url = DATABASE_URL.replace("asyncpg", "psycopg2")
+sync_url = DATABASE_URL
+if "asyncpg" in sync_url:
+    sync_url = sync_url.replace("asyncpg", "psycopg2")
 
 engine = create_engine(sync_url)
 with engine.connect() as conn:

@@ -1,15 +1,21 @@
-import asyncio
-import sys
-from sqlalchemy.ext.asyncio import create_async_engine
+import os
+from dotenv import load_dotenv
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
-from app.models.schemas import Event
+from sqlalchemy import select
+from models import Event
+import asyncio
 
-if sys.platform == 'win32':
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+load_dotenv()
 
-DATABASE_URL = "postgresql+asyncpg://postgres:Sankar%40722001@localhost:5432/infinitetechai"
+# Connection String
+DATABASE_URL = os.getenv("DATABASE_URL")
+if not DATABASE_URL:
+    DATABASE_URL = "postgresql+asyncpg://postgres:Sankar%40722001@localhost:5432/infinitetechai"
+
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+
 engine = create_async_engine(DATABASE_URL)
 
 async def verify_data():

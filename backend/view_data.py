@@ -11,14 +11,10 @@ import sys
 # Add current directory to path so imports work
 sys.path.append(os.getcwd())
 
-# DATABASE_URL from environment or hardcoded fallback (same as in database.py)
+# DATABASE_URL from environment or hardcoded fallback
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    print("Database URL not found in env, using default from database.py logic...")
-    # Using the Render internal URL found in database.py for convenience if env is missing
-    # Note: This only works if running from a machine that can access this URL (Render internal network)
-    # If running locally, you might need the external URL.
-    # For now, let's assume the user has the env var set or we fallback to local dev
+    print("Database URL not found in env, using local default...")
     DATABASE_URL = "postgresql+asyncpg://postgres:postgres@localhost:5432/infinite_bz"
 
 # Ensure asyncpg

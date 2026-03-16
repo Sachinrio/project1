@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Logs
 logs
 *.log
@@ -22,7 +23,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
+=======
 # Python
 __pycache__/
 *.pyc
@@ -76,13 +77,4 @@ chrome_profile/
 backend/tickets/
 backend/uploads/
 backend/debug_email_identity.txt
-backend/pw-browsers/
-backend/debug_git.py
-app.db
-out.txt
-backend/err.txt
-backend/fixed_output.txt
-backend/meetup_output.txt
-backend/test_output.txt
-backend/test_result.txt
-backend/scraper.log
+>>>>>>> ca8320614c722af5ea1b972d8929650161ba53e5

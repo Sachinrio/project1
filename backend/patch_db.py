@@ -1,12 +1,20 @@
 import asyncio
 import asyncpg
+import os
+from dotenv import load_dotenv
+# Get DB URL from app config
+from app.core.database import DATABASE_URL
+
+load_dotenv()
 
 async def patch_database():
-    # Connection strings from database.py
-    # DATABASE_URL = "postgresql+asyncpg://postgres:12345@localhost:5432/events_hub"
-    # we need the asyncpg version without the driver prefix for raw connection
-    conn_str = "postgresql://postgres:12345@localhost:5432/events_hub"
-    
+    # Use the DATABASE_URL from our core config, but strip the +asyncpg for the raw asyncpg driver
+    conn_str = DATABASE_URL
+    if "+asyncpg" in conn_str:
+        conn_str = conn_str.replace("+asyncpg", "")
+    elif conn_str.startswith("postgres://"):
+        conn_str = conn_str.replace("postgres://", "postgresql://", 1)
+        
     try:
         print(f"🔌 Connecting to {conn_str}...")
         conn = await asyncpg.connect(conn_str)

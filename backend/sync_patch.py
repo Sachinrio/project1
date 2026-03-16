@@ -1,9 +1,17 @@
-
+import os
+from dotenv import load_dotenv
 import psycopg2
 from psycopg2 import sql
 
+load_dotenv()
+
 def patch_database():
-    conn_str = "postgresql://postgres:12345@localhost:5432/events_hub"
+    conn_str = os.getenv("DATABASE_URL", "postgresql://postgres:12345@localhost:5432/events_hub")
+    
+    if "+asyncpg" in conn_str:
+        conn_str = conn_str.replace("+asyncpg", "")
+    elif conn_str.startswith("postgresql+asyncpg://"):
+        conn_str = conn_str.replace("postgresql+asyncpg://", "postgresql://")
     
     try:
         print(f"Connecting to {conn_str}...")

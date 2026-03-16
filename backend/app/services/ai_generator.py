@@ -10,6 +10,11 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from typing import List, Optional
 from .browser_searcher import browser_searcher
 
+import langchain
+# Patch for missing verbose attribute in some langchain versions
+if not hasattr(langchain, "verbose"):
+    langchain.verbose = False
+
 # Define Pydantic models for Langchain parsing
 class AgendaItem(BaseModel):
     time: str = Field(description="Time of the session (e.g., 10:00 AM)")
