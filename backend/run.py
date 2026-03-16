@@ -11,11 +11,18 @@ if __name__ == "__main__":
     # We installed chromium locally to ./pw-browsers during build.sh
     root_dir = os.path.dirname(os.path.abspath(__file__))
     custom_pw_path = os.path.join(root_dir, "pw-browsers")
-    if os.path.exists(custom_pw_path):
+    
+    # Check if the path is already set by render_start.sh (preferred)
+    env_pw_path = os.environ.get("PLAYWRIGHT_BROWSERS_PATH")
+    
+    if env_pw_path and os.path.exists(env_pw_path):
+        print(f"STARTUP: Using PLAYWRIGHT_BROWSERS_PATH from environment: {env_pw_path}")
+    elif os.path.exists(custom_pw_path):
         os.environ["PLAYWRIGHT_BROWSERS_PATH"] = custom_pw_path
-        print(f"Set PLAYWRIGHT_BROWSERS_PATH to {custom_pw_path}")
+        print(f"STARTUP: Found custom browsers at {custom_pw_path}")
     else:
-        print("WARNING: Custom Playwright path not found. Proceeding with system defaults.")
+        print(f"WARNING: Playwright browsers NOT FOUND at {custom_pw_path} or via ENV.")
+        print("Scrapers will likely fail unless 'playwright install' was run globally.")
 
     # 2. Force Proactor Loop for Playwright on Windows
     if sys.platform == 'win32':
