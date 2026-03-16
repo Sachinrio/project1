@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Eye, EyeOff, Loader2, Calendar, MapPin, Search, ArrowRight, CheckCircle2, Linkedin, ShieldCheck, Check, X, ArrowLeft } from 'lucide-react';
 import { TermsModal, PrivacyModal } from './LegalDocs';
 import { GoogleLogin } from '@react-oauth/google';
+import { API_ENDPOINTS } from '../api_config';
 
 export default function AuthPage({ onBack, onComplete, initialMode = 'login', initialEmail = '' }) {
     const [mode, setMode] = useState(initialMode); // 'login' | 'signup' | 'forgot'
@@ -30,7 +31,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
         setVerifyStatus('sending');
         setError(null);
         try {
-            const res = await fetch('/api/v1/auth/verify-email/send', {
+            const res = await fetch(API_ENDPOINTS.VERIFY_EMAIL_SEND, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email }),
@@ -51,7 +52,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
             return;
         }
         try {
-            const res = await fetch('/api/v1/auth/verify-email/check', {
+            const res = await fetch(API_ENDPOINTS.VERIFY_EMAIL_CHECK, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, otp: verificationOtp }),
@@ -91,7 +92,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
             formData.append('username', email);
             formData.append('password', password);
 
-            const res = await fetch('/api/v1/auth/login', {
+            const res = await fetch(API_ENDPOINTS.LOGIN, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData,
@@ -122,7 +123,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
         setLoading(true);
         setError(null);
         try {
-            const res = await fetch('/api/v1/auth/google', {
+            const res = await fetch(API_ENDPOINTS.GOOGLE_AUTH, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ token: credentialResponse.credential }),
@@ -159,7 +160,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
         }
 
         try {
-            const res = await fetch('/api/v1/auth/register', {
+            const res = await fetch(API_ENDPOINTS.REGISTER, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -190,7 +191,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
         try {
             if (resetStep === 1) {
                 // Step 1: Request OTP
-                const res = await fetch('/api/v1/auth/forgot-password', {
+                const res = await fetch(API_ENDPOINTS.FORGOT_PASSWORD, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email }),
@@ -208,7 +209,7 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
                     throw new Error("Passwords do not match");
                 }
 
-                const res = await fetch('/api/v1/auth/reset-password', {
+                const res = await fetch(API_ENDPOINTS.RESET_PASSWORD, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({

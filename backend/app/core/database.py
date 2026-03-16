@@ -43,7 +43,10 @@ if DATABASE_URL:
         else:
             # Internal Render URLs usually don't need SSL, but if they fail, try ssl=True
             connect_args["ssl"] = False 
-            print("DATABASE: Optimization - SSL disabled for internal connection.")
+            print("DATABASE: Internal connection detected. SSL disabled for handshake.")
+
+# Add command timeout specifically for asyncpg if needed
+connect_args["command_timeout"] = 60
 
 # Create the engine with optimized pool settings
 engine = create_async_engine(

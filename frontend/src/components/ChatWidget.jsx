@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, X, Bot, User, Minimize2, Maximize2, Sparkles, Trash2, Zap, MapPin, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
+import { API_ENDPOINTS } from '../api_config';
 
 export default function ChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
@@ -27,7 +28,7 @@ export default function ChatWidget() {
 
                 try {
                     const token = localStorage.getItem('token');
-                    const res = await fetch('/api/chat', {
+                    const res = await fetch(API_ENDPOINTS.CHAT, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -81,7 +82,7 @@ export default function ChatWidget() {
             const page = window.location.pathname;
 
             const token = localStorage.getItem('token');
-            const res = await fetch('/api/chat', {
+            const res = await fetch(API_ENDPOINTS.CHAT, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
