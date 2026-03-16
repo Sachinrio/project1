@@ -18,4 +18,4 @@ echo "Installing browsers to $PLAYWRIGHT_BROWSERS_PATH"
 rm -rf "$PLAYWRIGHT_BROWSERS_PATH"
 mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
 
-playwright install chromium --with-deps
+python -m playwright install chromium
