@@ -25,29 +25,43 @@ async def run_full_scrape_cycle():
     print("EVENT MANAGER: Starting Full Scrape Cycle...")
     
     async def run_playwright_scraper(scraper_class):
+        print(f"EVENT MANAGER: Setting up Playwright for {scraper_class.__name__}...", flush=True)
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(
-                    headless=True,
-                    args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
-                )
-                page = await browser.new_page()
-                
-                # Block heavy assets to prevent OOM
-                async def route_handler(route):
-                    if route.request.resource_type in ["image", "media", "font"]:
-                        await route.abort()
-                    else:
-                        await route.continue_()
-                await page.route("**/*", route_handler)
-                
-                scraper = scraper_class()
-                events = await scraper.scrape(page)
-                await browser.close()
-                return events
-        except Exception as e:
-            print(f"{scraper_class.__name__} Error: {e}")
+            # 5 Minute Max Timeout for any single scraper
+            return await asyncio.wait_for(_run_playwright_internal(scraper_class), timeout=300)
+        except asyncio.TimeoutError:
+            print(f"{scraper_class.__name__} Error: Timeout exceeded (5 minutes).", flush=True)
             return []
+        except Exception as e:
+            print(f"{scraper_class.__name__} Error: {e}", flush=True)
+            return []
+
+    async def _run_playwright_internal(scraper_class):
+        async with async_playwright() as p:
+            print(f"EVENT MANAGER: Launching headless Chromium for {scraper_class.__name__}...", flush=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+            )
+            print(f"EVENT MANAGER: Chromium launched. Creating new page...", flush=True)
+            page = await browser.new_page()
+            print(f"EVENT MANAGER: Page created. Attaching network blockers...", flush=True)
+            
+            # Block heavy assets to prevent OOM
+            async def route_handler(route):
+                if route.request.resource_type in ["image", "media", "font"]:
+                    await route.abort()
+                else:
+                    await route.continue_()
+            await page.route("**/*", route_handler)
+            
+            print(f"EVENT MANAGER: Network blockers active. Executing scrape()...", flush=True)
+            scraper = scraper_class()
+            events = await scraper.scrape(page)
+            
+            print(f"EVENT MANAGER: Closing browser...", flush=True)
+            await browser.close()
+            return events
 
     # Run sequentially to prevent Out of Memory (OOM) crashes on Render
     try:
