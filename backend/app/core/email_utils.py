@@ -141,7 +141,7 @@ async def send_ticket_email(email: EmailStr, name: str, event_title: str, event_
                 {"<p>Your ticket is attached to this email as a PDF.</p>" if ticket_path else ""}
                 <br/>
                 <div style="text-align: center;">
-                    <a href="http://localhost:5174/?view=ticket-details&eventId={event_id}&email={email}&ticketId={ticket_id}&eventName={quote(event_title)}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 8px; font-weight: bold;">Go to Ticket Box</a>
+                    <a href="{os.getenv('FRONTEND_URL', 'http://localhost:5174').rstrip('/')}/?view=ticket-details&eventId={event_id}&email={email}&ticketId={ticket_id}&eventName={quote(event_title)}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 8px; font-weight: bold;">Go to Ticket Box</a>
                 </div>
                 <br/>
                 <p style="font-size: 12px; color: #888;">Powered by Infinite BZ Event Platform</p>
@@ -308,7 +308,7 @@ async def send_event_ticket_email(email: EmailStr, event_data: dict, confirmatio
                     <img src="data:image/png;base64,{qr_base64}" alt="QR Code" style="max-width: 200px;" />
                     <br/>
                     <div style="text-align: center; margin-top: 20px;">
-                        <a href="http://localhost:5174/?view=ticket-details&eventId={event_data.get('id', '')}&email={email}&ticketId={unique_ticket_id}&eventName={quote(event_data.get('title', ''))}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 8px; font-weight: bold;">Go to Ticket</a>
+                        <a href="{os.getenv('FRONTEND_URL', 'http://localhost:5174').rstrip('/')}/?view=ticket-details&eventId={event_data.get('id', '')}&email={email}&ticketId={unique_ticket_id}&eventName={quote(event_data.get('title', ''))}" style="background-color: #38BDF8; color: white; padding: 15px 32px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; border-radius: 8px; font-weight: bold;">Go to Ticket</a>
                     </div>
                 </div>
             </body>

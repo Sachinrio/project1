@@ -46,9 +46,9 @@ async def upload_file(file: UploadFile = File(...)):
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
             
-        # Return URL (Assuming localhost for dev, needs env var for prod)
-        # Using a relative path that frontend can prepend domain to, or full path if simple
-        return {"url": f"http://localhost:8000/uploads/{filename}"}
+        # Return URL using BACKEND_URL environment variable 
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000").rstrip("/")
+        return {"url": f"{backend_url}/uploads/{filename}"}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"File upload failed: {str(e)}")

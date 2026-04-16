@@ -4,7 +4,7 @@ import os
 
 class BaseScraper:
     # Use environment variable for security, fallback to provided key if not set (though env is preferred)
-    SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY", "b58f4363957c7716d677f77594d25ef0") 
+    SCRAPER_API_KEY = os.getenv("SCRAPER_API_KEY") 
     
     def get_proxy_url(self, target_url: str, render_js: bool = True):
         """
