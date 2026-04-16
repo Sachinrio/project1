@@ -1,3 +1,8 @@
+"""
+Event Manager — Orchestrates all scrapers and saves results to DB.
+ALL scrapers are now HTTP-only (no Playwright/Chromium).
+This is required for Render's free tier (512MB RAM).
+"""
 
 import asyncio
 from sqlalchemy import delete
@@ -9,189 +14,134 @@ from datetime import datetime
 from app.core.database import engine
 from app.models.schemas import Event
 
-# Import Scrapers
+# Import HTTP-only Scrapers
 print("EVENT MANAGER: Importing scrapers...", flush=True)
 from app.services.scrapers.meetup import MeetupScraper
 from app.services.scrapers.allevents import AllEventsScraper
 from app.services.scrapers.trade_centre import CTCScraper
-from app.services.scraper import scrape_events_playwright # Eventbrite Scraper
-from playwright.async_api import async_playwright
+from app.services.scraper import scrape_events_playwright   # Eventbrite (HTTP)
 print("EVENT MANAGER: Scrapers imported.", flush=True)
+
+
+async def _run_scraper_safe(name: str, coro) -> list:
+    """Runs a scraper coroutine with a timeout and error guard."""
+    print(f"EVENT MANAGER: Starting {name}...", flush=True)
+    try:
+        result = await asyncio.wait_for(coro, timeout=120)  # 2-min max per scraper
+        print(f"EVENT MANAGER: {name} finished. Found {len(result)} events.", flush=True)
+        return result
+    except asyncio.TimeoutError:
+        print(f"EVENT MANAGER: {name} timed out after 2 minutes.", flush=True)
+        return []
+    except Exception as e:
+        print(f"EVENT MANAGER: {name} failed: {e}", flush=True)
+        return []
+
 
 async def run_full_scrape_cycle():
     """
-    Orchestrator that runs all scrapers and updates DB.
+    Orchestrator: runs all HTTP scrapers sequentially and saves results to DB.
+    No Playwright/Chromium is spawned at all — safe for Render free tier.
     """
-    print("EVENT MANAGER: Starting Full Scrape Cycle...")
-    
-    async def run_playwright_scraper(scraper_class):
-        print(f"EVENT MANAGER: Setting up Playwright for {scraper_class.__name__}...", flush=True)
-        try:
-            # 5 Minute Max Timeout for any single scraper
-            return await asyncio.wait_for(_run_playwright_internal(scraper_class), timeout=300)
-        except asyncio.TimeoutError:
-            print(f"{scraper_class.__name__} Error: Timeout exceeded (5 minutes).", flush=True)
-            return []
-        except Exception as e:
-            print(f"{scraper_class.__name__} Error: {e}", flush=True)
-            return []
+    print("EVENT MANAGER: Starting Full Scrape Cycle (HTTP-only mode)...", flush=True)
 
-    async def _run_playwright_internal(scraper_class):
-        async with async_playwright() as p:
-            print(f"EVENT MANAGER: Launching headless Chromium for {scraper_class.__name__}...", flush=True)
-            browser = await p.chromium.launch(
-                headless=True,
-                args=[
-                    "--no-sandbox", 
-                    "--disable-dev-shm-usage", 
-                    "--disable-gpu",
-                    "--single-process",
-                    "--disable-setuid-sandbox",
-                    "--no-zygote"
-                ]
-            )
-            print(f"EVENT MANAGER: Chromium launched. Creating new page...", flush=True)
-            page = await browser.new_page()
-            print(f"EVENT MANAGER: Page created. Attaching network blockers...", flush=True)
-            
-            # Block heavy assets to prevent OOM
-            async def route_handler(route):
-                if route.request.resource_type in ["image", "media", "font"]:
-                    await route.abort()
-                else:
-                    await route.continue_()
-            await page.route("**/*", route_handler)
-            
-            print(f"EVENT MANAGER: Network blockers active. Executing scrape()...", flush=True)
-            scraper = scraper_class()
-            events = await scraper.scrape(page)
-            
-            print(f"EVENT MANAGER: Closing browser...", flush=True)
-            await browser.close()
-            return events
+    meetup_scraper = MeetupScraper()
+    allevents_scraper = AllEventsScraper()
+    ctc_scraper = CTCScraper()
 
-    # Run sequentially to prevent Out of Memory (OOM) crashes on Render
-    try:
-        print("EVENT MANAGER: Launching Meetup Scraper (1/4)...", flush=True)
-        meetup_events = await run_playwright_scraper(MeetupScraper)
-        print(f"EVENT MANAGER: Meetup finished! Found {len(meetup_events)} events.", flush=True)
-    except Exception as e:
-        print(f"EVENT MANAGER: Meetup failed: {e}", flush=True)
-        meetup_events = []
-        
-    try:
-        print("\nEVENT MANAGER: Launching AllEvents Scraper (2/4)...", flush=True)
-        allevents = await run_playwright_scraper(AllEventsScraper)
-        print(f"EVENT MANAGER: AllEvents finished! Found {len(allevents)} events.", flush=True)
-    except Exception as e:
-        print(f"EVENT MANAGER: AllEvents failed: {e}", flush=True)
-        allevents = []
-        
-    try:
-        print("\nEVENT MANAGER: Launching CTC Scraper (3/4)...", flush=True)
-        ctc_events = await run_playwright_scraper(CTCScraper)
-        print(f"EVENT MANAGER: CTC finished! Found {len(ctc_events)} events.", flush=True)
-    except Exception as e:
-        print(f"EVENT MANAGER: CTC failed: {e}", flush=True)
-        ctc_events = []
-        
-    try:
-        print("\nEVENT MANAGER: Launching Eventbrite Scraper (4/4)...", flush=True)
-        eb_events = await scrape_events_playwright("chennai")
-        print(f"EVENT MANAGER: Eventbrite finished! Found {len(eb_events)} events.", flush=True)
-    except Exception as e:
-        print(f"EVENT MANAGER: Eventbrite failed: {e}", flush=True)
-        eb_events = []
+    # Run sequentially (small delay between each to avoid hammering Render's network)
+    meetup_events = await _run_scraper_safe("Meetup (1/4)", meetup_scraper.scrape_http())
+    await asyncio.sleep(1)
 
-    results = [meetup_events, allevents, ctc_events, eb_events]
-    all_new_events = []
-    for res in results:
-        all_new_events.extend(res)
+    allevents_events = await _run_scraper_safe("AllEvents (2/4)", allevents_scraper.scrape_http())
+    await asyncio.sleep(1)
 
-    print(f"EVENT MANAGER: Scraped {len(all_new_events)} total events.")
-    
-    # 2. Save to Database
+    ctc_events = await _run_scraper_safe("CTC (3/4)", ctc_scraper.scrape_http())
+    await asyncio.sleep(1)
+
+    eb_events = await _run_scraper_safe("Eventbrite (4/4)", scrape_events_playwright("chennai"))
+
+    all_new_events = meetup_events + allevents_events + ctc_events + eb_events
+    print(f"EVENT MANAGER: Total scraped: {len(all_new_events)} events.", flush=True)
+
+    if not all_new_events:
+        print("EVENT MANAGER: No events scraped. Skipping DB update.", flush=True)
+        return
+
+    # Save to Database
     async_session = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
     async with async_session() as session:
         added = 0
         updated = 0
         for data in all_new_events:
-            stmt = select(Event).where(Event.eventbrite_id == data['eventbrite_id'])
-            result = await session.execute(stmt)
-            existing = result.scalars().first()
-            
-            if not existing:
-                event = Event(**data)
-                session.add(event)
-                added += 1
-            else:
-                # Comprehensive Update Logic
-                existing.title = data['title']
-                existing.description = data['description']
-                existing.start_time = data['start_time']
-                existing.end_time = data['end_time']
-                existing.venue_name = data['venue_name']
-                existing.venue_address = data.get('venue_address')
-                existing.organizer_name = data.get('organizer_name')
-                existing.image_url = data.get('image_url')
-                existing.is_free = data.get('is_free', False)
-                existing.online_event = data.get('online_event', False)
-                existing.url = data['url']
-                existing.raw_data = data.get('raw_data', {})
-                updated += 1
-        
+            try:
+                stmt = select(Event).where(Event.eventbrite_id == data["eventbrite_id"])
+                result = await session.execute(stmt)
+                existing = result.scalars().first()
+
+                if not existing:
+                    event = Event(**data)
+                    session.add(event)
+                    added += 1
+                else:
+                    existing.title = data["title"]
+                    existing.description = data["description"]
+                    existing.start_time = data["start_time"]
+                    existing.end_time = data["end_time"]
+                    existing.venue_name = data["venue_name"]
+                    existing.venue_address = data.get("venue_address")
+                    existing.organizer_name = data.get("organizer_name")
+                    existing.image_url = data.get("image_url")
+                    existing.is_free = data.get("is_free", False)
+                    existing.online_event = data.get("online_event", False)
+                    existing.url = data["url"]
+                    existing.raw_data = data.get("raw_data", {})
+                    updated += 1
+            except Exception as e:
+                print(f"EVENT MANAGER: DB save error for '{data.get('title')}': {e}")
+                continue
+
         await session.commit()
-        print(f"EVENT MANAGER: DB Saved {added} new, Updated {updated}.")
-        
-        # 3. Cleanup Old Events
+        print(f"EVENT MANAGER: DB Saved {added} new, Updated {updated}.", flush=True)
+
+        # Cleanup outdated events
         await remove_outdated_events(session)
 
-# Import UserRegistration to handle foreign key cleanup
+
+# Import models for FK cleanup
 from app.models.schemas import Event, UserRegistration, TicketClass
 
-# ... (Previous imports remain same) ...
-
-# ... (scrapers import) ...
-
-# ... (run_full_scrape_cycle function) ...
 
 async def remove_outdated_events(session: AsyncSession):
     """
     Deletes events where end_time < NOW.
-    Safely handles foreign keys by deleting related registrations first.
+    Safely handles foreign keys by deleting related records first.
     """
     try:
         current_time = datetime.now()
-        # print(f"CLEANUP: Checking for events older than {current_time}...")
-        
-        # 1. Select IDs of events to delete
+
         stmt_select = select(Event.id).where(Event.end_time < current_time)
         result_ids = await session.execute(stmt_select)
         event_ids = result_ids.scalars().all()
-        
+
         if not event_ids:
-            # print("CLEANUP: No old events found.")
             return
 
         print(f"CLEANUP: Found {len(event_ids)} old events to delete.")
 
-        # 2. Delete related registrations first
         stmt_del_regs = delete(UserRegistration).where(UserRegistration.event_id.in_(event_ids))
         res_regs = await session.execute(stmt_del_regs)
-        print(f"CLEANUP: Deleted {res_regs.rowcount} related registrations.")
+        print(f"CLEANUP: Deleted {res_regs.rowcount} registrations.")
 
-        # 3. Delete related ticket classes
         stmt_del_tickets = delete(TicketClass).where(TicketClass.event_id.in_(event_ids))
         res_tickets = await session.execute(stmt_del_tickets)
-        print(f"CLEANUP: Deleted {res_tickets.rowcount} related ticket classes.")
+        print(f"CLEANUP: Deleted {res_tickets.rowcount} ticket classes.")
 
-        # 4. Delete events
         stmt_del_events = delete(Event).where(Event.id.in_(event_ids))
         res_events = await session.execute(stmt_del_events)
         await session.commit()
-        
+
         print(f"CLEANUP: Deleted {res_events.rowcount} old events.")
     except Exception as e:
         print(f"CLEANUP FAILED: {e}")
-        # Rollback in case of error to keep DB consistent
         await session.rollback()

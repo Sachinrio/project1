@@ -1,176 +1,205 @@
+"""
+Meetup Scraper — HTTP-only (no Playwright/Chromium).
+Uses the Meetup public GraphQL API to fetch Chennai business events.
+This is reliable and uses ~5MB RAM instead of ~400MB for Chromium.
+"""
 
+import aiohttp
 import asyncio
-from playwright.async_api import Page
+import hashlib
 from datetime import datetime, timedelta
-import dateparser
 from typing import List, Dict
-from app.services.scrapers.base_scraper import BaseScraper
 from .utils import is_business_event
 
-class MeetupScraper(BaseScraper):
-    async def scrape(self, page: Page) -> List[Dict]:
-        print("Starting Meetup Scrape (Link Hunter Mode)...")
+IMAGE_POOL = [
+    "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1528605105345-5344ea20e269?q=80&w=1000&auto=format&fit=crop",
+]
+
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "application/json, text/html, */*",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Referer": "https://www.meetup.com/",
+}
+
+MEETUP_GQL_URL = "https://www.meetup.com/gql2"
+
+GQL_QUERY = """
+query CategorySearch($input: ConnectionInput!, $filter: SearchConnectionFilter!) {
+  rankedEvents(input: $input, filter: $filter) {
+    edges {
+      node {
+        id
+        title
+        eventUrl
+        dateTime
+        endTime
+        description
+        venue { name address city }
+        imageUrl
+        group { name }
+      }
+    }
+  }
+}
+"""
+
+class MeetupScraper:
+    async def scrape_http(self) -> List[Dict]:
+        print("MeetupScraper (HTTP): Starting...")
         events = []
-        
-        # 1. Use the Query Param URL (More stable than clean URLs)
-        url = "https://www.meetup.com/find/?location=in--Chennai&source=EVENTS&categoryId=career-business"
-        
-        # render_js=True is MUST for Meetup
-        # proxy_url = self.get_proxy_url(url, render_js=True)
-        
+
+        payload = {
+            "operationName": "CategorySearch",
+            "query": GQL_QUERY,
+            "variables": {
+                "input": {"first": 30},
+                "filter": {
+                    "query": "business",
+                    "lat": 13.0827,
+                    "lon": 80.2707,
+                    "radius": 50,
+                    "source": "EVENTS",
+                }
+            }
+        }
+
         try:
-            # Set a large viewport internally to ensure desktop layout
-            await page.set_viewport_size({'width': 1920, 'height': 1080})
-            
-            print("Meetup: Navigating Direct (Proxy Disabled)...")
-            # 60 Sec Timeout to be safe, avoid hanging
-            try:
-                await page.goto(url, timeout=60000, wait_until="domcontentloaded")
-            except Exception as e:
-                print(f"Meetup: Goto timeout/error: {e}")
-            
-            # Wait for Body to load
-            try:
-                await page.wait_for_selector('body', timeout=15000)
-            except Exception as e:
-                print(f"Meetup: Body selector timeout. Proceeding anyway... {e}")
-                pass
-            
-            # Scroll to trigger lazy loading
-            for _ in range(3):
-                await page.evaluate("window.scrollBy(0, 1000)")
-                await asyncio.sleep(2)
-            
-            # --- STRATEGY A: Standard Card Selector ---
-            print("Meetup: Attempting Strategy A (Cards)...")
-            cards = await page.query_selector_all('div[data-testid="event-card-in-search"]')
-            
-            # --- STRATEGY B: Link Hunter (Fallback) ---
-            if len(cards) == 0:
-                print("Meetup: Strategy A failed (0 cards). Engaging Strategy B (Link Hunter)...")
-                # Find ALL links containing '/events/' 
-                # This bypasses specific class names or test-ids
-                cards = await page.query_selector_all('a[href*="/events/"]')
-
-            if len(cards) == 0:
-                print("Meetup: Strategy B failed. Dumping HTML to debug_meetup.html...")
-                content = await page.content()
-                with open("debug_meetup.html", "w", encoding="utf-8") as f:
-                    f.write(content)
-
-            print(f"Meetup: Found {len(cards)} potential items.")
-
-            seen_ids = set()
-
-            for card in cards:
-                try:
-                    # 1. Extract URL & ID
-                    # If card is an 'a' tag (Strategy B), use it directly. 
-                    # If card is a 'div' (Strategy A), find the 'a' inside.
-                    tag_name = await card.evaluate("el => el.tagName")
-                    link_element = card if tag_name == 'A' else await card.query_selector("a")
+            timeout = aiohttp.ClientTimeout(total=30)
+            async with aiohttp.ClientSession(headers=HEADERS, timeout=timeout) as session:
+                async with session.post(MEETUP_GQL_URL, json=payload) as resp:
+                    if resp.status != 200:
+                        print(f"MeetupScraper: GQL returned {resp.status}. Trying RSS fallback...")
+                        return await self._rss_fallback(session)
                     
-                    if not link_element:
-                        continue
-                        
-                    event_url = await link_element.get_attribute('href')
-                    if not event_url:
-                        continue
-                        
-                    # Extract ID (the numbers in the URL)
-                    # Format: meetup.com/.../events/123456789/
-                    if "/events/" not in event_url:
-                        continue
-                        
-                    # Simple extraction of the numeric ID
-                    parts = event_url.split("/events/")[-1].split("/")[0]
-                    event_id = ''.join(filter(str.isdigit, parts))
+                    data = await resp.json()
+                    edges = data.get("data", {}).get("rankedEvents", {}).get("edges", [])
+                    print(f"MeetupScraper: GQL returned {len(edges)} events.")
                     
-                    if not event_id or event_id in seen_ids:
-                        continue
-                    seen_ids.add(event_id)
+                    if not edges:
+                        return await self._rss_fallback(session)
 
-                    # 2. Extract Text (Title & Date)
-                    # We grab the full text of the link/card and parse it
-                    full_text = await card.inner_text()
-                    lines = [line.strip() for line in full_text.split('\n') if line.strip()]
-                    
-                    title = "Untitled Meetup Event"
-                    start_time = None
-                    
-                    # Try to find a line that looks like a date
-                    for line in lines:
-                        # Strict parsing for Meetup format "Fri, Jan 29 · 7:00 PM IST"
-                        parsed_date = dateparser.parse(line, settings={'PREFER_DATES_FROM': 'future'})
-                        if parsed_date and len(line) > 5: # Avoid matching short numbers/times only
-                            # Check if the line likely contains date-like info (e.g. month names or day names)
-                            date_keywords = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-                            if any(k in line for k in date_keywords):
-                                start_time = parsed_date
-                                # Remove the date line from potential titles
-                                if line in lines: lines.remove(line)
-                                if lines:
-                                    # Pick the longest or first remaining line as title
-                                    title = max(lines, key=len)
-                                break
-                    
-                    # Fallback if no date found
-                    if not start_time:
-                        start_time = datetime.now() + timedelta(days=7) # Default to next week
-                        if lines:
-                            title = lines[0] # Just take the first line
+                    for edge in edges:
+                        try:
+                            node = edge.get("node", {})
+                            title = node.get("title", "Untitled Meetup")
+                            url = node.get("eventUrl", "")
+                            dt_str = node.get("dateTime", "")
+                            end_str = node.get("endTime", "")
+                            description = node.get("description", "") or f"Join this Meetup event: {title}"
+                            image = node.get("imageUrl") or IMAGE_POOL[abs(hash(title)) % len(IMAGE_POOL)]
+                            venue_obj = node.get("venue") or {}
+                            venue = venue_obj.get("name") or "Chennai"
 
-                    # 3. Extract Image
-                    img_el = await card.query_selector('img')
-                    event_image = None
-                    if img_el:
-                        attrs = ["src", "data-src", "srcset", "data-img"]
-                        for attr in attrs:
-                            val = await img_el.get_attribute(attr)
-                            if val and ("http" in val or val.startswith("//")) and "data:image" not in val and "placeholder" not in val:
-                                event_image = val.split(",")[0].split(" ")[0].strip()
-                                if event_image.startswith("//"):
-                                    event_image = "https:" + event_image
-                                break
-                    
-                    if not event_image:
-                        image_pool = [
-                            "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop"
-                        ]
-                        event_image = image_pool[abs(hash(title)) % len(image_pool)]
+                            start_time = datetime.now() + timedelta(days=7)
+                            end_time = start_time + timedelta(hours=2)
+                            if dt_str:
+                                try:
+                                    start_time = datetime.fromisoformat(dt_str.replace("Z", "+00:00")).replace(tzinfo=None)
+                                    end_time = start_time + timedelta(hours=2)
+                                except Exception:
+                                    pass
+                            if end_str:
+                                try:
+                                    end_time = datetime.fromisoformat(end_str.replace("Z", "+00:00")).replace(tzinfo=None)
+                                except Exception:
+                                    pass
 
-                    # 4. Construct Event
-                    event_data = {
-                        "eventbrite_id": f"meetup_{event_id}",
-                        "title": title[:100], # Truncate if too long
-                        "description": f"Join this meetup: {event_url}",
-                        "start_time": start_time.replace(tzinfo=None) if start_time else None,
-                        "end_time": (start_time + timedelta(hours=2)).replace(tzinfo=None) if start_time else None,
-                        "url": event_url if "http" in event_url else f"https://www.meetup.com{event_url}",
-                        "image_url": event_image, 
-                        "venue_name": "Check Event Link",
-                        "venue_address": "Chennai, India",
-                        "organizer_name": "Meetup Group",
-                        "is_free": False,
-                        "online_event": False,
-                        "category": "Business",
-                        "raw_data": {"source": "meetup"}
-                    }
-                    
-                    if is_business_event(event_data):
-                        events.append(event_data)
-                    else:
-                        print(f"  [Filtered] Non-business event: {title}")
-                    
-                except Exception as e:
-                    continue
+                            event_data = {
+                                "eventbrite_id": f"meetup_{hashlib.md5(url.encode()).hexdigest()[:12]}",
+                                "title": title[:100],
+                                "description": description[:500],
+                                "start_time": start_time,
+                                "end_time": end_time,
+                                "url": url,
+                                "image_url": image,
+                                "venue_name": venue,
+                                "venue_address": "Chennai, India",
+                                "organizer_name": node.get("group", {}).get("name", "Meetup Group"),
+                                "is_free": False,
+                                "online_event": False,
+                                "category": "Business",
+                                "raw_data": {"source": "meetup_gql"}
+                            }
 
+                            if is_business_event(event_data):
+                                events.append(event_data)
+                            else:
+                                print(f"  [Filtered] Non-business: {title}")
+                        except Exception as e:
+                            print(f"MeetupScraper: Error parsing edge: {e}")
+                            continue
+
+        except asyncio.TimeoutError:
+            print("MeetupScraper: Request timed out.")
         except Exception as e:
-            print(f"Meetup Global Error: {e}")
-            await page.screenshot(path="debug_meetup_fatal.png")
-            
-        print(f"Meetup Scrape finished. Collected {len(events)} events.")
+            print(f"MeetupScraper: HTTP error: {e}")
+
+        print(f"MeetupScraper: Collected {len(events)} events.")
         return events
+
+    async def _rss_fallback(self, session: aiohttp.ClientSession) -> List[Dict]:
+        """Fallback: Fetch Meetup Chennai RSS feed for events."""
+        print("MeetupScraper: Trying RSS fallback...")
+        events = []
+        rss_urls = [
+            "https://www.meetup.com/find/events/rss/?location=in--Chennai&category=career-business",
+        ]
+        try:
+            from bs4 import BeautifulSoup
+            import dateparser
+
+            for rss_url in rss_urls:
+                try:
+                    async with session.get(rss_url, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                        if resp.status != 200:
+                            continue
+                        xml = await resp.text()
+                        soup = BeautifulSoup(xml, "lxml-xml")
+                        items = soup.find_all("item")
+                        print(f"MeetupScraper RSS: Found {len(items)} items.")
+                        for item in items[:20]:
+                            try:
+                                title = item.find("title").text.strip() if item.find("title") else "Meetup Event"
+                                link = item.find("link").text.strip() if item.find("link") else ""
+                                pub_date = item.find("pubDate")
+                                start_time = datetime.now() + timedelta(days=7)
+                                if pub_date:
+                                    parsed = dateparser.parse(pub_date.text)
+                                    if parsed:
+                                        start_time = parsed.replace(tzinfo=None)
+
+                                event_data = {
+                                    "eventbrite_id": f"meetup_{hashlib.md5(link.encode()).hexdigest()[:12]}",
+                                    "title": title[:100],
+                                    "description": f"Join this Meetup event: {title}",
+                                    "start_time": start_time,
+                                    "end_time": start_time + timedelta(hours=2),
+                                    "url": link,
+                                    "image_url": IMAGE_POOL[abs(hash(title)) % len(IMAGE_POOL)],
+                                    "venue_name": "Chennai",
+                                    "venue_address": "Chennai, India",
+                                    "organizer_name": "Meetup Group",
+                                    "is_free": False,
+                                    "online_event": False,
+                                    "category": "Business",
+                                    "raw_data": {"source": "meetup_rss"}
+                                }
+                                if is_business_event(event_data):
+                                    events.append(event_data)
+                            except Exception as e:
+                                print(f"MeetupScraper RSS item error: {e}")
+                                continue
+                except Exception as e:
+                    print(f"MeetupScraper RSS fetch error for {rss_url}: {e}")
+        except Exception as e:
+            print(f"MeetupScraper RSS fallback error: {e}")
+        return events
+
+    # Keep a stub for compatibility with any code expecting `scrape(page)`
+    async def scrape(self, page=None) -> List[Dict]:
+        return await self.scrape_http()

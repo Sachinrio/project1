@@ -1,109 +1,102 @@
+"""
+Eventbrite Scraper — HTTP-only (no Playwright/Chromium).
+Strategy:
+  1. Hit the Eventbrite Search API directly (private but stable JSON API).
+  2. For each found event ID, call the official Eventbrite public API for full details.
+  3. Falls back to scraping the HTML search page with aiohttp if the search API is blocked.
+"""
+
 import asyncio
-import random
+import aiohttp
 import requests
+import re
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
-from playwright.async_api import async_playwright
 from bs4 import BeautifulSoup
-import urllib.parse
 from app.services.scrapers.utils import is_business_event
 
 # --- CONSTANTS ---
 BASE_URL = "https://www.eventbrite.com"
 EVENTBRITE_API_TOKEN = "T6WRADHDNPM5S4VYLFR5"
 
+IMAGE_POOL = [
+    "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
+    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop",
+]
+
+BROWSER_HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Accept-Encoding": "gzip, deflate, br",
+    "Referer": "https://www.eventbrite.com/",
+    "DNT": "1",
+}
+
+
 def fetch_event_details_api(event_id: str, fallback_image: str = None) -> Optional[Dict]:
     """
-    Fetches event details (title, start/end time, is_free, venue) from Eventbrite API.
-    Returns a dict with cleaned data or None if failed.
+    Fetches event details from the official Eventbrite API.
+    Returns a cleaned dict or None if the call fails.
     """
     url = f"https://www.eventbriteapi.com/v3/events/{event_id}/"
     headers = {"Authorization": f"Bearer {EVENTBRITE_API_TOKEN}"}
     params = {"expand": "venue,ticket_classes,organizer"}
-    
+
     try:
         response = requests.get(url, headers=headers, params=params, timeout=10)
         if response.status_code == 200:
             data = response.json()
-            
-            # --- Parse Times ---
+
             start_str = data.get("start", {}).get("local")
             end_str = data.get("end", {}).get("local")
-            
             start_time = datetime.fromisoformat(start_str) if start_str else datetime.now()
             end_time = datetime.fromisoformat(end_str) if end_str else start_time + timedelta(hours=2)
-            
-            # --- Recurring Event Fix ---
-            # If start_time is in the past, and end_time is in the future,
-            # and the duration is long (> 7 days), assume it's a series and find the next occurrence.
-            # We assume it repeats WEEKLY on the same weekday.
-            now = datetime.now(start_time.tzinfo) # Use same timezone
-            
+
+            # Recurring event fix
+            now = datetime.now(start_time.tzinfo)
             if start_time < now and end_time > now:
                 duration = end_time - start_time
                 if duration.days > 7:
-                    # It's likely a series. Find next occurrence.
-                    # 1. Calculate how many weeks passed
                     days_since_start = (now - start_time).days
                     weeks_passed = (days_since_start // 7) + 1
-                    
                     next_start = start_time + timedelta(weeks=weeks_passed)
-                    
-                    # Ensure we haven't passed the end (though condition end_time > now ensures at least one slot left?)
                     if next_start < end_time:
-                         print(f"  [Recurrence Fix] Moving start from {start_time.date()} to next occurrence: {next_start.date()}")
-                         start_time = next_start
-                         # We should probably adjust end_time too to be the session end, 
-                         # but we don't know the session duration if the API gives us Series End.
-                         # However, leaving Series End as end_time usually works for "is_active" checks.
-                         # But for UI display, we might want "Session End".
-                         # If we don't know session duration, maybe defaulting to start + 2 hours is safer?
-                         # Or just keep end_time as is (user UI check doesn't show end time?).
-                         # Let's keep end_time as is for now, or maybe cap it?
-                         pass
-            
-            # --- Parse Is_Free ---
+                        print(f"  [Recurrence Fix] Moving to {next_start.date()}")
+                        start_time = next_start
+
             is_free = data.get("is_free", False)
             online_event = data.get("online_event", False)
 
-            # --- Venue & Address ---
             venue = data.get("venue")
             if venue:
                 venue_name = venue.get("name") or "TBD"
                 address_obj = venue.get("address") or {}
-                venue_address = address_obj.get("localized_address_display") or address_obj.get("address_1") or address_obj.get("city") or "Chennai, India"
+                venue_address = (
+                    address_obj.get("localized_address_display")
+                    or address_obj.get("address_1")
+                    or address_obj.get("city")
+                    or "Chennai, India"
+                )
             else:
-                # If venue is None, it's likely an online event
                 venue_name = "Online Event"
                 venue_address = "Online"
-                # Force online_event to True if venue is missing
-                if not online_event: 
-                     online_event = True
-            
-            # --- Organizer ---
+                online_event = True
+
             organizer = data.get("organizer") or {}
             organizer_name = organizer.get("name") or "Unknown Organizer"
-            if event_id == "1978745812993":
-                organizer_name = "COSMIR SOLUTIONS"
-            
+
             name_obj = data.get("name") or {}
             desc_obj = data.get("description") or {}
             logo_obj = data.get("logo") or {}
-
             logo_url = logo_obj.get("url")
-            
-            # Use fallback image if API has no logo or API gives a placeholder
-            if not logo_url or "placeholder" in logo_url.lower():
-                logo_url = fallback_image
 
-            if not logo_url or "placeholder" in logo_url.lower():
-                image_pool = [
-                    "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
-                    "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
-                    "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
-                    "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop"
-                ]
-                logo_url = image_pool[abs(hash(name_obj.get("text", ""))) % len(image_pool)]
+            if not logo_url or "placeholder" in (logo_url or "").lower():
+                logo_url = fallback_image
+            if not logo_url or "placeholder" in (logo_url or "").lower():
+                logo_url = IMAGE_POOL[abs(hash(name_obj.get("text", ""))) % len(IMAGE_POOL)]
 
             return {
                 "title": name_obj.get("text", "Untitled Event"),
@@ -116,216 +109,142 @@ def fetch_event_details_api(event_id: str, fallback_image: str = None) -> Option
                 "venue_address": venue_address,
                 "organizer_name": organizer_name,
                 "url": data.get("url"),
-                "logo_url": logo_url
+                "logo_url": logo_url,
             }
         else:
-            print(f"API Error for {event_id}: {response.status_code} - {response.text}")
+            print(f"API Error for {event_id}: {response.status_code}")
             return None
     except Exception as e:
         print(f"Exception fetching API for {event_id}: {e}")
         return None
 
+
+async def _search_via_api(city: str = "chennai", category: str = "business") -> List[str]:
+    """
+    Calls Eventbrite's internal search API (JSON) to get event IDs.
+    Returns a list of event IDs.
+    """
+    event_ids = []
+    try:
+        # Eventbrite's internal search endpoint (stable, returns JSON)
+        search_url = f"{BASE_URL}/api/v3/destination/search/"
+        params = {
+            "expand.destination_event": "primary_venue,image,tags,saves,primary_organizer,ticket_availability",
+            "page_size": 20,
+            "q": f"{category} events in {city}",
+            "places": "Chennai",
+            "online_events_only": "false",
+            "client_timezone": "Asia/Kolkata",
+            "aff": "ebdssbdestsearch",
+        }
+        timeout = aiohttp.ClientTimeout(total=20)
+        async with aiohttp.ClientSession(headers=BROWSER_HEADERS, timeout=timeout) as session:
+            async with session.get(search_url, params=params) as resp:
+                if resp.status != 200:
+                    print(f"Eventbrite internal API: status {resp.status}")
+                    return []
+                data = await resp.json(content_type=None)
+                events_section = data.get("events", {})
+                results = events_section.get("results", [])
+                print(f"Eventbrite internal API: {len(results)} results.")
+                for r in results:
+                    eid = str(r.get("id") or "")
+                    if eid:
+                        event_ids.append(eid)
+    except Exception as e:
+        print(f"Eventbrite internal API error: {e}")
+    return event_ids
+
+
+async def _search_via_html(city: str = "chennai", category: str = "business") -> List[str]:
+    """
+    Fallback: Fetch Eventbrite search HTML page and parse event IDs from links.
+    Uses aiohttp (no browser).
+    """
+    event_ids = []
+    seen = set()
+    search_url = f"{BASE_URL}/b/india--{city}/{category}/"
+    try:
+        timeout = aiohttp.ClientTimeout(total=25)
+        connector = aiohttp.TCPConnector(ssl=False)
+        async with aiohttp.ClientSession(headers=BROWSER_HEADERS, timeout=timeout, connector=connector) as session:
+            async with session.get(search_url) as resp:
+                if resp.status != 200:
+                    print(f"Eventbrite HTML search: status {resp.status}")
+                    return []
+                html = await resp.text()
+                print(f"Eventbrite HTML: Got {len(html)} chars.")
+                soup = BeautifulSoup(html, "lxml")
+                # Extract event IDs from all links containing '-' followed by digits
+                for tag in soup.find_all("a", href=True):
+                    href = tag["href"]
+                    if "/e/" in href or "eventbrite.com" in href:
+                        parts = href.split("-")
+                        if parts:
+                            last = parts[-1].split("?")[0].strip("/")
+                            if last.isdigit() and last not in seen:
+                                seen.add(last)
+                                event_ids.append(last)
+                print(f"Eventbrite HTML: Found {len(event_ids)} event IDs.")
+    except Exception as e:
+        print(f"Eventbrite HTML search error: {e}")
+    return event_ids
+
+
 async def scrape_events_playwright(city: str = "chennai", category: str = "business") -> List[Dict]:
     """
-    Scrapes Eventbrite Search to find Event IDs, then utilizes the Eventbrite API
-    to fetch accurate details for each event.
+    Main entry point. Uses HTTP-only strategy — no Playwright browser needed.
     """
+    print(f"Eventbrite Scraper (HTTP): Starting for city={city}, category={category}")
     cleaned_events = []
     seen_ids = set()
-    
-    # Construct Search URL
-    encoded_city = urllib.parse.quote(city)
-    # User requested: https://www.eventbrite.com/b/india--chennai/business/
-    search_url = f"{BASE_URL}/b/india--{encoded_city}/{category}/"
-    
-    print(f"Scraper: Starting Playwright session for {search_url}...")
 
-    async with async_playwright() as p:
-        # Launch browser with stealth args
-        browser = await p.chromium.launch(
-            headless=True,
-            args=[
-                "--disable-gpu",
-                "--no-sandbox",
-                "--disable-dev-shm-usage",
-                "--disable-blink-features=AutomationControlled", 
-                "--window-size=1920,1080"
-            ]
-        )
-        context = await browser.new_context(
-            user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            viewport={"width": 1920, "height": 1080},
-            ignore_https_errors=True,
-            java_script_enabled=True,
-            bypass_csp=True,
-            locale="en-US",
-            timezone_id="Asia/Kolkata", # Localize to user's region
-            extra_http_headers={
-                "Accept-Language": "en-US,en;q=0.9",
-                "Upgrade-Insecure-Requests": "1",
-                "Sec-Ch-Ua": '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
-                "Sec-Ch-Ua-Mobile": "?0",
-                "Sec-Ch-Ua-Platform": '"Windows"'
+    # 1. Try internal JSON API first
+    event_ids = await _search_via_api(city, category)
+
+    # 2. Fallback to HTML parsing
+    if not event_ids:
+        print("Eventbrite: Internal API returned 0 IDs. Trying HTML fallback...")
+        event_ids = await _search_via_html(city, category)
+
+    print(f"Eventbrite: Processing {len(event_ids)} event IDs via public API...")
+
+    for event_id in event_ids[:25]:  # Cap at 25 to avoid hitting rate limits
+        if event_id in seen_ids:
+            continue
+        seen_ids.add(event_id)
+
+        print(f"Fetching API details for ID: {event_id}...")
+        api_data = fetch_event_details_api(event_id)
+
+        if api_data:
+            event_data = {
+                "eventbrite_id": event_id,
+                "title": api_data["title"],
+                "description": api_data["description"] or f"Eventbrite event in {city}",
+                "start_time": api_data["start_time"],
+                "end_time": api_data["end_time"],
+                "url": api_data["url"],
+                "image_url": api_data["logo_url"],
+                "venue_name": api_data["venue_name"],
+                "venue_address": api_data["venue_address"],
+                "organizer_name": api_data["organizer_name"],
+                "is_free": api_data["is_free"],
+                "online_event": api_data["online_event"],
+                "raw_data": {"source": "eventbrite_api"}
             }
-        )
-        # Import stealth dynamically or at top
-        from playwright_stealth import stealth_async
+            cleaned_events.append(event_data)
+            if not is_business_event(event_data):
+                print(f"  [Note] Weak keywords but passing: {event_data['title']}")
+        else:
+            print(f"Skipping {event_id} — API call failed.")
 
-        page = await context.new_page()
-        
-        async def route_handler(route):
-            if route.request.resource_type in ["image", "media", "font"]:
-                await route.abort()
-            else:
-                await route.continue_()
-        await page.route("**/*", route_handler)
-        
-        await stealth_async(page)
+        # Small delay to avoid rate limiting
+        await asyncio.sleep(0.3)
 
-        try:
-            try:
-                await page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
-            except Exception as e:
-                print(f"Scraper: Goto timeout/error: {e}")
-            
-            # --- DEBUG: Check for Blocking ---
-            page_title = await page.title()
-            print(f"Scraper: Page Title -> {page_title}")
-            if any(k in page_title for k in ["Access Denied", "Just a moment", "Captcha", "Security", "Cloudflare"]):
-                 print("CRITICAL: Scraper blocked by anti-bot protection.")
-            
-            # Wait for event cards
-            try:
-                await page.wait_for_selector("div.event-card__details, section.event-card-details", timeout=15000)
-            except Exception as e:
-                print(f"Timeout waiting for selectors. Proceeding anyway... {e}")
-                pass
-            
-            # Scroll more to trigger lazy loading of images
-            for _ in range(5):
-                await page.evaluate("window.scrollBy(0, 1500)")
-                await asyncio.sleep(random.uniform(2, 4))
-
-            # HTML Parsing just to get IDs
-            content = await page.content()
-            soup = BeautifulSoup(content, "html.parser")
-            
-            cards = soup.select("section.event-card-details, div.event-card__details")
-            print(f"Found {len(cards)} cards. Fetching details via API...")
-
-            for card in cards:
-                try:
-                    # Extract ID from Link
-                    link_tag = card.select_one("a.event-card-link") or card.select_one("a")
-                    url = link_tag['href'] if link_tag else ""
-                    if url.startswith("/"):
-                        url = BASE_URL + url
-                    
-                    event_id = "unknown"
-                    if "/e/" in url:
-                        parts = url.split("-")
-                        last_part = parts[-1].split("?")[0]
-                        if last_part.isdigit():
-                            event_id = last_part
-                    
-                    if not event_id or event_id == "unknown":
-                         continue 
-
-                    if event_id in seen_ids:
-                        continue
-                    seen_ids.add(event_id) 
-                    
-                    
-                    # --- NEW: Extract Card Image (Aggressively) ---
-                    card_image = None
-                    try:
-                        # Find parent card for image extraction
-                        parent = card.find_parent("article") or card.find_parent("div", class_="event-card")
-                        img_tag = parent.select_one("img") if parent else soup.select_one(f"a[href*='{event_id}'] img")
-                        if img_tag:
-                            # Try multiple attributes
-                            for attr in ["data-src", "src", "srcset", "data-img", "data-event-item-image"]:
-                                val = img_tag.get(attr)
-                                if val and ("http" in val or val.startswith("//")) and "data:image" not in val:
-                                    potential_img = val.split(",")[0].split(" ")[0].strip()
-                                    if potential_img.startswith("//"):
-                                        potential_img = "https:" + potential_img
-                                    
-                                    # Filter out placeholders
-                                    if "placeholder" in potential_img.lower() or "logo" in potential_img.lower():
-                                        continue
-
-                                    card_image = potential_img
-                                    break
-                    except:
-                        pass
-                    
-                    # --- SCARPE FALLBACK: Organizer ---
-                    scraped_organizer = "Unknown Organizer"
-                    try:
-                        # Try common selectors for organizer on search card
-                        org_tag = card.select_one(".event-card__organizer") or \
-                                  card.select_one("div[data-testid='organizer-name']") or \
-                                  card.select_one(".organizer-name")
-                        if org_tag:
-                            scraped_organizer = org_tag.get_text(strip=True).replace("By ", "")
-                    except:
-                        pass
-
-                    # --- HYBRID STEP: Call API ---
-                    print(f"Fetching API details for ID: {event_id}...")
-                    api_data = fetch_event_details_api(event_id, fallback_image=card_image)
-                    
-                    if api_data:
-                        # Fallback for organizer
-                        final_organizer = api_data['organizer_name']
-                        if not final_organizer or final_organizer == "Unknown Organizer" or final_organizer == "null":
-                             if scraped_organizer != "Unknown Organizer":
-                                 final_organizer = scraped_organizer
-                             else:
-                                 # Hard fallback for the specific problematic event if HTML fails
-                                 if event_id == "1978745812993":
-                                     final_organizer = "COSMIR SOLUTIONS"
-
-                        # Use API data
-                        event_data = {
-                            "eventbrite_id": event_id,
-                            "title": api_data['title'],
-                            "description": api_data['description'] or f"Scraped from {url}",
-                            "start_time": api_data['start_time'],
-                            "end_time": api_data['end_time'],
-                            "url": api_data['url'],
-                            "image_url": api_data['logo_url'],
-                            "venue_name": api_data['venue_name'],
-                            "venue_address": api_data['venue_address'],
-                            "organizer_name": final_organizer,
-                            "is_free": api_data['is_free'],
-                            "online_event": api_data['online_event'],
-                            "raw_data": {"source": "eventbrite_api"}
-                        }
-                        
-                        # Eventbrite 'business' category already filters for business events.
-                        # We don't strictly enforce is_business_event here to avoid dropping valid events.
-                        cleaned_events.append(event_data)
-                        if not is_business_event(event_data):
-                            print(f"  [Note] Event passed but lacks strict keywords: {event_data['title']}")
-                    else:
-                        print(f"Skipping {event_id} due to API failure.")
-                        # Optional: Fallback to scraping if API fails? 
-                        # For now, let's skip to ensure high quality data.
-
-                except Exception as e:
-                    print(f"Error processing card: {e}")
-                    continue
-
-        except Exception as e:
-            print(f"Scraper Error: {e}")
-        
-        finally:
-            await browser.close()
-            
-    print(f"Scraper finished. collected {len(cleaned_events)} high-quality events.")
+    print(f"Eventbrite Scraper: Collected {len(cleaned_events)} events.")
     return cleaned_events
+
 
 def scrape_and_process_events(city: str):
     return asyncio.run(scrape_events_playwright(city))
