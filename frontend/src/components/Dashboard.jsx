@@ -157,10 +157,12 @@ export default function Dashboard({ user, onLogout, onNavigate, initialView, ini
                 // Check local storage for last seen count
                 const lastSeenCount = parseInt(localStorage.getItem('lastSeenActivityCount') || '0');
 
-                // If we have more activities than before, show Red Dot
                 if (activities.length > lastSeenCount) {
                     setHasUnreadNotifications(true);
                 }
+            } else if (res.status === 401) {
+                // Token has expired, log user out to prevent spamming the backend
+                if (onLogout) onLogout();
             }
         } catch (err) {
             console.error("Failed to fetch user activities", err);

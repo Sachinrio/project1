@@ -56,8 +56,8 @@ class BrowserSearcher:
                 page = await context.new_page()
                 
                 # Use Stealth pattern from scraper.py
-                from playwright_stealth import Stealth
-                await Stealth().apply_stealth_async(page)
+                from playwright_stealth import stealth_async
+                await stealth_async(page)
                 
                 # 1. Navigate to DuckDuckGo Homepage
                 print("BrowserSearcher: Navigating to https://duckduckgo.com/")
