@@ -17,7 +17,8 @@ async def trigger_refresh(background_tasks: BackgroundTasks):
     # Ensure Playwright path is correct for Render
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.abspath(os.path.join(current_dir, "../.."))
-    os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(project_root, "pw-browsers")
+    if os.getenv("IS_RENDER") == "true":
+        os.environ["PLAYWRIGHT_BROWSERS_PATH"] = os.path.join(project_root, "pw-browsers")
     os.environ["PYTHONPATH"] = project_root
 
     print("API: Triggering scraper inside FastAPI background task...")

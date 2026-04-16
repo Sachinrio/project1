@@ -8,7 +8,7 @@ python-multipart==0.0.7
 # Database
 sqlalchemy==2.0.25
 sqlmodel==0.0.14
-asyncpg==0.29.0
+asyncpg>=0.29.0
 alembic==1.13.1
 
 # Authentication & Security
@@ -53,4 +53,4 @@ langchain-core==0.1.23
 langchain-google-genai==0.0.9
 langchain-groq==0.0.1
 duckduckgo-search>=6.0.0
-Pillow==10.2.0
+Pillow>=10.2.0

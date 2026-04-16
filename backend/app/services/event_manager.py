@@ -40,14 +40,28 @@ async def run_full_scrape_cycle():
             print(f"{scraper_class.__name__} Error: {e}")
             return []
 
-    # Run all in parallel
-    results = await asyncio.gather(
-        run_playwright_scraper(MeetupScraper),
-        run_playwright_scraper(AllEventsScraper),
-        run_playwright_scraper(CTCScraper),
-        scrape_events_playwright("chennai")
-    )
-    
+    # Run sequentially to prevent Out of Memory (OOM) crashes on Render
+    try:
+        meetup_events = await run_playwright_scraper(MeetupScraper)
+    except Exception:
+        meetup_events = []
+        
+    try:
+        allevents = await run_playwright_scraper(AllEventsScraper)
+    except Exception:
+        allevents = []
+        
+    try:
+        ctc_events = await run_playwright_scraper(CTCScraper)
+    except Exception:
+        ctc_events = []
+        
+    try:
+        eb_events = await scrape_events_playwright("chennai")
+    except Exception:
+        eb_events = []
+
+    results = [meetup_events, allevents, ctc_events, eb_events]
     all_new_events = []
     for res in results:
         all_new_events.extend(res)
