@@ -16,14 +16,17 @@ class AllEventsScraper(BaseScraper):
         
         try:
             print("AllEvents: Navigating Direct (Proxy Disabled)...")
-            # Increase timeout
-            await page.goto(target_url, timeout=180000)
+            # Increase timeout but use domcontentloaded to avoid hanging on aborted assets
+            try:
+                await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
+            except Exception as e:
+                print(f"AllEvents: Goto timeout/error: {e}")
             
             # Wait for body to ensure load
             try:
-                await page.wait_for_selector('body', timeout=60000)
-            except:
-                print("AllEvents: Body selector timeout. Dumping HTML...")
+                await page.wait_for_selector('body', timeout=15000)
+            except Exception as e:
+                print(f"AllEvents: Body selector timeout. Proceeding anyway... {e}")
                 pass
             
             print("AllEvents page loaded.")

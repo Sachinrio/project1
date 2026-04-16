@@ -23,14 +23,17 @@ class MeetupScraper(BaseScraper):
             await page.set_viewport_size({'width': 1920, 'height': 1080})
             
             print("Meetup: Navigating Direct (Proxy Disabled)...")
-            # 3 Minute Timeout to be safe
-            await page.goto(url, timeout=180000)
+            # 60 Sec Timeout to be safe, avoid hanging
+            try:
+                await page.goto(url, timeout=60000, wait_until="domcontentloaded")
+            except Exception as e:
+                print(f"Meetup: Goto timeout/error: {e}")
             
             # Wait for Body to load
             try:
-                await page.wait_for_selector('body', timeout=60000)
-            except:
-                print("Meetup: Body selector timeout. Dumping HTML...")
+                await page.wait_for_selector('body', timeout=15000)
+            except Exception as e:
+                print(f"Meetup: Body selector timeout. Proceeding anyway... {e}")
                 pass
             
             # Scroll to trigger lazy loading

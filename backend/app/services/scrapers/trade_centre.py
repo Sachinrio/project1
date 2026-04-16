@@ -17,18 +17,19 @@ class CTCScraper(BaseScraper):
         # proxy_url = self.get_proxy_url(target_url, render_js=True)
         
         try:
-            # Increase timeout
-            await page.goto(target_url, timeout=180000)
-            print("CTC page loaded.")
+            try:
+                # Use domcontentloaded
+                await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
+                print("CTC page loaded.")
+            except Exception as e:
+                print(f"CTC: Goto timeout/error: {e}")
             
             # Wait for the JS-rendered content
-            # The JS renders into #pills-tabContent-schedule
             try:
-                await page.wait_for_selector('.schedule-item', timeout=60000)
-            except:
-                print("CTC: No .schedule-item found. Taking debug screenshot...")
-                await page.screenshot(path="debug_ctc_fail.png")
-                return []
+                await page.wait_for_selector('.schedule-item', timeout=15000)
+            except Exception as e:
+                print(f"CTC: No .schedule-item found or timeout. Taking debug screenshot... {e}")
+                pass
             
             items = await page.query_selector_all('.schedule-item')
             print(f"Found {len(items)} CTC items.")

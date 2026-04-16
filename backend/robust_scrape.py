@@ -40,7 +40,17 @@ async def save_events(events, source_name):
 async def run_scraper_safe(scraper_cls, name):
     try:
         async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
+            browser = await p.chromium.launch(
+                headless=True,
+                args=[
+                    "--no-sandbox", 
+                    "--disable-dev-shm-usage", 
+                    "--disable-gpu",
+                    "--single-process",
+                    "--disable-setuid-sandbox",
+                    "--no-zygote"
+                ]
+            )
             page = await browser.new_page()
             scraper = scraper_cls()
             events = await scraper.scrape(page)

@@ -183,7 +183,10 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
         await stealth_async(page)
 
         try:
-            await page.goto(search_url, timeout=120000)
+            try:
+                await page.goto(search_url, timeout=60000, wait_until="domcontentloaded")
+            except Exception as e:
+                print(f"Scraper: Goto timeout/error: {e}")
             
             # --- DEBUG: Check for Blocking ---
             page_title = await page.title()
@@ -193,12 +196,10 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
             
             # Wait for event cards
             try:
-                await page.wait_for_selector("div.event-card__details, section.event-card-details", timeout=20000)
+                await page.wait_for_selector("div.event-card__details, section.event-card-details", timeout=15000)
             except Exception as e:
-                print(f"Timeout waiting for selectors. Dumping HTML snippet...")
-                content = await page.content()
-                print(f"HTML Snippet: {content[:1000]}")
-                raise e
+                print(f"Timeout waiting for selectors. Proceeding anyway... {e}")
+                pass
             
             # Scroll more to trigger lazy loading of images
             for _ in range(5):

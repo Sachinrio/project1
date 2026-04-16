@@ -41,7 +41,14 @@ async def run_full_scrape_cycle():
             print(f"EVENT MANAGER: Launching headless Chromium for {scraper_class.__name__}...", flush=True)
             browser = await p.chromium.launch(
                 headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+                args=[
+                    "--no-sandbox", 
+                    "--disable-dev-shm-usage", 
+                    "--disable-gpu",
+                    "--single-process",
+                    "--disable-setuid-sandbox",
+                    "--no-zygote"
+                ]
             )
             print(f"EVENT MANAGER: Chromium launched. Creating new page...", flush=True)
             page = await browser.new_page()
