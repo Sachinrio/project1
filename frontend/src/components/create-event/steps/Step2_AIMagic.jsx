@@ -18,12 +18,11 @@ export default function Step2_AIMagic({ formData, updateFormData, onNext, onBack
         setError(null);
 
         try {
-            const duration = getDuration();
             const payload = {
                 title: formData.title,
                 category: formData.category,
-                duration: duration,
-                start_time: formData.startTime || "10:00"
+                start_time: formData.startTime || "10:00",
+                end_time: formData.endTime || "12:00"
             };
 
             // Assuming Vite proxy or absolute URL. Using absolute for clarity based on existing code.
