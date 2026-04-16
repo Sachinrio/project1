@@ -32,6 +32,15 @@ async def run_full_scrape_cycle():
                     args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
                 )
                 page = await browser.new_page()
+                
+                # Block heavy assets to prevent OOM
+                async def route_handler(route):
+                    if route.request.resource_type in ["image", "media", "font"]:
+                        await route.abort()
+                    else:
+                        await route.continue_()
+                await page.route("**/*", route_handler)
+                
                 scraper = scraper_class()
                 events = await scraper.scrape(page)
                 await browser.close()

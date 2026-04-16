@@ -172,6 +172,14 @@ async def scrape_events_playwright(city: str = "chennai", category: str = "busin
         from playwright_stealth import stealth_async
 
         page = await context.new_page()
+        
+        async def route_handler(route):
+            if route.request.resource_type in ["image", "media", "font"]:
+                await route.abort()
+            else:
+                await route.continue_()
+        await page.route("**/*", route_handler)
+        
         await stealth_async(page)
 
         try:
