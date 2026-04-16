@@ -140,19 +140,17 @@ class AIGeneratorService:
             if "description" in result:
                 result["description"] = self._clean_description(result["description"])
 
-            # 4. Generate Image (DuckDuckGo Lite Proxy)
-            from .image_scraper import image_scraper_service
+            # 4. Generate Image (DuckDuckGo Browser Search)
             print(f"DEBUG: Starting Fast DDG Proxy Image Search for: {title}")
             try:
-                # Use a fast 10-second timeout
-                image_url = await asyncio.wait_for(image_scraper_service.get_image_url(title), timeout=10.0)
+                image_url = await asyncio.wait_for(self._search_image(title), timeout=25.0)
                 if not image_url:
                     print("DEBUG: Proxy Image search returned nothing.")
                     result["imageUrl"] = ""
                 else:
                     result["imageUrl"] = image_url
             except asyncio.TimeoutError:
-                print("DEBUG: Image search hit global 10s limit.")
+                print("DEBUG: Image search hit global limit.")
                 result["imageUrl"] = ""
             except Exception as search_err:
                 print(f"DEBUG: Image search crashed heavily: {search_err}.")

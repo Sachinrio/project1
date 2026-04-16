@@ -27,7 +27,10 @@ async def run_full_scrape_cycle():
     async def run_playwright_scraper(scraper_class):
         try:
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
+                browser = await p.chromium.launch(
+                    headless=True,
+                    args=["--no-sandbox", "--disable-dev-shm-usage", "--disable-gpu"]
+                )
                 page = await browser.new_page()
                 scraper = scraper_class()
                 events = await scraper.scrape(page)
