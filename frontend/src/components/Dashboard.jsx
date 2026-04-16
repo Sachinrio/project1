@@ -1056,13 +1056,14 @@ function EventCard({ event, onRegister, isRegistered, user, onNavigate }) {
                         "1511795409834-ef04bbd61622",
                         "1587825140708-dfaf72ae4b04",
                         "1431540015161-0bf868a2d407"
-                    ][event.id % 6]}?q=80&w=1000&auto=format&fit=crop`}
+                    ][(typeof event.id === 'string' ? event.id.charCodeAt(0) : event.id || 0) % 6]}?q=80&w=1000&auto=format&fit=crop`}
                     alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 bg-slate-100"
                     onError={(e) => {
                         e.target.onerror = null;
                         const fallbacks = ["1540575861501-7cf05a4b125a", "1505373630103-89d00c2a5851", "1475721027785-f74eccf877e2", "1511795409834-ef04bbd61622"];
-                        e.target.src = `https://images.unsplash.com/photo-${fallbacks[event.id % 4]}?q=80&w=1000&auto=format&fit=crop`;
+                        const safeIndex = (typeof event.id === 'string' ? event.id.charCodeAt(event.id.length - 1) : event.id || 0) % 4;
+                        e.target.src = `https://images.unsplash.com/photo-${fallbacks[safeIndex]}?q=80&w=1000&auto=format&fit=crop`;
                     }}
                 />
 
