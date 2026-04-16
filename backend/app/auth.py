@@ -12,7 +12,7 @@ from app.models.schemas import User, TokenData
 # Configuration
 SECRET_KEY = "supersecretkeychangeinproduction"  # TODO: Move to .env
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/v1/auth/login")

@@ -11,12 +11,9 @@ class AllEventsScraper(BaseScraper):
         print("Starting AllEvents Scrape (Business Only)...")
         target_url = "https://allevents.in/chennai/business"
         
-        # AllEvents is heavy, use render_js=True
-        # proxy_url = self.get_proxy_url(target_url, render_js=True)
-        
         try:
             print("AllEvents: Navigating Direct (Proxy Disabled)...")
-            # Increase timeout but use domcontentloaded to avoid hanging on aborted assets
+            # Use domcontentloaded to avoid hanging on blocked assets
             try:
                 await page.goto(target_url, timeout=60000, wait_until="domcontentloaded")
             except Exception as e:
@@ -30,77 +27,91 @@ class AllEventsScraper(BaseScraper):
                 pass
             
             print("AllEvents page loaded.")
-            # Selector for event items
-            # Using .event-card as it proved more reliable in deep audit
-            items = await page.query_selector_all('.event-card')
-            if not items:
-                items = await page.query_selector_all('li[data-link]')
-            if not items:
-                items = await page.query_selector_all('div.event-item')
-                
-            print(f"Found {len(items)} AllEvents items.")
+
+            # === FAST BULK EXTRACTION VIA PAGE.EVALUATE ===
+            # Instead of looping in Python with Playwright async calls (slow on Render),
+            # we do all DOM extraction in one single JS call. Massively faster.
+            raw_items = await page.evaluate("""
+                () => {
+                    const results = [];
+                    
+                    // Try all known AllEvents card selectors
+                    let cards = Array.from(document.querySelectorAll('.event-card'));
+                    if (!cards.length) cards = Array.from(document.querySelectorAll('li[data-link]'));
+                    if (!cards.length) cards = Array.from(document.querySelectorAll('div.event-item'));
+
+                    const limit = Math.min(cards.length, 30);
+                    for (let i = 0; i < limit; i++) {
+                        const item = cards[i];
+                        try {
+                            // Title
+                            const titleEl = item.querySelector('.title') || item.querySelector('h3');
+                            const title = titleEl ? titleEl.innerText.trim() : "Unknown Event";
+
+                            // Link
+                            const linkEl = item.querySelector('a');
+                            const link = linkEl ? (linkEl.getAttribute('href') || '') : (item.getAttribute('data-link') || '');
+
+                            // Time
+                            const timeEl = item.querySelector('.time') || item.querySelector('.date');
+                            const timeStr = timeEl ? timeEl.innerText.trim() : '';
+
+                            // Venue
+                            const venueEl = item.querySelector('.subtitle') || item.querySelector('.location');
+                            const venue = venueEl ? venueEl.innerText.trim() : 'Chennai';
+
+                            // Image - check multiple attributes
+                            let image = '';
+                            const imgEl = item.querySelector('img.banner-image-v3') ||
+                                          item.querySelector('img[data-src*="banner"]') ||
+                                          item.querySelector('img[src*="banner"]') ||
+                                          item.querySelector('img');
+                            if (imgEl) {
+                                for (const attr of ['data-src', 'data-img', 'data-lazy-src', 'srcset', 'src']) {
+                                    let val = imgEl.getAttribute(attr) || '';
+                                    if (val) {
+                                        let candidate = val.split(',')[0].split(' ')[0].trim();
+                                        if (candidate.startsWith('//')) candidate = 'https:' + candidate;
+                                        const bad = ['og-logo', 'logo.jpg', 'logo.png', 'placeholder', 'blank.gif', 'data:image'];
+                                        if (candidate.startsWith('http') && !bad.some(b => candidate.toLowerCase().includes(b))) {
+                                            image = candidate;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
+                            results.push({ title, link, timeStr, venue, image });
+                        } catch(e) {}
+                    }
+                    return results;
+                }
+            """)
             
+            print(f"Found {len(raw_items)} AllEvents items.")
+            
+            image_pool = [
+                "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
+                "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop"
+            ]
+
             events = []
-            # Process up to 50 items to get a good batch
-            for item in items[:50]:
+            for item in raw_items:
                 try:
-                    title_el = await item.query_selector('.title') or await item.query_selector('h3')
-                    title = await title_el.inner_text() if title_el else "Unknown Event"
-                    
-                    link_el = await item.query_selector('a')
-                    link = await link_el.get_attribute('href') if link_el else ""
-                    if not link:
-                        link = await item.get_attribute('data-link') or ""
-                    
-                    time_el = await item.query_selector('.time') or await item.query_selector('.date')
-                    time_str = await time_el.inner_text() if time_el else ""
-                    
-                    venue_el = await item.query_selector('.subtitle') or await item.query_selector('.location')
-                    venue = await venue_el.inner_text() if venue_el else "Chennai"
+                    title = item.get("title", "Unknown Event")
+                    link = item.get("link", "")
+                    time_str = item.get("timeStr", "")
+                    venue = item.get("venue", "Chennai")
+                    event_image = item.get("image", "") or image_pool[abs(hash(title)) % len(image_pool)]
 
                     start_time = datetime.now() + timedelta(days=2)
                     if time_str:
-                        # Clean up text specifically for AllEvents (e.g. "Sun Feb 11")
                         clean_time = time_str.replace('\n', ' ').strip()
                         parsed = dateparser.parse(clean_time)
                         if parsed:
                             start_time = parsed
-
-                    # --- Smart Image Hunter (V3) ---
-                    # AllEvents posters are usually lazy-loaded in 'data-src' or 'data-img'
-                    # The high-quality image usually has 'banner' in the URL.
-                    event_image = None
-                    
-                    # 1. Try to find the specific banner image
-                    img_el = await item.query_selector('img.banner-image-v3') or \
-                             await item.query_selector('img[data-src*="banner"]') or \
-                             await item.query_selector('img[src*="banner"]') or \
-                             await item.query_selector('img')
-
-                    if img_el:
-                        # 2. Check attributes in order of quality/presence
-                        for attr in ["data-src", "data-img", "data-lazy-src", "srcset", "src"]:
-                            val = await img_el.get_attribute(attr)
-                            if val:
-                                # Normalize protocol-relative or path
-                                potential = val.split(",")[0].split(" ")[0].strip()
-                                if potential.startswith("//"):
-                                    potential = "https:" + potential
-                                
-                                # Final filtering: skip generic logos/placeholders
-                                if "http" in potential and not any(p in potential.lower() for p in ["og-logo", "logo.jpg", "logo.png", "placeholder", "blank.gif", "data:image"]):
-                                    event_image = potential
-                                    break
-                    
-                    if not event_image:
-                        # Fallback pool
-                        image_pool = [
-                            "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1505373630103-89d00c2a5851?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1475721027785-f74eccf877e2?q=80&w=1000&auto=format&fit=crop",
-                            "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=1000&auto=format&fit=crop"
-                        ]
-                        event_image = image_pool[abs(hash(title)) % len(image_pool)]
 
                     event_data = {
                         "title": title,

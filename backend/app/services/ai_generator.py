@@ -140,21 +140,20 @@ class AIGeneratorService:
             if "description" in result:
                 result["description"] = self._clean_description(result["description"])
 
-            # 4. Generate Image (DuckDuckGo Browser Search)
-            print(f"DEBUG: Starting Fast DDG Proxy Image Search for: {title}")
+            # 4. Generate Image (DuckDuckGo HTTP Search)
+            print(f"DEBUG: Starting HTTP Image Search for: {title}")
             try:
-                image_url = await asyncio.wait_for(self._search_image(title), timeout=25.0)
+                image_url = await asyncio.wait_for(self._search_image(title), timeout=20.0)
                 if not image_url:
-                    print("DEBUG: Proxy Image search returned nothing.")
-                    result["imageUrl"] = ""
-                else:
-                    result["imageUrl"] = image_url
+                    print("DEBUG: Image search returned nothing. Using category fallback.")
+                    image_url = self._get_category_fallback(category)
+                result["imageUrl"] = image_url
             except asyncio.TimeoutError:
-                print("DEBUG: Image search hit global limit.")
-                result["imageUrl"] = ""
+                print("DEBUG: Image search timed out. Using category fallback.")
+                result["imageUrl"] = self._get_category_fallback(category)
             except Exception as search_err:
-                print(f"DEBUG: Image search crashed heavily: {search_err}.")
-                result["imageUrl"] = ""
+                print(f"DEBUG: Image search crashed: {search_err}. Using fallback.")
+                result["imageUrl"] = self._get_category_fallback(category)
 
             return result
 
@@ -280,6 +279,24 @@ class AIGeneratorService:
             print(f"DEBUG: Vision check total failure: {e}")
             return True
 
+
+    def _get_category_fallback(self, category: str = "") -> str:
+        """Returns an Unsplash image URL based on event category."""
+        cat = (category or "").lower()
+        fallbacks = {
+            "tech": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000&auto=format&fit=crop",
+            "technology": "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=1000&auto=format&fit=crop",
+            "workshop": "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1000&auto=format&fit=crop",
+            "networking": "https://images.unsplash.com/photo-1528605105345-5344ea20e269?q=80&w=1000&auto=format&fit=crop",
+            "finance": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?q=80&w=1000&auto=format&fit=crop",
+            "marketing": "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?q=80&w=1000&auto=format&fit=crop",
+            "startup": "https://images.unsplash.com/photo-1504805572947-34fad45aed93?q=80&w=1000&auto=format&fit=crop",
+        }
+        for key, url in fallbacks.items():
+            if key in cat:
+                return url
+        # Default business/conference image
+        return "https://images.unsplash.com/photo-1540575861501-7cf05a4b125a?q=80&w=1000&auto=format&fit=crop"
 
     def _clean_description(self, text: str) -> str:
         """Removes markdown headers."""
