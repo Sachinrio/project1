@@ -51,23 +51,35 @@ async def run_full_scrape_cycle():
 
     # Run sequentially to prevent Out of Memory (OOM) crashes on Render
     try:
+        print("EVENT MANAGER: Launching Meetup Scraper (1/4)...", flush=True)
         meetup_events = await run_playwright_scraper(MeetupScraper)
-    except Exception:
+        print(f"EVENT MANAGER: Meetup finished! Found {len(meetup_events)} events.", flush=True)
+    except Exception as e:
+        print(f"EVENT MANAGER: Meetup failed: {e}", flush=True)
         meetup_events = []
         
     try:
+        print("\nEVENT MANAGER: Launching AllEvents Scraper (2/4)...", flush=True)
         allevents = await run_playwright_scraper(AllEventsScraper)
-    except Exception:
+        print(f"EVENT MANAGER: AllEvents finished! Found {len(allevents)} events.", flush=True)
+    except Exception as e:
+        print(f"EVENT MANAGER: AllEvents failed: {e}", flush=True)
         allevents = []
         
     try:
+        print("\nEVENT MANAGER: Launching CTC Scraper (3/4)...", flush=True)
         ctc_events = await run_playwright_scraper(CTCScraper)
-    except Exception:
+        print(f"EVENT MANAGER: CTC finished! Found {len(ctc_events)} events.", flush=True)
+    except Exception as e:
+        print(f"EVENT MANAGER: CTC failed: {e}", flush=True)
         ctc_events = []
         
     try:
+        print("\nEVENT MANAGER: Launching Eventbrite Scraper (4/4)...", flush=True)
         eb_events = await scrape_events_playwright("chennai")
-    except Exception:
+        print(f"EVENT MANAGER: Eventbrite finished! Found {len(eb_events)} events.", flush=True)
+    except Exception as e:
+        print(f"EVENT MANAGER: Eventbrite failed: {e}", flush=True)
         eb_events = []
 
     results = [meetup_events, allevents, ctc_events, eb_events]
