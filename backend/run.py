@@ -22,6 +22,6 @@ if __name__ == "__main__":
         asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
         print("Windows Proactor Loop Policy Applied.")
 
-    port = int(os.getenv("PORT", 8001))
+    port = int(os.getenv("PORT", 8000))
     print(f"Starting Server with Custom Runner (NO RELOAD - REQUIRED FOR PLAYWRIGHT ON WINDOWS)... Listening on port {port}")
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

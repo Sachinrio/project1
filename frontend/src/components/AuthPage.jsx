@@ -558,7 +558,6 @@ export default function AuthPage({ onBack, onComplete, initialMode = 'login', in
                                         theme="filled_black"
                                         shape="circle"
                                         size="large"
-                                        width="100%"
                                         text="continue_with"
                                     />
                                 </div>
