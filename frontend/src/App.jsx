@@ -12,7 +12,6 @@ import EventRegisterPage from './components/EventRegisterPage';
 import ChatWidget from './components/ChatWidget';
 import PackagesPricingPage from './components/PackagesPricingPage';
 import AllServicesPage from './components/AllServicesPage';
-import { API_ENDPOINTS } from './api_config';
 
 export default function App() {
   const [events, setEvents] = useState([]);
@@ -66,7 +65,7 @@ export default function App() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch(`${API_ENDPOINTS.EVENTS}?limit=100`);
+      const res = await fetch('/api/v1/events?limit=100');
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
       console.log("App: fetchEvents data:", data); // DEBUG
@@ -112,7 +111,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch(API_ENDPOINTS.AUTH_ME, {
+      const res = await fetch('/api/v1/auth/me', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -301,7 +300,7 @@ export default function App() {
           }}
           onSave={async (eventData) => {
             const token = localStorage.getItem('token');
-            const res = await fetch(API_ENDPOINTS.EVENTS, {
+            const res = await fetch('/api/v1/events', {
               method: 'POST',
               headers: {
                 'Authorization': `Bearer ${token}`,

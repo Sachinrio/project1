@@ -12,10 +12,5 @@ pip install -r requirements.txt
 # Using dirname $0 to ensure it's always inside the backend folder
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export PLAYWRIGHT_BROWSERS_PATH="$SCRIPT_DIR/pw-browsers"
-
 echo "Installing browsers to $PLAYWRIGHT_BROWSERS_PATH"
-# Clean potential orphan directories to ensure a fresh install
-rm -rf "$PLAYWRIGHT_BROWSERS_PATH"
-mkdir -p "$PLAYWRIGHT_BROWSERS_PATH"
-
-python -m playwright install chromium
+playwright install chromium

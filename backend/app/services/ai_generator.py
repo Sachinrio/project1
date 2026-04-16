@@ -11,9 +11,13 @@ from typing import List, Optional
 from .browser_searcher import browser_searcher
 
 import langchain
-# Patch for missing verbose attribute in some langchain versions
-if not hasattr(langchain, "verbose"):
-    langchain.verbose = False
+try:
+    import langchain.globals
+    langchain.globals.set_verbose(False)
+except (ImportError, AttributeError):
+    # Fallback for older versions
+    if not hasattr(langchain, "verbose"):
+        langchain.verbose = False
 
 # Define Pydantic models for Langchain parsing
 class AgendaItem(BaseModel):
